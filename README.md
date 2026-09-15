@@ -1,6 +1,6 @@
 # Machine List Dashboard
 
-Dashboard for the **GSS & LED Machine List** (Akij Light Engineering Ltd.).
+Dashboard for the **GSS & LED Machine List** (Electronics Project Plan).
 
 Built from the source workbook `GSS,LED Machine List.xlsx`.
 
