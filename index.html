@@ -15,7 +15,8 @@ body{background:radial-gradient(1200px 480px at 12% -10%, rgba(42,154,160,.13), 
 .card{background:#fff;border:5px solid #00565c;border-radius:18px;padding:20px;box-shadow:0 6px 18px rgba(13,40,58,.07);margin-bottom:16px}
 .card-title{font-size:17px;font-weight:800;color:#005151;margin-bottom:14px}
 
-.home-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:18px auto 0;max-width:760px}
+.home-inner{max-width:880px;margin:0 auto}
+.home-cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:22px 0 0}
 .homecard{position:relative;overflow:hidden;border-radius:16px;padding:20px 22px;color:#fff;cursor:pointer;transition:all .22s;box-shadow:0 10px 22px rgba(13,40,58,.16);min-height:120px;display:flex;flex-direction:column;justify-content:center}
 .homecard:hover{transform:translateY(-4px);box-shadow:0 16px 32px rgba(13,40,58,.26)}
 .homecard:after{content:"";position:absolute;top:-45px;right:-45px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.12)}
@@ -30,12 +31,12 @@ body{background:radial-gradient(1200px 480px at 12% -10%, rgba(42,154,160,.13), 
 .back-btn{display:inline-block;margin:2px 0 16px;padding:10px 22px;background:#fff;color:#00565c;border:1px solid rgba(0,86,92,.3);text-decoration:none;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 2px 6px rgba(13,40,58,.06)}
 .back-btn:hover{background:#00565c;color:#fff;border-color:#00565c;box-shadow:0 6px 16px rgba(0,86,92,.24)}
 
-.prod-gallery{display:grid;grid-template-columns:repeat(8,92px);gap:14px 16px;justify-content:center;margin-top:26px}
+.prod-gallery{display:grid;grid-template-columns:repeat(8,1fr);gap:14px 12px;justify-items:center;margin-top:30px}
 .prod-gallery .row2:nth-child(8){grid-column:3}
 .prod{width:92px;background:transparent;transition:all .2s}
 .prod:hover{transform:translateY(-4px)}
 .prod img{width:100%;height:74px;object-fit:contain;display:block;background:transparent}
-.quote{margin:30px auto 0;max-width:720px;text-align:center;color:#5d7283;font-size:13.5px;line-height:1.9;font-style:italic;padding:0 16px}
+.quote{margin:34px 0 0;text-align:center;color:#5d7283;font-size:13.5px;line-height:1.9;font-style:italic;padding:0 16px}
 .quote span{display:block}
 .quote span+span{margin-top:2px}
 .sec-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:16px}
@@ -90,6 +91,7 @@ tr.total td{background:#eaf3f3;font-weight:800;color:#005151;border-top:2px soli
 <div class="wrap">
 
 <div id="viewHome">
+<div class="home-inner">
 <div class="home-cards">
 <div class="homecard hc-a" id="goMachine">
 <div class="hc-icon">&#9881;</div>
@@ -120,6 +122,7 @@ tr.total td{background:#eaf3f3;font-weight:800;color:#005151;border-top:2px soli
 <div class="quote">
 <span>Before taking the first step, make sure the path is properly planned</span>
 <span>Success begins with proper planning and ends with consistent execution</span>
+</div>
 </div>
 </div>
 
