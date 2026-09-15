@@ -31,11 +31,11 @@ body{background:radial-gradient(1200px 480px at 12% -10%, rgba(42,154,160,.13), 
 .back-btn{display:inline-block;margin:2px 0 16px;padding:10px 22px;background:#fff;color:#00565c;border:1px solid rgba(0,86,92,.3);text-decoration:none;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 2px 6px rgba(13,40,58,.06)}
 .back-btn:hover{background:#00565c;color:#fff;border-color:#00565c;box-shadow:0 6px 16px rgba(0,86,92,.24)}
 
-.prod-gallery{display:grid;grid-template-columns:repeat(8,1fr);gap:14px 12px;justify-items:center;margin-top:30px}
-.prod-gallery .row2:nth-child(8){grid-column:3}
-.prod{width:92px;background:transparent;transition:all .2s}
+.prod-gallery{display:flex;flex-direction:column;gap:18px;margin-top:30px}
+.prod-row{display:flex;justify-content:center;align-items:flex-end;gap:22px;flex-wrap:wrap}
+.prod{width:74px;background:transparent;transition:all .2s}
 .prod:hover{transform:translateY(-4px)}
-.prod img{width:100%;height:74px;object-fit:contain;display:block;background:transparent}
+.prod img{width:100%;height:56px;object-fit:contain;display:block;background:transparent}
 .quote{margin:34px 0 0;text-align:center;color:#5d7283;font-size:13.5px;line-height:1.9;font-style:italic;padding:0 16px}
 .quote span{display:block}
 .quote span+span{margin-top:2px}
@@ -107,6 +107,7 @@ tr.total td{background:#eaf3f3;font-weight:800;color:#005151;border-top:2px soli
 </div>
 </div>
 <div class="prod-gallery">
+<div class="prod-row">
 <div class="prod"><img src="products/onyx-gang-switch.png" alt="Gang Switch"></div>
 <div class="prod"><img src="products/piano-switch.png" alt="Piano Switch"></div>
 <div class="prod"><img src="products/aurora-multi-socket.png" alt="Multi Socket"></div>
@@ -114,10 +115,13 @@ tr.total td{background:#eaf3f3;font-weight:800;color:#005151;border-top:2px soli
 <div class="prod"><img src="products/cherry-switch-socket.png" alt="Switch Socket"></div>
 <div class="prod"><img src="products/plug.png" alt="Plug"></div>
 <div class="prod"><img src="products/distribution-box.png" alt="Distribution Box"></div>
-<div class="prod row2"><img src="products/exhaust-fan.png" alt="Exhaust Fan"></div>
-<div class="prod row2"><img src="products/led-bulb.png" alt="LED Bulb"></div>
-<div class="prod row2"><img src="products/down-panel.png" alt="Down Panel"></div>
-<div class="prod row2"><img src="products/flood-light.png" alt="Flood Light"></div>
+</div>
+<div class="prod-row">
+<div class="prod"><img src="products/exhaust-fan.png" alt="Exhaust Fan"></div>
+<div class="prod"><img src="products/led-bulb.png" alt="LED Bulb"></div>
+<div class="prod"><img src="products/down-panel.png" alt="Down Panel"></div>
+<div class="prod"><img src="products/flood-light.png" alt="Flood Light"></div>
+</div>
 </div>
 <div class="quote">
 <span>Before taking the first step, make sure the path is properly planned</span>
