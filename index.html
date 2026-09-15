@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Machine List Dashboard - Akij Light Engineering Ltd.</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter','Segoe UI',-apple-system,Roboto,Arial,sans-serif}
+body{background:radial-gradient(1200px 480px at 12% -10%, rgba(42,154,160,.13), transparent 60%),radial-gradient(1000px 440px at 108% -18%, rgba(0,86,92,.11), transparent 55%),#f4f7f9;min-height:100vh;color:#12263a;-webkit-font-smoothing:antialiased}
+.hdr{background:linear-gradient(135deg,#0b7f89 0%,#006066 45%,#003c44 100%);padding:20px 18px 18px;text-align:center;position:relative;overflow:hidden}
+.hdr:after{content:"";position:absolute;inset:0;background:radial-gradient(700px 180px at 50% -80%,rgba(255,255,255,.2),transparent 70%);pointer-events:none}
+.hdr-text{position:relative;color:#fff;font-size:17px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.hdr-sub{position:relative;color:rgba(255,255,255,.72);font-size:12px;margin-top:3px}
+.wrap{max-width:1200px;margin:18px auto;padding:0 14px 44px}
+.tabs{display:flex;gap:10px;margin:16px 0}
+.tab{padding:11px 24px;background:#fff;color:#00565c;border:2px solid rgba(0,86,92,.25);border-radius:999px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s}
+.tab:hover{border-color:#00565c}
+.tab.active{background:linear-gradient(135deg,#0b7f89,#00565c);color:#fff;border-color:#00565c;box-shadow:0 8px 18px rgba(0,86,92,.24)}
+.card{background:#fff;border:5px solid #00565c;border-radius:18px;padding:20px;box-shadow:0 6px 18px rgba(13,40,58,.07);margin-bottom:16px}
+.card-title{font-size:17px;font-weight:800;color:#005151;margin-bottom:14px}
+.sec-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:16px}
+.seccard{background:#fff;border:2px solid rgba(0,86,92,.18);border-radius:16px;padding:16px 18px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;box-shadow:0 4px 12px rgba(13,40,58,.06)}
+.seccard:hover{transform:translateY(-3px);border-color:#00565c;box-shadow:0 12px 24px rgba(0,86,92,.18)}
+.seccard .sc-name{font-size:15px;font-weight:800;color:#005151;margin-bottom:6px;position:relative}
+.seccard .sc-line{font-size:12px;color:#5d7283;position:relative}
+.seccard .sc-line b{color:#0a6b72}
+.seccard:after{content:"";position:absolute;top:-30px;right:-30px;width:90px;height:90px;border-radius:50%;background:rgba(42,154,160,.10)}
+.seccard.active{background:linear-gradient(135deg,#0b7f89,#00565c);border-color:#00565c}
+.seccard.active .sc-name,.seccard.active .sc-line,.seccard.active .sc-line b{color:#fff}
+.seccard.active:after{background:rgba(255,255,255,.14)}
+.stats{display:flex;gap:14px;margin:0 0 16px;flex-wrap:wrap}
+.stat{padding:14px 22px;border-radius:14px;font-size:12px;font-weight:600;color:#fff;min-width:150px;position:relative;overflow:hidden;box-shadow:0 10px 22px rgba(13,40,58,.14)}
+.stat:after{content:"";position:absolute;top:-26px;right:-26px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.14)}
+.stat .num{font-size:24px;font-weight:800;display:block;margin-bottom:2px;position:relative}
+.stat.a{background:linear-gradient(135deg,#0b7f89,#00565c)}
+.stat.b{background:linear-gradient(135deg,#4caf50,#2e7d32)}
+.stat.c{background:linear-gradient(135deg,#ffb74d,#ef6c00)}
+.stat.d{background:linear-gradient(135deg,#7e57c2,#4527a0)}
+.top-bar{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px}
+.field{display:flex;flex-direction:column;gap:3px;flex:1;min-width:170px}
+.field label{font-size:12px;font-weight:600;color:#5d7283;text-transform:uppercase;letter-spacing:.04em}
+.field select,.field input{padding:9px 12px;border:1.5px solid #d8e2e6;border-radius:10px;font-size:14px;background:#fff;font-family:inherit}
+.field select:focus,.field input:focus{border-color:#0a6b72;outline:none;box-shadow:0 0 0 3px rgba(42,154,160,.16)}
+.tbl-wrap{overflow-x:auto;border:1px solid rgba(0,86,92,.4);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#eaf3f3;color:#00565c;padding:11px 10px;text-align:left;position:sticky;top:0;font-weight:700;cursor:pointer;user-select:none;border-bottom:2px solid #d7e6e6;white-space:nowrap}
+th:hover{background:#dceeee}
+td{padding:10px;border-bottom:1px solid #eef2f4;vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f6fafb}
+td.sl{text-align:center;font-weight:700;color:#00565c;width:42px}
+tr.alt td{background:#fbfdfd;font-size:12px;color:#5d7283}
+tr.alt td.sl{color:#9fb6b6}
+td.num{text-align:right;white-space:nowrap}
+td.qty{text-align:center;font-weight:700;color:#00565c}
+.sec-badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;color:#fff;background:#006066;white-space:nowrap}
+.mail{color:#0a6b72;text-decoration:none;word-break:break-all}
+.mail:hover{text-decoration:underline}
+tr.total td{background:#eaf3f3;font-weight:800;color:#005151;border-top:2px solid #d7e6e6}
+.proj{font-weight:800;color:#005151;background:#f2f8f8}
+.no-data{text-align:center;padding:40px;color:#8aa0ae;font-size:15px}
+.foot{text-align:center;color:#8aa0ae;font-size:12px;padding:10px 0 0}
+.foot a{color:#0a6b72}
+</style>
+</head>
+<body>
+<div class="hdr">
+<div class="hdr-text">AKIJ LIGHT ENGINEERING LTD.</div>
+<div class="hdr-sub">GSS &amp; LED Machine List &middot; Setup &amp; Space Plan</div>
+</div>
+<div class="wrap">
+<div class="tabs">
+<button class="tab active" id="tabMachine">Machine List</button>
+<button class="tab" id="tabLand">Land &amp; Space Plan</button>
+</div>
+
+<div id="viewMachine">
+<div class="sec-cards" id="secCards"></div>
+<div class="stats" id="mStats"></div>
+<div class="card">
+<div class="top-bar">
+<div class="field"><label>Search</label><input type="text" id="searchBox" placeholder="Machine, supplier, company, e-mail..."></div>
+</div>
+<div class="tbl-wrap">
+<table id="mTable">
+<thead><tr>
+<th data-col="sl">S/L</th>
+<th data-col="section">Section</th>
+<th data-col="machine">Machine</th>
+<th data-col="brand">Brand / Origin</th>
+<th data-col="supplier">Supplier / Company</th>
+<th data-col="mail">Mail ID</th>
+<th data-col="qty">Qty</th>
+<th data-col="rate">Rate (USD)</th>
+<th data-col="total">Total (USD)</th>
+</tr></thead>
+<tbody id="mBody"></tbody>
+</table>
+</div>
+<div class="no-data" id="mNo" style="display:none">No machines found.</div>
+</div>
+</div>
+
+<div id="viewLand" style="display:none">
+<div class="stats" id="lStats"></div>
+<div class="card">
+<div class="top-bar">
+<div class="field"><label>Project</label><select id="projFilter"><option value="">All Projects</option></select></div>
+</div>
+<div class="tbl-wrap">
+<table id="lTable">
+<thead><tr>
+<th>Project</th>
+<th>Machine / Area</th>
+<th>Qty</th>
+<th>Length (M)</th>
+<th>Width (M)</th>
+<th>Base Area (Sq.M)</th>
+<th>Total Base (Sq.M)</th>
+<th>Clearance (Sq.M)</th>
+<th>Total Area (Sq.M)</th>
+<th>Total Area (Sq.F)</th>
+</tr></thead>
+<tbody id="lBody"></tbody>
+</table>
+</div>
+</div>
+</div>
+
+<div class="foot">
+Source: <a href="https://docs.google.com/spreadsheets/d/1tKfrjgWKSe557zNHis93qXIIxUJli0Pt/edit" target="_blank" rel="noopener">GSS,LED Machine List.xlsx</a>
+</div>
+</div>
+
+<script src="data.js"></script>
+<script>
+var fmt = function(n){ return n==null||n==='' ? '' : Number(n).toLocaleString('en-US'); };
+var money = function(n){ return n==null||n==='' ? '' : '$'+Number(n).toLocaleString('en-US',{maximumFractionDigits:0}); };
+function esc(s){ return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : ''; }
+function mailLink(s){
+  if(!s) return '';
+  return String(s).split(/[\s,;]+/).filter(Boolean).map(function(m){
+    return '<a class="mail" href="mailto:'+esc(m)+'">'+esc(m)+'</a>';
+  }).join('<br>');
+}
+function secColor(s){
+  var map={'Plastic':'#006066','Work Shop':'#7e57c2','Switch':'#ef6c00','LED':'#2e7d32','LAB':'#c2185b'};
+  return map[s]||'#006066';
+}
+
+var sortCol='section', sortAsc=true, secVal='', searchVal='';
+var M = window.MACHINE_DATA || [];
+var SECS = [];
+M.forEach(function(m){ if(SECS.indexOf(m.section)===-1) SECS.push(m.section); });
+
+function sectionStats(sec){
+  var list = sec ? M.filter(function(m){return m.section===sec;}) : M;
+  var qty=0, usd=0;
+  list.forEach(function(m){ qty+=m.qty||0; usd+=m.total||0; });
+  return { count:list.length, qty:qty, usd:usd };
+}
+function renderSecCards(){
+  var el=document.getElementById('secCards');
+  var html='<div class="seccard'+(secVal===''?' active':'')+'" data-sec=""><div class="sc-name">All Sections</div><div class="sc-line"><b>'+M.length+'</b> machines &middot; <b>'+fmt(sectionStats('').qty)+'</b> sets</div><div class="sc-line">'+money(sectionStats('').usd)+'</div></div>';
+  SECS.forEach(function(s){
+    var st=sectionStats(s);
+    html+='<div class="seccard'+(secVal===s?' active':'')+'" data-sec="'+esc(s)+'"><div class="sc-name">'+esc(s)+'</div><div class="sc-line"><b>'+st.count+'</b> machines &middot; <b>'+fmt(st.qty)+'</b> sets</div><div class="sc-line">'+money(st.usd)+'</div></div>';
+  });
+  el.innerHTML=html;
+  el.querySelectorAll('.seccard').forEach(function(c){
+    c.addEventListener('click',function(){
+      secVal=this.getAttribute('data-sec')||'';
+      renderSecCards(); renderStats(); renderMachines();
+    });
+  });
+}
+function machineRows(){
+  return M.filter(function(m){
+    if(secVal && m.section!==secVal) return false;
+    if(searchVal){
+      var hay=[m.machine,m.brand,m.supplier,m.company,m.mail,m.section].join(' ').toLowerCase();
+      if(hay.indexOf(searchVal)===-1) return false;
+    }
+    return true;
+  });
+}
+function renderStats(){
+  var list = secVal ? M.filter(function(m){return m.section===secVal;}) : M;
+  var secs={}; list.forEach(function(m){ secs[m.section]=1; });
+  var qty=0,usd=0;
+  list.forEach(function(m){ qty+=m.qty||0; usd+=m.total||0; });
+  document.getElementById('mStats').innerHTML=
+    '<div class="stat a"><span class="num">'+list.length+'</span>'+(secVal?'Machines in '+esc(secVal):'Machines')+'</div>'+
+    '<div class="stat b"><span class="num">'+fmt(qty)+'</span>Total Sets</div>'+
+    '<div class="stat c"><span class="num">'+money(usd)+'</span>Total Amount (USD)</div>'+
+    '<div class="stat d"><span class="num">'+Object.keys(secs).length+'</span>Section'+(Object.keys(secs).length===1?'':'s')+'</div>';
+}
+function renderMachines(){
+  var list=machineRows();
+  if(sortCol!=='sl'){
+    list=list.slice().sort(function(a,b){
+      var av=a[sortCol]||'', bv=b[sortCol]||'';
+      if(sortCol==='qty'||sortCol==='rate'||sortCol==='total'){ av=av||0; bv=bv||0; return sortAsc?av-bv:bv-av; }
+      return sortAsc?String(av).localeCompare(String(bv)):String(bv).localeCompare(String(av));
+    });
+  }
+  var tb=document.getElementById('mBody'); tb.innerHTML='';
+  document.getElementById('mNo').style.display=list.length?'none':'block';
+  list.forEach(function(m,i){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td class="sl">'+(i+1)+'</td>'+
+      '<td><span class="sec-badge" style="background:'+secColor(m.section)+'">'+esc(m.section)+'</span></td>'+
+      '<td>'+esc(m.machine)+'</td>'+
+      '<td>'+esc(m.brand)+'</td>'+
+      '<td>'+esc(m.company)+(m.supplier?'<br><span style="color:#8aa0ae">'+esc(m.supplier)+'</span>':'')+'</td>'+
+      '<td>'+mailLink(m.mail)+'</td>'+
+      '<td class="qty">'+fmt(m.qty)+'</td>'+
+      '<td class="num">'+money(m.rate)+'</td>'+
+      '<td class="num">'+money(m.total)+'</td>';
+    tb.appendChild(tr);
+    (m.alts||[]).forEach(function(a){
+      var at=document.createElement('tr'); at.className='alt';
+      at.innerHTML='<td class="sl">&#8627;</td><td></td><td></td>'+
+        '<td>'+esc(a.brand)+'</td>'+
+        '<td>'+esc(a.company)+(a.supplier?'<br><span>'+esc(a.supplier)+'</span>':'')+'</td>'+
+        '<td>'+mailLink(a.mail)+'</td><td></td><td></td><td></td>';
+      tb.appendChild(at);
+    });
+  });
+}
+
+function renderLand(){
+  var projVal=document.getElementById('projFilter').value;
+  var L=window.LAND_DATA||[];
+  var projects=[];
+  L.forEach(function(r){ if(projects.indexOf(r.project)===-1) projects.push(r.project); });
+  var rows=L.filter(function(r){ return !projVal || r.project===projVal; });
+  var totM=0, totF=0;
+  L.forEach(function(r){ if(r.isTotal){ totM+=r.totalAreaM||0; totF+=r.totalAreaF||0; } });
+  document.getElementById('lStats').innerHTML=
+    '<div class="stat a"><span class="num">'+fmt(Math.round(totM))+'</span>Total Area (Sq.M)</div>'+
+    '<div class="stat b"><span class="num">'+fmt(Math.round(totF))+'</span>Total Area (Sq.F)</div>'+
+    '<div class="stat d"><span class="num">'+projects.length+'</span>Projects</div>';
+  var tb=document.getElementById('lBody'); tb.innerHTML='';
+  var shown={};
+  rows.forEach(function(r){
+    var tr=document.createElement('tr');
+    if(r.isTotal) tr.className='total';
+    var showProj=!shown[r.project]; shown[r.project]=true;
+    tr.innerHTML='<td class="'+(showProj?'proj':'')+'">'+(showProj?esc(r.project):'')+'</td>'+
+      '<td>'+esc(r.machine)+'</td>'+
+      '<td class="qty">'+fmt(r.qty)+'</td>'+
+      '<td class="num">'+fmt(r.length)+'</td>'+
+      '<td class="num">'+fmt(r.width)+'</td>'+
+      '<td class="num">'+fmt(r.base)+'</td>'+
+      '<td class="num">'+fmt(r.totalBase)+'</td>'+
+      '<td class="num">'+fmt(r.clearance)+'</td>'+
+      '<td class="num">'+fmt(r.totalAreaM)+'</td>'+
+      '<td class="num">'+fmt(r.totalAreaF)+'</td>';
+    tb.appendChild(tr);
+  });
+}
+
+document.querySelectorAll('#mTable th[data-col]').forEach(function(th){
+  th.addEventListener('click',function(){
+    var c=this.getAttribute('data-col');
+    if(c==='sl')return;
+    if(sortCol===c){sortAsc=!sortAsc}else{sortCol=c;sortAsc=true}
+    renderMachines();
+  });
+});
+document.getElementById('searchBox').addEventListener('input',function(){ searchVal=this.value.trim().toLowerCase(); renderMachines(); });
+document.getElementById('projFilter').addEventListener('change',renderLand);
+
+document.getElementById('tabMachine').addEventListener('click',function(){
+  this.classList.add('active'); document.getElementById('tabLand').classList.remove('active');
+  document.getElementById('viewMachine').style.display='block'; document.getElementById('viewLand').style.display='none';
+});
+document.getElementById('tabLand').addEventListener('click',function(){
+  this.classList.add('active'); document.getElementById('tabMachine').classList.remove('active');
+  document.getElementById('viewLand').style.display='block'; document.getElementById('viewMachine').style.display='none';
+  renderLand();
+});
+
+(function init(){
+  var projs=[];
+  (window.LAND_DATA||[]).forEach(function(r){ if(projs.indexOf(r.project)===-1) projs.push(r.project); });
+  var ps=document.getElementById('projFilter');
+  projs.forEach(function(p){ var o=document.createElement('option'); o.value=p; o.textContent=p; ps.appendChild(o); });
+  renderSecCards(); renderStats(); renderMachines();
+})();
+</script>
+</body>
+</html>
