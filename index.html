@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Electronics business project plan</title>
+<title>Electronics Business Project Plan</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Inter','Segoe UI',-apple-system,Roboto,Arial,sans-serif}
 body{background:radial-gradient(1200px 480px at 12% -10%, rgba(42,154,160,.13), transparent 60%),radial-gradient(1000px 440px at 108% -18%, rgba(0,86,92,.11), transparent 55%),#f4f7f9;min-height:100vh;color:#12263a;-webkit-font-smoothing:antialiased}
@@ -15,7 +15,7 @@ body{background:radial-gradient(1200px 480px at 12% -10%, rgba(42,154,160,.13), 
 .card{background:#fff;border:5px solid #00565c;border-radius:18px;padding:20px;box-shadow:0 6px 18px rgba(13,40,58,.07);margin-bottom:16px}
 .card-title{font-size:17px;font-weight:800;color:#005151;margin-bottom:14px}
 
-.home-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:18px;max-width:760px}
+.home-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:18px auto 0;max-width:760px}
 .homecard{position:relative;overflow:hidden;border-radius:16px;padding:20px 22px;color:#fff;cursor:pointer;transition:all .22s;box-shadow:0 10px 22px rgba(13,40,58,.16);min-height:120px;display:flex;flex-direction:column;justify-content:center}
 .homecard:hover{transform:translateY(-4px);box-shadow:0 16px 32px rgba(13,40,58,.26)}
 .homecard:after{content:"";position:absolute;top:-45px;right:-45px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.12)}
@@ -30,6 +30,11 @@ body{background:radial-gradient(1200px 480px at 12% -10%, rgba(42,154,160,.13), 
 .back-btn{display:inline-block;margin:2px 0 16px;padding:10px 22px;background:#fff;color:#00565c;border:1px solid rgba(0,86,92,.3);text-decoration:none;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 2px 6px rgba(13,40,58,.06)}
 .back-btn:hover{background:#00565c;color:#fff;border-color:#00565c;box-shadow:0 6px 16px rgba(0,86,92,.24)}
 
+.prod-gallery{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-top:30px}
+.prod{background:#fff;border:1px solid rgba(0,86,92,.14);border-radius:14px;padding:14px 10px 10px;width:152px;text-align:center;box-shadow:0 4px 12px rgba(13,40,58,.06);transition:all .2s}
+.prod:hover{transform:translateY(-3px);box-shadow:0 12px 22px rgba(0,86,92,.14)}
+.prod img{width:100%;height:104px;object-fit:contain;display:block;margin-bottom:8px}
+.prod div{font-size:12px;font-weight:700;color:#005151}
 .sec-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:16px}
 .seccard{background:#fff;border:2px solid rgba(0,86,92,.18);border-radius:16px;padding:16px 18px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;box-shadow:0 4px 12px rgba(13,40,58,.06)}
 .seccard:hover{transform:translateY(-3px);border-color:#00565c;box-shadow:0 12px 24px rgba(0,86,92,.18)}
@@ -77,7 +82,7 @@ tr.total td{background:#eaf3f3;font-weight:800;color:#005151;border-top:2px soli
 </head>
 <body>
 <div class="hdr">
-<div class="hdr-text">Electronics business project plan</div>
+<div class="hdr-text">Electronics Business Project Plan</div>
 </div>
 <div class="wrap">
 
@@ -95,6 +100,13 @@ tr.total td{background:#eaf3f3;font-weight:800;color:#005151;border-top:2px soli
 <div class="hc-sub" id="homeLandSub">Project-wise area &amp; space plan</div>
 <div class="hc-go">Open &rarr;</div>
 </div>
+</div>
+<div class="prod-gallery">
+<div class="prod"><img src="products/gang-switch.png" alt="Gang Switch"><div>Gang Switch</div></div>
+<div class="prod"><img src="products/piano-switch.png" alt="Piano Switch"><div>Piano Switch</div></div>
+<div class="prod"><img src="products/holder.png" alt="Holder"><div>Holder</div></div>
+<div class="prod"><img src="products/led-bulb-1.png" alt="LED Bulb"><div>LED Bulb</div></div>
+<div class="prod"><img src="products/led-bulb-2.png" alt="LED Bulb"><div>LED Bulb</div></div>
 </div>
 </div>
 
