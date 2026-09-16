@@ -130,7 +130,11 @@ tr.total td{background:#eaf3f3;font-weight:800;color:#005151;border-top:2px soli
 
 <div id="viewMachine" style="display:none">
 <button class="back-btn" id="backMachine">&#8592; Back</button>
+<div id="mSections">
 <div class="sec-cards" id="secCards"></div>
+</div>
+<div id="mDetail" style="display:none">
+<button class="back-btn" id="backSections">&#8592; Sections</button>
 <div class="stats" id="mStats"></div>
 <div class="card">
 <div class="top-bar">
@@ -153,6 +157,7 @@ tr.total td{background:#eaf3f3;font-weight:800;color:#005151;border-top:2px soli
 </table>
 </div>
 <div class="no-data" id="mNo" style="display:none">No machines found.</div>
+</div>
 </div>
 </div>
 
@@ -235,7 +240,7 @@ function renderHome(){
 }
 function renderSecCards(){
   var el=document.getElementById('secCards');
-  var html='<div class="seccard'+(secVal===''?' active':'')+'" data-sec=""><div class="sc-name">All Sections</div><div class="sc-line"><b>'+M.length+'</b> machines &middot; <b>'+fmt(sectionStats('').qty)+'</b> sets</div><div class="sc-line">'+money(sectionStats('').usd)+'</div></div>';
+  var html='';
   SECS.forEach(function(s){
     var st=sectionStats(s);
     html+='<div class="seccard'+(secVal===s?' active':'')+'" data-sec="'+esc(s)+'"><div class="sc-name">'+esc(s)+'</div><div class="sc-line"><b>'+st.count+'</b> machines &middot; <b>'+fmt(st.qty)+'</b> sets</div><div class="sc-line">'+money(st.usd)+'</div></div>';
@@ -244,9 +249,16 @@ function renderSecCards(){
   el.querySelectorAll('.seccard').forEach(function(c){
     c.addEventListener('click',function(){
       secVal=this.getAttribute('data-sec')||'';
+      searchVal=''; document.getElementById('searchBox').value='';
       renderSecCards(); renderStats(); renderMachines();
+      showMachineDetail(true);
     });
   });
+}
+function showMachineDetail(on){
+  document.getElementById('mSections').style.display = on?'none':'block';
+  document.getElementById('mDetail').style.display = on?'block':'none';
+  window.scrollTo(0,0);
 }
 function machineRows(){
   return M.filter(function(m){
@@ -352,9 +364,10 @@ document.querySelectorAll('#mTable th[data-col]').forEach(function(th){
 document.getElementById('searchBox').addEventListener('input',function(){ searchVal=this.value.trim().toLowerCase(); renderMachines(); });
 document.getElementById('projFilter').addEventListener('change',renderLand);
 
-document.getElementById('goMachine').addEventListener('click',function(){ show('machine'); });
+document.getElementById('goMachine').addEventListener('click',function(){ show('machine'); showMachineDetail(false); });
 document.getElementById('goLand').addEventListener('click',function(){ show('land'); renderLand(); });
 document.getElementById('backMachine').addEventListener('click',function(){ show('home'); });
+document.getElementById('backSections').addEventListener('click',function(){ secVal=''; renderSecCards(); showMachineDetail(false); });
 document.getElementById('backLand').addEventListener('click',function(){ show('home'); });
 
 (function init(){
