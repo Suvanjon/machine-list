@@ -211,9 +211,54 @@ function secColor(s){
 }
 
 var sortCol='section', sortAsc=true, secVal='', searchVal='';
-var M = window.MACHINE_DATA || [];
+var SHEET_ID='1BeciLxtwDh-PkkoxpYHwBc87ATa3nYQPKdAXB9maXvY';
+var GID_MACHINE='86905509', GID_LAND='746325702';
+var CSV_MACHINE='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&gid='+GID_MACHINE;
+var CSV_LAND='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&gid='+GID_LAND;
+var M = [];
+var L = [];
 var SECS = [];
-M.forEach(function(m){ if(SECS.indexOf(m.section)===-1) SECS.push(m.section); });
+function rebuildSections(){
+  SECS=[];
+  M.forEach(function(m){ if(m.section && SECS.indexOf(m.section)===-1) SECS.push(m.section); });
+}
+function parseCSV(text){
+  var lines=[],row=[],field='',inQ=false;
+  for(var i=0;i<text.length;i++){
+    var c=text[i];
+    if(inQ){ if(c==='"'){ if(i+1<text.length&&text[i+1]==='"'){field+='"';i++}else{inQ=false} }else{field+=c} }
+    else{ if(c==='"'){inQ=true} else if(c===','){row.push(field);field=''} else if(c==='\n'||c==='\r'){ if(c==='\r'&&i+1<text.length&&text[i+1]==='\n')i++; row.push(field);field=''; if(row.length>1)lines.push(row); row=[] } else {field+=c} }
+  }
+  if(field||row.length>0){ row.push(field); if(row.length>1)lines.push(row); }
+  return lines;
+}
+function num(v){ var n=parseFloat(v); return isNaN(n)?null:n; }
+function str(v){ return v==null?'':String(v).trim(); }
+function buildMachineData(rows){
+  var out=[],cur=null;
+  for(var i=1;i<rows.length;i++){
+    var r=rows[i];
+    var section=str(r[0]);
+    if(section.indexOf('Total')===0) continue;
+    var machine=str(r[1]);
+    var sup={brand:str(r[2]),supplier:str(r[3]),company:str(r[4]),mail:str(r[5])};
+    if(machine){
+      cur={section:section,machine:machine,brand:sup.brand,supplier:sup.supplier,company:sup.company,mail:sup.mail,qty:num(r[6]),rate:num(r[7]),total:num(r[8]),alts:[]};
+      out.push(cur);
+    }else if(cur){ cur.alts.push(sup); }
+  }
+  return out;
+}
+function buildLandData(rows){
+  var out=[],project='';
+  for(var i=1;i<rows.length;i++){
+    var r=rows[i];
+    if(str(r[0])) project=str(r[0]);
+    var machine=str(r[1]);
+    out.push({project:project,machine:machine,qty:num(r[2]),length:num(r[3]),width:num(r[4]),base:num(r[5]),totalBase:num(r[6]),clearance:num(r[7]),totalAreaM:num(r[8]),totalAreaF:num(r[9]),isTotal:machine.indexOf('Total')===0});
+  }
+  return out;
+}
 
 var SEC_LABEL={'Plastic':'Plastic Manufacturing'};
 function secLabel(s){ return SEC_LABEL[s]||s; }
@@ -244,7 +289,6 @@ function sectionStats(sec){
   return { count:list.length, qty:qty, usd:usd };
 }
 function landTotals(){
-  var L=window.LAND_DATA||[];
   var byProj={}, order=[];
   L.forEach(function(r){
     if(!byProj[r.project]){ byProj[r.project]={total:null, rows:[]}; order.push(r.project); }
@@ -386,7 +430,6 @@ function renderMachines(){
 
 function renderLand(){
   var projVal=document.getElementById('projFilter').value;
-  var L=window.LAND_DATA||[];
   var projects=[];
   L.forEach(function(r){ if(projects.indexOf(r.project)===-1) projects.push(r.project); });
   var rows=L.filter(function(r){ return !projVal || r.project===projVal; });
@@ -480,11 +523,27 @@ document.getElementById('backGroups').addEventListener('click',function(){
 document.getElementById('backLand').addEventListener('click',function(){ show('home'); });
 
 (function init(){
-  var projs=[];
-  (window.LAND_DATA||[]).forEach(function(r){ if(projs.indexOf(r.project)===-1) projs.push(r.project); });
   var ps=document.getElementById('projFilter');
-  projs.forEach(function(p){ var o=document.createElement('option'); o.value=p; o.textContent=p; ps.appendChild(o); });
-  renderHome(); renderSecCards(); renderStats(); renderMachines(); restoreView();
+  function finish(){
+    rebuildSections();
+    ps.innerHTML='<option value="">All Projects</option>';
+    var projs=[];
+    L.forEach(function(r){ if(projs.indexOf(r.project)===-1) projs.push(r.project); });
+    projs.forEach(function(p){ var o=document.createElement('option'); o.value=p; o.textContent=p; ps.appendChild(o); });
+    renderHome(); renderSecCards(); renderStats(); renderMachines(); restoreView();
+  }
+  function fallback(){
+    M=window.MACHINE_DATA||[]; L=window.LAND_DATA||[];
+    finish();
+  }
+  Promise.all([
+    fetch(CSV_MACHINE).then(function(r){ return r.text(); }).then(function(t){ return buildMachineData(parseCSV(t)); }),
+    fetch(CSV_LAND).then(function(r){ return r.text(); }).then(function(t){ return buildLandData(parseCSV(t)); })
+  ]).then(function(res){
+    if(!res[0] || !res[0].length) throw new Error('empty');
+    M=res[0]; L=res[1]||[];
+    finish();
+  }).catch(function(){ fallback(); });
 })();
 </script>
 </body>
