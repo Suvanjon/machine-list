@@ -304,7 +304,7 @@ function landTotals(){
 }
 function renderHome(){
   var st=sectionStats('');
-  document.getElementById('homeMachineSub').innerHTML='<b>'+M.length+'</b> machines &middot; <b>'+fmt(st.qty)+'</b> sets &middot; '+money(st.usd);
+  document.getElementById('homeMachineSub').innerHTML='<b>'+M.length+'</b> size &middot; <b>'+fmt(st.qty)+'</b> sets &middot; '+money(st.usd);
   var lt=landTotals();
   document.getElementById('homeLandSub').innerHTML='<b>'+lt.projects+'</b> projects &middot; '+fmt(Math.round(lt.sqm))+' Sq.M total area';
 }
@@ -313,7 +313,7 @@ function renderSecCards(){
   var html='';
   SECS.forEach(function(s){
     var st=sectionStats(s);
-    html+='<div class="seccard'+(secVal===s?' active':'')+'" data-sec="'+esc(s)+'"><div class="sc-name">'+esc(secLabel(s))+'</div><div class="sc-line"><b>'+st.count+'</b> machines &middot; <b>'+fmt(st.qty)+'</b> sets</div><div class="sc-line">'+money(st.usd)+'</div></div>';
+    html+='<div class="seccard'+(secVal===s?' active':'')+'" data-sec="'+esc(s)+'"><div class="sc-name">'+esc(secLabel(s))+'</div><div class="sc-line"><b>'+st.count+'</b> size &middot; <b>'+fmt(st.qty)+'</b> sets</div><div class="sc-line">'+money(st.usd)+'</div></div>';
   });
   el.innerHTML=html;
   el.querySelectorAll('.seccard').forEach(function(c){
@@ -336,7 +336,7 @@ function renderGroupCards(){
     var list=M.filter(function(m){ return m.section===secVal && inGroup(m,g); });
     var qty=0,usd=0;
     list.forEach(function(m){ qty+=m.qty||0; usd+=m.total||0; });
-    html+='<div class="seccard" data-gi="'+groups.indexOf(g)+'"><div class="sc-name">'+esc(g.label)+'</div><div class="sc-line"><b>'+list.length+'</b> machines &middot; <b>'+fmt(qty)+'</b> sets</div><div class="sc-line">'+money(usd)+'</div></div>';
+    html+='<div class="seccard" data-gi="'+groups.indexOf(g)+'"><div class="sc-name">'+esc(g.label)+'</div><div class="sc-line"><b>'+list.length+'</b> size &middot; <b>'+fmt(qty)+'</b> sets</div><div class="sc-line">'+money(usd)+'</div></div>';
   });
   el.innerHTML=html;
   el.querySelectorAll('.seccard').forEach(function(c){
