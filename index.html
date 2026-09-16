@@ -211,6 +211,8 @@ var M = window.MACHINE_DATA || [];
 var SECS = [];
 M.forEach(function(m){ if(SECS.indexOf(m.section)===-1) SECS.push(m.section); });
 
+var SEC_LABEL={'Plastic':'Plastic Manufacturing'};
+function secLabel(s){ return SEC_LABEL[s]||s; }
 function sectionStats(sec){
   var list = sec ? M.filter(function(m){return m.section===sec;}) : M;
   var qty=0, usd=0;
@@ -243,7 +245,7 @@ function renderSecCards(){
   var html='';
   SECS.forEach(function(s){
     var st=sectionStats(s);
-    html+='<div class="seccard'+(secVal===s?' active':'')+'" data-sec="'+esc(s)+'"><div class="sc-name">'+esc(s)+'</div><div class="sc-line"><b>'+st.count+'</b> machines &middot; <b>'+fmt(st.qty)+'</b> sets</div><div class="sc-line">'+money(st.usd)+'</div></div>';
+    html+='<div class="seccard'+(secVal===s?' active':'')+'" data-sec="'+esc(s)+'"><div class="sc-name">'+esc(secLabel(s))+'</div><div class="sc-line"><b>'+st.count+'</b> machines &middot; <b>'+fmt(st.qty)+'</b> sets</div><div class="sc-line">'+money(st.usd)+'</div></div>';
   });
   el.innerHTML=html;
   el.querySelectorAll('.seccard').forEach(function(c){
@@ -283,7 +285,7 @@ function renderStats(){
   var qty=0,usd=0;
   list.forEach(function(m){ qty+=m.qty||0; usd+=m.total||0; });
   document.getElementById('mStats').innerHTML=
-    '<div class="stat a"><span class="num">'+list.length+'</span>'+(secVal?'Machines in '+esc(secVal):'Machines')+'</div>'+
+    '<div class="stat a"><span class="num">'+list.length+'</span>'+(secVal?'Machines in '+esc(secLabel(secVal)):'Machines')+'</div>'+
     '<div class="stat b"><span class="num">'+fmt(qty)+'</span>Total Sets</div>'+
     '<div class="stat c"><span class="num">'+money(usd)+'</span>Total Amount (USD)</div>'+
     '<div class="stat d"><span class="num">'+Object.keys(secs).length+'</span>Section'+(Object.keys(secs).length===1?'':'s')+'</div>';
@@ -302,7 +304,7 @@ function renderMachines(){
   list.forEach(function(m,i){
     var tr=document.createElement('tr');
     tr.innerHTML='<td class="sl">'+(i+1)+'</td>'+
-      '<td><span class="sec-badge" style="background:'+secColor(m.section)+'">'+esc(m.section)+'</span></td>'+
+      '<td><span class="sec-badge" style="background:'+secColor(m.section)+'">'+esc(secLabel(m.section))+'</span></td>'+
       '<td>'+esc(m.machine)+'</td>'+
       '<td>'+esc(m.brand)+'</td>'+
       '<td>'+esc(m.company)+(m.supplier?'<br><span style="color:#8aa0ae">'+esc(m.supplier)+'</span>':'')+'</td>'+
