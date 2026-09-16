@@ -540,12 +540,14 @@ function loadData(first){
     lastSig=sig;
     M=res[0]; L=res[1]||[];
     rebuildSections(); refreshFilters();
-    renderHome(); restoreView();
+    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand();
+    restoreView();
   }).catch(function(){
     if(M.length) return;
     M=window.MACHINE_DATA||[]; L=window.LAND_DATA||[];
     rebuildSections(); refreshFilters();
-    renderHome(); restoreView();
+    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand();
+    restoreView();
   });
 }
 loadData(true);
