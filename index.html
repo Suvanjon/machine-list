@@ -59,8 +59,16 @@ body{background:radial-gradient(1200px 480px at 12% -10%, rgba(42,154,160,.13), 
 .stat.c{background:linear-gradient(135deg,#ffb74d,#ef6c00)}
 .stat.d{background:linear-gradient(135deg,#7e57c2,#4527a0)}
 a.stat{display:block;text-decoration:none;cursor:pointer}
-.stat.edit{background:linear-gradient(135deg,#e0a800,#b8860b)}
+.stat.edit{background:linear-gradient(135deg,#e0a800,#b8860b);cursor:pointer}
 .stat.edit:hover{opacity:.92}
+.modal{position:fixed;inset:0;background:rgba(10,30,40,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal-box{background:#fff;border:5px solid #00565c;border-radius:18px;padding:22px;width:100%;max-width:460px;max-height:92vh;overflow:auto;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.modal-head div{font-size:18px;font-weight:800;color:#005151}
+.modal-head button{border:none;background:none;font-size:26px;color:#5d7283;cursor:pointer;line-height:1}
+.entry-msg{font-size:13px;font-weight:600;margin:10px 0;display:none}
+.entry-msg.ok{color:#2e7d32;display:block}
+.entry-msg.err{color:#c62828;display:block}
 .top-bar{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px}
 .field{display:flex;flex-direction:column;gap:3px;flex:1;min-width:170px}
 .field label{font-size:12px;font-weight:600;color:#5d7283;text-transform:uppercase;letter-spacing:.04em}
@@ -231,6 +239,7 @@ var GID_MACHINE='86905509', GID_LAND='746325702';
 var CSV_MACHINE='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&gid='+GID_MACHINE;
 var CSV_LAND='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&gid='+GID_LAND;
 var SHEET_URL='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/edit';
+var ENTRY_URL='https://script.google.com/macros/s/AKfycbwkoI4iRDaHDfI0Gt76KgLYsL_m9kTIi4WxXsBavdBX9Po-LMk7ps2efZrTSniw5SLQ5Q/exec';
 var M = [];
 var L = [];
 var SECS = [];
@@ -405,7 +414,7 @@ function renderStats(){
   document.getElementById('mStats').innerHTML=
     '<div class="stat b"><span class="num">'+fmt(qty)+'</span>Total Sets</div>'+
     '<div class="stat c"><span class="num">'+money(usd)+'</span>Total Amount (USD)</div>'+
-    '<a class="stat edit" href="'+SHEET_URL+'" target="_blank" rel="noopener"><span class="num">&#9998;</span>Edit / Add Data</a>';
+    '<div class="stat edit" id="entryOpen" onclick="openEntry()"><span class="num">&#9998;</span>Edit / Add Data</div>';
 }
 function renderMachines(){
   var list=machineRows();
@@ -588,6 +597,92 @@ function primeView(){
 primeView();
 loadData(true);
 setInterval(function(){ loadData(false); }, 60000);
+
+function entryModeChange(){
+  document.getElementById('entrySelWrap').style.display = document.getElementById('entryMode').value==='update' ? 'block':'none';
+}
+function entrySelChange(){
+  var m = document.getElementById('entrySel').value;
+  var found=null;
+  M.forEach(function(x){ if(x.machine===m) found=x; });
+  if(found){
+    document.getElementById('entrySection').value=found.section;
+    document.getElementById('entryMachine').value=found.machine;
+    document.getElementById('entryBrand').value=found.brand||'';
+    document.getElementById('entrySupplier').value=found.supplier||'';
+    document.getElementById('entryCompany').value=found.company||'';
+    document.getElementById('entryMail').value=found.mail||'';
+    document.getElementById('entryQty').value=found.qty==null?'':found.qty;
+    document.getElementById('entryRate').value=found.rate==null?'':found.rate;
+  }
+}
+function openEntry(){
+  var sec=document.getElementById('entrySection');
+  sec.innerHTML='';
+  SECS.forEach(function(s){ var o=document.createElement('option'); o.value=s; o.textContent=secLabel(s); sec.appendChild(o); });
+  var sel=document.getElementById('entrySel');
+  sel.innerHTML='<option value="">-- Select --</option>';
+  M.slice().sort(function(a,b){ return a.machine.localeCompare(b.machine); }).forEach(function(m){
+    var o=document.createElement('option'); o.value=m.machine; o.textContent=m.machine; sel.appendChild(o);
+  });
+  document.getElementById('entryMode').value='add';
+  document.getElementById('entrySelWrap').style.display='none';
+  document.getElementById('entryMachine').value='';
+  document.getElementById('entryBrand').value='';
+  document.getElementById('entrySupplier').value='';
+  document.getElementById('entryCompany').value='';
+  document.getElementById('entryMail').value='';
+  document.getElementById('entryQty').value='';
+  document.getElementById('entryRate').value='';
+  var msg=document.getElementById('entryMsg'); msg.className='entry-msg'; msg.textContent='';
+  document.getElementById('entryModal').style.display='flex';
+}
+function closeEntry(){ document.getElementById('entryModal').style.display='none'; }
+function saveEntry(){
+  var mode=document.getElementById('entryMode').value;
+  var sel=document.getElementById('entrySel').value;
+  var payload={
+    action: mode==='update' ? 'update' : 'add',
+    origMachine: mode==='update' ? sel : undefined,
+    section: document.getElementById('entrySection').value,
+    machine: document.getElementById('entryMachine').value.trim(),
+    brand: document.getElementById('entryBrand').value.trim(),
+    supplier: document.getElementById('entrySupplier').value.trim(),
+    company: document.getElementById('entryCompany').value.trim(),
+    mail: document.getElementById('entryMail').value.trim(),
+    qty: document.getElementById('entryQty').value,
+    rate: document.getElementById('entryRate').value
+  };
+  if(!payload.machine){ showEntryMsg('Machine name is required', false); return; }
+  if(!payload.section){ showEntryMsg('Section is required', false); return; }
+  var msg=document.getElementById('entryMsg'); msg.className='entry-msg'; msg.textContent='Saving...';
+  fetch(ENTRY_URL, { method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload) })
+    .then(function(r){ return r.text(); })
+    .then(function(t){ var j=JSON.parse(t); if(j.ok){ showEntryMsg('Saved', true); loadData(false); setTimeout(closeEntry, 900); } else { showEntryMsg('Error: '+j.message, false); } })
+    .catch(function(e){ showEntryMsg('Network error', false); });
+}
+function showEntryMsg(t, ok){
+  var m=document.getElementById('entryMsg'); m.className='entry-msg '+(ok?'ok':'err'); m.textContent=t;
+}
 </script>
+<div class="modal" id="entryModal" style="display:none">
+<div class="modal-box">
+<div class="modal-head"><div>Edit / Add Data</div><button id="entryClose" onclick="closeEntry()">&times;</button></div>
+<div class="field"><label>Mode</label><select id="entryMode" onchange="entryModeChange()"><option value="add">Add New Machine</option><option value="update">Edit Existing Machine</option></select></div>
+<div class="field" id="entrySelWrap" style="display:none"><label>Select Machine</label><select id="entrySel" onchange="entrySelChange()"></select></div>
+<div class="field"><label>Section</label><select id="entrySection"></select></div>
+<div class="field"><label>Machine</label><input type="text" id="entryMachine" placeholder="Machine name"></div>
+<div class="field"><label>Brand / Origin</label><input type="text" id="entryBrand"></div>
+<div class="field"><label>Supplier Name</label><input type="text" id="entrySupplier"></div>
+<div class="field"><label>Company Name</label><input type="text" id="entryCompany"></div>
+<div class="field"><label>Mail ID</label><input type="text" id="entryMail"></div>
+<div class="row">
+<div class="field"><label>Qty</label><input type="number" id="entryQty"></div>
+<div class="field"><label>Rate (USD)</label><input type="number" id="entryRate"></div>
+</div>
+<div class="entry-msg" id="entryMsg"></div>
+<button class="btn" id="entrySave" onclick="saveEntry()">Save</button>
+</div>
+</div>
 </body>
 </html>
