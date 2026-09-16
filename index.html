@@ -91,7 +91,7 @@ tr.total td{background:#eaf3f3;font-weight:800;color:#005151;border-top:2px soli
 </div>
 <div class="wrap">
 
-<div id="viewHome">
+<div id="viewHome" style="display:none">
 <div class="home-inner">
 <div class="quote-top">Before taking the first step, make sure the path is properly planned</div>
 <div class="home-cards">
@@ -568,6 +568,7 @@ function loadData(first){
     restoreView();
   });
 }
+restoreView();
 loadData(true);
 setInterval(function(){ loadData(false); }, 60000);
 </script>
