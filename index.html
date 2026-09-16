@@ -58,6 +58,9 @@ body{background:radial-gradient(1200px 480px at 12% -10%, rgba(42,154,160,.13), 
 .stat.b{background:linear-gradient(135deg,#4caf50,#2e7d32)}
 .stat.c{background:linear-gradient(135deg,#ffb74d,#ef6c00)}
 .stat.d{background:linear-gradient(135deg,#7e57c2,#4527a0)}
+a.stat{display:block;text-decoration:none;cursor:pointer}
+.stat.edit{background:linear-gradient(135deg,#e0a800,#b8860b)}
+.stat.edit:hover{opacity:.92}
 .top-bar{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px}
 .field{display:flex;flex-direction:column;gap:3px;flex:1;min-width:170px}
 .field label{font-size:12px;font-weight:600;color:#5d7283;text-transform:uppercase;letter-spacing:.04em}
@@ -227,6 +230,7 @@ var SHEET_ID='1BeciLxtwDh-PkkoxpYHwBc87ATa3nYQPKdAXB9maXvY';
 var GID_MACHINE='86905509', GID_LAND='746325702';
 var CSV_MACHINE='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&gid='+GID_MACHINE;
 var CSV_LAND='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&gid='+GID_LAND;
+var SHEET_URL='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/edit';
 var M = [];
 var L = [];
 var SECS = [];
@@ -400,7 +404,8 @@ function renderStats(){
   list.forEach(function(m){ qty+=m.qty||0; usd+=m.total||0; });
   document.getElementById('mStats').innerHTML=
     '<div class="stat b"><span class="num">'+fmt(qty)+'</span>Total Sets</div>'+
-    '<div class="stat c"><span class="num">'+money(usd)+'</span>Total Amount (USD)</div>';
+    '<div class="stat c"><span class="num">'+money(usd)+'</span>Total Amount (USD)</div>'+
+    '<a class="stat edit" href="'+SHEET_URL+'" target="_blank" rel="noopener"><span class="num">&#9998;</span>Edit / Add Data</a>';
 }
 function renderMachines(){
   var list=machineRows();
