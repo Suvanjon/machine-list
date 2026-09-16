@@ -278,7 +278,9 @@ function buildMachineData(rows){
     var machine=str(r[1]);
     var sup={brand:str(r[2]),supplier:str(r[3]),company:str(r[4]),mail:str(r[5])};
     if(machine){
-      cur={section:section,machine:machine,brand:sup.brand,supplier:sup.supplier,company:sup.company,mail:sup.mail,qty:num(r[6]),rate:num(r[7]),total:num(r[8]),alts:[]};
+      var q=num(r[6]), rt=num(r[7]);
+      var tot=(q!=null && rt!=null) ? q*rt : num(r[8]);
+      cur={section:section,machine:machine,brand:sup.brand,supplier:sup.supplier,company:sup.company,mail:sup.mail,qty:q,rate:rt,total:tot,alts:[]};
       out.push(cur);
     }else if(cur){ cur.alts.push(sup); }
   }
