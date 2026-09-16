@@ -264,8 +264,10 @@ var SEC_LABEL={'Plastic':'Plastic Manufacturing'};
 function secLabel(s){ return SEC_LABEL[s]||s; }
 var MACHINE_GROUPS={
   'Plastic':[
+    {label:'Injection Molding Machine', re:/Injection Molding/i},
     {label:'Crusher Machine', re:/Crusher/i},
     {label:'Mixture Machine', re:/Mixture/i},
+    {label:'Central Feeding', re:/Central Feeding|Auto Loader/i},
     {label:'Supporting Machine', rest:true}
   ]
 };
