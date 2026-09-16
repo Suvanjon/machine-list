@@ -518,29 +518,38 @@ document.getElementById('backGroups').addEventListener('click',function(){
 });
 document.getElementById('backLand').addEventListener('click',function(){ show('home'); });
 
-(function init(){
+var lastSig='';
+function refreshFilters(){
   var ps=document.getElementById('projFilter');
-  function finish(){
-    rebuildSections();
-    ps.innerHTML='<option value="">All Projects</option>';
-    var projs=[];
-    L.forEach(function(r){ if(projs.indexOf(r.project)===-1) projs.push(r.project); });
-    projs.forEach(function(p){ var o=document.createElement('option'); o.value=p; o.textContent=p; ps.appendChild(o); });
-    renderHome(); renderSecCards(); renderStats(); renderMachines(); restoreView();
-  }
-  function fallback(){
-    M=window.MACHINE_DATA||[]; L=window.LAND_DATA||[];
-    finish();
-  }
-  Promise.all([
-    fetch(CSV_MACHINE).then(function(r){ return r.text(); }).then(function(t){ return buildMachineData(parseCSV(t)); }),
-    fetch(CSV_LAND).then(function(r){ return r.text(); }).then(function(t){ return buildLandData(parseCSV(t)); })
+  var cur=ps.value;
+  ps.innerHTML='<option value="">All Projects</option>';
+  var projs=[];
+  L.forEach(function(r){ if(projs.indexOf(r.project)===-1) projs.push(r.project); });
+  projs.forEach(function(p){ var o=document.createElement('option'); o.value=p; o.textContent=p; ps.appendChild(o); });
+  ps.value=cur;
+}
+function loadData(first){
+  var t='&t='+Date.now();
+  return Promise.all([
+    fetch(CSV_MACHINE+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildMachineData(parseCSV(x)); }),
+    fetch(CSV_LAND+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildLandData(parseCSV(x)); })
   ]).then(function(res){
     if(!res[0] || !res[0].length) throw new Error('empty');
+    var sig=JSON.stringify(res[0])+'|'+JSON.stringify(res[1]||[]);
+    if(!first && sig===lastSig) return;
+    lastSig=sig;
     M=res[0]; L=res[1]||[];
-    finish();
-  }).catch(function(){ fallback(); });
-})();
+    rebuildSections(); refreshFilters();
+    renderHome(); restoreView();
+  }).catch(function(){
+    if(M.length) return;
+    M=window.MACHINE_DATA||[]; L=window.LAND_DATA||[];
+    rebuildSections(); refreshFilters();
+    renderHome(); restoreView();
+  });
+}
+loadData(true);
+setInterval(function(){ loadData(false); }, 60000);
 </script>
 </body>
 </html>
