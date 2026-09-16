@@ -606,7 +606,6 @@ function entrySelChange(){
   var found=null;
   M.forEach(function(x){ if(x.machine===m) found=x; });
   if(found){
-    document.getElementById('entrySection').value=found.section;
     document.getElementById('entryMachine').value=found.machine;
     document.getElementById('entryBrand').value=found.brand||'';
     document.getElementById('entrySupplier').value=found.supplier||'';
@@ -616,13 +615,16 @@ function entrySelChange(){
     document.getElementById('entryRate').value=found.rate==null?'':found.rate;
   }
 }
+function formMachines(){
+  var list=M.filter(function(m){ return m.section===secVal; });
+  var g = machineGroupLabel ? groupOf(machineGroupLabel) : null;
+  if(g){ list=list.filter(function(m){ return inGroup(m,g); }); }
+  return list;
+}
 function openEntry(){
-  var sec=document.getElementById('entrySection');
-  sec.innerHTML='';
-  SECS.forEach(function(s){ var o=document.createElement('option'); o.value=s; o.textContent=secLabel(s); sec.appendChild(o); });
   var sel=document.getElementById('entrySel');
   sel.innerHTML='<option value="">-- Select --</option>';
-  M.slice().sort(function(a,b){ return a.machine.localeCompare(b.machine); }).forEach(function(m){
+  formMachines().slice().sort(function(a,b){ return a.machine.localeCompare(b.machine); }).forEach(function(m){
     var o=document.createElement('option'); o.value=m.machine; o.textContent=m.machine; sel.appendChild(o);
   });
   document.getElementById('entryMode').value='add';
@@ -644,7 +646,7 @@ function saveEntry(){
   var payload={
     action: mode==='update' ? 'update' : 'add',
     origMachine: mode==='update' ? sel : undefined,
-    section: document.getElementById('entrySection').value,
+    section: secVal,
     machine: document.getElementById('entryMachine').value.trim(),
     brand: document.getElementById('entryBrand').value.trim(),
     supplier: document.getElementById('entrySupplier').value.trim(),
@@ -654,7 +656,6 @@ function saveEntry(){
     rate: document.getElementById('entryRate').value
   };
   if(!payload.machine){ showEntryMsg('Machine name is required', false); return; }
-  if(!payload.section){ showEntryMsg('Section is required', false); return; }
   var msg=document.getElementById('entryMsg'); msg.className='entry-msg'; msg.textContent='Saving...';
   fetch(ENTRY_URL, { method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload) })
     .then(function(r){ return r.text(); })
@@ -670,7 +671,6 @@ function showEntryMsg(t, ok){
 <div class="modal-head"><div>Edit / Add Data</div><button id="entryClose" onclick="closeEntry()">&times;</button></div>
 <div class="field"><label>Mode</label><select id="entryMode" onchange="entryModeChange()"><option value="add">Add New Machine</option><option value="update">Edit Existing Machine</option></select></div>
 <div class="field" id="entrySelWrap" style="display:none"><label>Select Machine</label><select id="entrySel" onchange="entrySelChange()"></select></div>
-<div class="field"><label>Section</label><select id="entrySection"></select></div>
 <div class="field"><label>Machine</label><input type="text" id="entryMachine" placeholder="Machine name"></div>
 <div class="field"><label>Brand / Origin</label><input type="text" id="entryBrand"></div>
 <div class="field"><label>Supplier Name</label><input type="text" id="entrySupplier"></div>
