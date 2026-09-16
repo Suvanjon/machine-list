@@ -133,6 +133,10 @@ tr.total td{background:#eaf3f3;font-weight:800;color:#005151;border-top:2px soli
 <button class="back-btn" id="backMachine">&#8592; Back</button>
 <div class="sec-cards" id="secCards"></div>
 </div>
+<div id="mGroups" style="display:none">
+<button class="back-btn" id="backGroups">&#8592; Back</button>
+<div class="sec-cards" id="groupCards"></div>
+</div>
 <div id="mDetail" style="display:none">
 <button class="back-btn" id="backSections">&#8592; Back</button>
 <div class="stats" id="mStats"></div>
@@ -213,6 +217,15 @@ M.forEach(function(m){ if(SECS.indexOf(m.section)===-1) SECS.push(m.section); })
 
 var SEC_LABEL={'Plastic':'Plastic Manufacturing'};
 function secLabel(s){ return SEC_LABEL[s]||s; }
+var MACHINE_GROUPS={
+  'Plastic':[
+    {label:'Injection Molding Machine', re:/Injection Molding/i},
+    {label:'Crusher Machine', re:/Crusher/i},
+    {label:'Mixture Machine', re:/Mixture/i},
+    {label:'Central Feeding', re:/Central Feeding|Auto Loader/i}
+  ]
+};
+var machineRe=null, machineGroupLabel='';
 function sectionStats(sec){
   var list = sec ? M.filter(function(m){return m.section===sec;}) : M;
   var qty=0, usd=0;
@@ -252,26 +265,61 @@ function renderSecCards(){
     c.addEventListener('click',function(){
       secVal=this.getAttribute('data-sec')||'';
       searchVal=''; document.getElementById('searchBox').value='';
-      renderSecCards(); renderStats(); renderMachines();
+      machineRe=null; machineGroupLabel='';
+      renderSecCards();
+      if(MACHINE_GROUPS[secVal]){ renderGroupCards(); showMachineGroups(true); }
+      else { renderStats(); renderMachines(); showMachineDetail(true); }
+      syncHash();
+    });
+  });
+}
+function renderGroupCards(){
+  var el=document.getElementById('groupCards');
+  var groups=MACHINE_GROUPS[secVal]||[];
+  var html='';
+  groups.forEach(function(g){
+    var list=M.filter(function(m){ return m.section===secVal && g.re.test(m.machine); });
+    var qty=0,usd=0;
+    list.forEach(function(m){ qty+=m.qty||0; usd+=m.total||0; });
+    html+='<div class="seccard" data-gi="'+groups.indexOf(g)+'"><div class="sc-name">'+esc(g.label)+'</div><div class="sc-line"><b>'+list.length+'</b> machines &middot; <b>'+fmt(qty)+'</b> sets</div><div class="sc-line">'+money(usd)+'</div></div>';
+  });
+  el.innerHTML=html;
+  el.querySelectorAll('.seccard').forEach(function(c){
+    c.addEventListener('click',function(){
+      var gi=parseInt(this.getAttribute('data-gi'),10);
+      var g=groups[gi];
+      machineRe=g.re; machineGroupLabel=g.label;
+      renderStats(); renderMachines();
       showMachineDetail(true); syncHash();
     });
   });
 }
+function showMachineGroups(on){
+  document.getElementById('mSections').style.display = on?'none':'block';
+  document.getElementById('mGroups').style.display = on?'block':'none';
+  document.getElementById('mDetail').style.display = 'none';
+  window.scrollTo(0,0);
+}
 function showMachineDetail(on){
   document.getElementById('mSections').style.display = on?'none':'block';
+  document.getElementById('mGroups').style.display = 'none';
   document.getElementById('mDetail').style.display = on?'block':'none';
   window.scrollTo(0,0);
 }
 var currentView='home';
 function syncHash(){
   var h='';
-  if(currentView==='machine') h='machine'+(secVal?('/'+encodeURIComponent(secVal)):'');
+  if(currentView==='machine'){
+    h='machine'+(secVal?('/'+encodeURIComponent(secVal)):'');
+    if(machineGroupLabel) h+='/'+encodeURIComponent(machineGroupLabel);
+  }
   else if(currentView==='land') h='land';
   try{ history.replaceState(null,'', h?('#'+h):location.pathname+location.search); }catch(e){}
 }
 function machineRows(){
   return M.filter(function(m){
     if(secVal && m.section!==secVal) return false;
+    if(machineRe && !machineRe.test(m.machine)) return false;
     if(searchVal){
       var hay=[m.machine,m.brand,m.supplier,m.company,m.mail,m.section].join(' ').toLowerCase();
       if(hay.indexOf(searchVal)===-1) return false;
@@ -280,12 +328,13 @@ function machineRows(){
   });
 }
 function renderStats(){
-  var list = secVal ? M.filter(function(m){return m.section===secVal;}) : M;
+  var list = machineRows();
   var secs={}; list.forEach(function(m){ secs[m.section]=1; });
   var qty=0,usd=0;
   list.forEach(function(m){ qty+=m.qty||0; usd+=m.total||0; });
+  var title = machineGroupLabel ? machineGroupLabel : (secVal?('Machines in '+secLabel(secVal)):'Machines');
   document.getElementById('mStats').innerHTML=
-    '<div class="stat a"><span class="num">'+list.length+'</span>'+(secVal?'Machines in '+esc(secLabel(secVal)):'Machines')+'</div>'+
+    '<div class="stat a"><span class="num">'+list.length+'</span>'+esc(title)+'</div>'+
     '<div class="stat b"><span class="num">'+fmt(qty)+'</span>Total Sets</div>'+
     '<div class="stat c"><span class="num">'+money(usd)+'</span>Total Amount (USD)</div>'+
     '<div class="stat d"><span class="num">'+Object.keys(secs).length+'</span>Section'+(Object.keys(secs).length===1?'':'s')+'</div>';
@@ -368,10 +417,25 @@ function restoreView(){
   try{ h=decodeURIComponent(h); }catch(e){}
   if(h==='land'){ show('land'); renderLand(); }
   else if(h.indexOf('machine/')===0){
-    var s=h.slice(8);
+    var parts=h.slice(8).split('/');
+    var s=parts[0], g=parts[1]||'';
     if(SECS.indexOf(s)!==-1){
-      secVal=s; renderSecCards(); renderStats(); renderMachines();
-      show('machine'); showMachineDetail(true);
+      secVal=s; machineRe=null; machineGroupLabel='';
+      renderSecCards();
+      var groups=MACHINE_GROUPS[s]||[];
+      var gi=-1;
+      if(g){ for(var i=0;i<groups.length;i++){ if(groups[i].label===g){ gi=i; break; } } }
+      if(gi>=0){
+        machineRe=groups[gi].re; machineGroupLabel=groups[gi].label;
+        renderGroupCards(); renderStats(); renderMachines();
+        show('machine'); showMachineDetail(true);
+      }else if(groups.length){
+        renderGroupCards();
+        show('machine'); showMachineGroups(true);
+      }else{
+        renderStats(); renderMachines();
+        show('machine'); showMachineDetail(true);
+      }
     }else{ show('machine'); showMachineDetail(false); }
   }
   else if(h==='machine'){ show('machine'); showMachineDetail(false); }
@@ -392,7 +456,16 @@ document.getElementById('projFilter').addEventListener('change',renderLand);
 document.getElementById('goMachine').addEventListener('click',function(){ show('machine'); showMachineDetail(false); });
 document.getElementById('goLand').addEventListener('click',function(){ show('land'); renderLand(); });
 document.getElementById('backMachine').addEventListener('click',function(){ show('home'); });
-document.getElementById('backSections').addEventListener('click',function(){ secVal=''; renderSecCards(); showMachineDetail(false); syncHash(); });
+document.getElementById('backSections').addEventListener('click',function(){
+  machineRe=null; machineGroupLabel='';
+  if(MACHINE_GROUPS[secVal]){ renderGroupCards(); showMachineGroups(true); }
+  else { secVal=''; renderSecCards(); showMachineDetail(false); }
+  syncHash();
+});
+document.getElementById('backGroups').addEventListener('click',function(){
+  secVal=''; machineRe=null; machineGroupLabel='';
+  renderSecCards(); showMachineDetail(false); syncHash();
+});
 document.getElementById('backLand').addEventListener('click',function(){ show('home'); });
 
 (function init(){
