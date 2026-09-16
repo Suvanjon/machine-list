@@ -251,7 +251,7 @@ function renderSecCards(){
       secVal=this.getAttribute('data-sec')||'';
       searchVal=''; document.getElementById('searchBox').value='';
       renderSecCards(); renderStats(); renderMachines();
-      showMachineDetail(true);
+      showMachineDetail(true); syncHash();
     });
   });
 }
@@ -259,6 +259,13 @@ function showMachineDetail(on){
   document.getElementById('mSections').style.display = on?'none':'block';
   document.getElementById('mDetail').style.display = on?'block':'none';
   window.scrollTo(0,0);
+}
+var currentView='home';
+function syncHash(){
+  var h='';
+  if(currentView==='machine') h='machine'+(secVal?('/'+encodeURIComponent(secVal)):'');
+  else if(currentView==='land') h='land';
+  try{ history.replaceState(null,'', h?('#'+h):location.pathname+location.search); }catch(e){}
 }
 function machineRows(){
   return M.filter(function(m){
@@ -347,10 +354,26 @@ function renderLand(){
 }
 
 function show(view){
+  currentView=view;
   document.getElementById('viewHome').style.display = view==='home'?'block':'none';
   document.getElementById('viewMachine').style.display = view==='machine'?'block':'none';
   document.getElementById('viewLand').style.display = view==='land'?'block':'none';
   window.scrollTo(0,0);
+  syncHash();
+}
+function restoreView(){
+  var h=location.hash.replace(/^#/,'');
+  try{ h=decodeURIComponent(h); }catch(e){}
+  if(h==='land'){ show('land'); renderLand(); }
+  else if(h.indexOf('machine/')===0){
+    var s=h.slice(8);
+    if(SECS.indexOf(s)!==-1){
+      secVal=s; renderSecCards(); renderStats(); renderMachines();
+      show('machine'); showMachineDetail(true);
+    }else{ show('machine'); showMachineDetail(false); }
+  }
+  else if(h==='machine'){ show('machine'); showMachineDetail(false); }
+  else { show('home'); }
 }
 
 document.querySelectorAll('#mTable th[data-col]').forEach(function(th){
@@ -367,7 +390,7 @@ document.getElementById('projFilter').addEventListener('change',renderLand);
 document.getElementById('goMachine').addEventListener('click',function(){ show('machine'); showMachineDetail(false); });
 document.getElementById('goLand').addEventListener('click',function(){ show('land'); renderLand(); });
 document.getElementById('backMachine').addEventListener('click',function(){ show('home'); });
-document.getElementById('backSections').addEventListener('click',function(){ secVal=''; renderSecCards(); showMachineDetail(false); });
+document.getElementById('backSections').addEventListener('click',function(){ secVal=''; renderSecCards(); showMachineDetail(false); syncHash(); });
 document.getElementById('backLand').addEventListener('click',function(){ show('home'); });
 
 (function init(){
@@ -375,7 +398,7 @@ document.getElementById('backLand').addEventListener('click',function(){ show('h
   (window.LAND_DATA||[]).forEach(function(r){ if(projs.indexOf(r.project)===-1) projs.push(r.project); });
   var ps=document.getElementById('projFilter');
   projs.forEach(function(p){ var o=document.createElement('option'); o.value=p; o.textContent=p; ps.appendChild(o); });
-  renderHome(); renderSecCards(); renderStats(); renderMachines();
+  renderHome(); renderSecCards(); renderStats(); renderMachines(); restoreView();
 })();
 </script>
 </body>
