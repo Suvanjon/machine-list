@@ -60,7 +60,8 @@ body{background:radial-gradient(1200px 480px at 12% -10%, rgba(42,154,160,.13), 
 .stat.d{background:linear-gradient(135deg,#7e57c2,#4527a0)}
 a.stat{display:block;text-decoration:none;cursor:pointer}
 .stat.edit{background:linear-gradient(135deg,#e0a800,#b8860b);cursor:pointer}
-.stat.edit:hover{opacity:.92}
+.stat.edit2{background:linear-gradient(135deg,#0e8f6f,#06644a);cursor:pointer}
+.stat.edit:hover,.stat.edit2:hover{opacity:.92}
 .modal{position:fixed;inset:0;background:rgba(10,30,40,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
 .modal-box{background:#fff;border:5px solid #00565c;border-radius:18px;padding:22px;width:100%;max-width:460px;max-height:92vh;overflow:auto;box-shadow:0 20px 50px rgba(0,0,0,.3)}
 .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
@@ -239,7 +240,7 @@ var GID_MACHINE='86905509', GID_LAND='746325702';
 var CSV_MACHINE='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&gid='+GID_MACHINE;
 var CSV_LAND='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&gid='+GID_LAND;
 var SHEET_URL='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/edit';
-var ENTRY_URL='https://script.google.com/macros/s/AKfycbwkoI4iRDaHDfI0Gt76KgLYsL_m9kTIi4WxXsBavdBX9Po-LMk7ps2efZrTSniw5SLQ5Q/exec';
+var ENTRY_URL='https://script.google.com/macros/s/AKfycbwRZFVw3CQUHD2nsu8_8x0DtLogTj3GGNnSurWJ9kbTieU6KJLEFrLBlv-bgSy6mwzvbw/exec';
 var M = [];
 var L = [];
 var SECS = [];
@@ -293,6 +294,7 @@ var MACHINE_GROUPS={
     {label:'Crusher Machine', re:/Crusher/i},
     {label:'Mixture Machine', re:/Mixture/i},
     {label:'Central Feeding', re:/Central Feeding|Auto Loader/i},
+    {label:'Mold', re:/^Mold$/i},
     {label:'Supporting Machine', rest:true}
   ]
 };
@@ -414,7 +416,8 @@ function renderStats(){
   document.getElementById('mStats').innerHTML=
     '<div class="stat b"><span class="num">'+fmt(qty)+'</span>Total Sets</div>'+
     '<div class="stat c"><span class="num">'+money(usd)+'</span>Total Amount (USD)</div>'+
-    '<div class="stat edit" id="entryOpen" onclick="openEntry()"><span class="num">&#9998;</span>Edit / Add Data</div>';
+    '<div class="stat edit" onclick="openMachineForm()"><span class="num">&#9998;</span>Machine</div>'+
+    '<div class="stat edit2" onclick="openSupplierForm()"><span class="num">&#9881;</span>Supplier Info</div>';
 }
 function renderMachines(){
   var list=machineRows();
