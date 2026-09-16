@@ -601,90 +601,117 @@ primeView();
 loadData(true);
 setInterval(function(){ loadData(false); }, 60000);
 
-function entryModeChange(){
-  document.getElementById('entrySelWrap').style.display = document.getElementById('entryMode').value==='update' ? 'block':'none';
-}
-function entrySelChange(){
-  var m = document.getElementById('entrySel').value;
-  var found=null;
-  M.forEach(function(x){ if(x.machine===m) found=x; });
-  if(found){
-    document.getElementById('entryMachine').value=found.machine;
-    document.getElementById('entryBrand').value=found.brand||'';
-    document.getElementById('entrySupplier').value=found.supplier||'';
-    document.getElementById('entryCompany').value=found.company||'';
-    document.getElementById('entryMail').value=found.mail||'';
-    document.getElementById('entryQty').value=found.qty==null?'':found.qty;
-    document.getElementById('entryRate').value=found.rate==null?'':found.rate;
-  }
-}
 function formMachines(){
   var list=M.filter(function(m){ return m.section===secVal; });
   var g = machineGroupLabel ? groupOf(machineGroupLabel) : null;
   if(g){ list=list.filter(function(m){ return inGroup(m,g); }); }
   return list;
 }
-function openEntry(){
-  var sel=document.getElementById('entrySel');
-  sel.innerHTML='<option value="">-- Select --</option>';
+function fillMachineOptions(sel, withBlank){
+  sel.innerHTML = withBlank ? '<option value="">-- Select --</option>' : '';
   formMachines().slice().sort(function(a,b){ return a.machine.localeCompare(b.machine); }).forEach(function(m){
     var o=document.createElement('option'); o.value=m.machine; o.textContent=m.machine; sel.appendChild(o);
   });
-  document.getElementById('entryMode').value='add';
-  document.getElementById('entrySelWrap').style.display='none';
-  document.getElementById('entryMachine').value='';
-  document.getElementById('entryBrand').value='';
-  document.getElementById('entrySupplier').value='';
-  document.getElementById('entryCompany').value='';
-  document.getElementById('entryMail').value='';
-  document.getElementById('entryQty').value='';
-  document.getElementById('entryRate').value='';
-  var msg=document.getElementById('entryMsg'); msg.className='entry-msg'; msg.textContent='';
-  document.getElementById('entryModal').style.display='flex';
 }
-function closeEntry(){ document.getElementById('entryModal').style.display='none'; }
-function saveEntry(){
-  var mode=document.getElementById('entryMode').value;
-  var sel=document.getElementById('entrySel').value;
-  var payload={
-    action: mode==='update' ? 'update' : 'add',
-    origMachine: mode==='update' ? sel : undefined,
-    section: secVal,
-    machine: document.getElementById('entryMachine').value.trim(),
-    brand: document.getElementById('entryBrand').value.trim(),
-    supplier: document.getElementById('entrySupplier').value.trim(),
-    company: document.getElementById('entryCompany').value.trim(),
-    mail: document.getElementById('entryMail').value.trim(),
-    qty: document.getElementById('entryQty').value,
-    rate: document.getElementById('entryRate').value
-  };
-  if(!payload.machine){ showEntryMsg('Machine name is required', false); return; }
-  var msg=document.getElementById('entryMsg'); msg.className='entry-msg'; msg.textContent='Saving...';
+function openModal(id){ document.getElementById(id).style.display='flex'; }
+function closeModal(id){ document.getElementById(id).style.display='none'; }
+function postEntry(payload, msgId, onDone){
+  var m=document.getElementById(msgId); m.className='entry-msg'; m.textContent='Saving...';
   fetch(ENTRY_URL, { method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload) })
     .then(function(r){ return r.text(); })
-    .then(function(t){ var j=JSON.parse(t); if(j.ok){ showEntryMsg('Saved', true); loadData(false); setTimeout(closeEntry, 900); } else { showEntryMsg('Error: '+j.message, false); } })
-    .catch(function(e){ showEntryMsg('Network error', false); });
+    .then(function(t){ var j=JSON.parse(t); if(j.ok){ m.className='entry-msg ok'; m.textContent='Saved'; if(onDone) onDone(); } else { m.className='entry-msg err'; m.textContent='Error: '+j.message; } })
+    .catch(function(){ m.className='entry-msg err'; m.textContent='Network error'; });
 }
-function showEntryMsg(t, ok){
-  var m=document.getElementById('entryMsg'); m.className='entry-msg '+(ok?'ok':'err'); m.textContent=t;
+
+function mModeChange(){ document.getElementById('mSelWrap').style.display = document.getElementById('mMode').value==='update' ? 'block':'none'; }
+function mSelChange(){
+  var m=document.getElementById('mSel').value, found=null;
+  M.forEach(function(x){ if(x.machine===m) found=x; });
+  if(found){
+    document.getElementById('mMachine').value=found.machine;
+    document.getElementById('mQty').value=found.qty==null?'':found.qty;
+    document.getElementById('mRate').value=found.rate==null?'':found.rate;
+  }
+}
+function openMachineForm(){
+  fillMachineOptions(document.getElementById('mSel'), true);
+  document.getElementById('mMode').value='add';
+  document.getElementById('mSelWrap').style.display='none';
+  document.getElementById('mMachine').value='';
+  document.getElementById('mQty').value='';
+  document.getElementById('mRate').value='';
+  var msg=document.getElementById('mMsg'); msg.className='entry-msg'; msg.textContent='';
+  openModal('machineModal');
+}
+function saveMachine(){
+  var mode=document.getElementById('mMode').value;
+  var sel=document.getElementById('mSel').value;
+  var payload={
+    action: mode==='update'?'updateMachine':'addMachine',
+    origMachine: mode==='update'?sel:undefined,
+    section: secVal,
+    machine: document.getElementById('mMachine').value.trim(),
+    qty: document.getElementById('mQty').value,
+    rate: document.getElementById('mRate').value
+  };
+  if(!payload.machine){ var mm=document.getElementById('mMsg'); mm.className='entry-msg err'; mm.textContent='Machine name is required'; return; }
+  postEntry(payload, 'mMsg', function(){ loadData(false); setTimeout(function(){ closeModal('machineModal'); }, 800); });
+}
+
+function sSelChange(){
+  var m=document.getElementById('sSel').value, found=null;
+  M.forEach(function(x){ if(x.machine===m) found=x; });
+  if(found){
+    document.getElementById('sBrand').value=found.brand||'';
+    document.getElementById('sSupplier').value=found.supplier||'';
+    document.getElementById('sCompany').value=found.company||'';
+    document.getElementById('sMail').value=found.mail||'';
+  }
+}
+function openSupplierForm(){
+  fillMachineOptions(document.getElementById('sSel'), false);
+  var msg=document.getElementById('sMsg'); msg.className='entry-msg'; msg.textContent='';
+  sSelChange();
+  openModal('supplierModal');
+}
+function saveSupplier(){
+  var sel=document.getElementById('sSel').value;
+  var payload={
+    action:'updateSupplier',
+    origMachine: sel,
+    brand: document.getElementById('sBrand').value.trim(),
+    supplier: document.getElementById('sSupplier').value.trim(),
+    company: document.getElementById('sCompany').value.trim(),
+    mail: document.getElementById('sMail').value.trim()
+  };
+  if(!sel){ var sm=document.getElementById('sMsg'); sm.className='entry-msg err'; sm.textContent='Select a machine'; return; }
+  postEntry(payload, 'sMsg', function(){ loadData(false); setTimeout(function(){ closeModal('supplierModal'); }, 800); });
 }
 </script>
-<div class="modal" id="entryModal" style="display:none">
+<div class="modal" id="machineModal" style="display:none">
 <div class="modal-box">
-<div class="modal-head"><div>Edit / Add Data</div><button id="entryClose" onclick="closeEntry()">&times;</button></div>
-<div class="field"><label>Mode</label><select id="entryMode" onchange="entryModeChange()"><option value="add">Add New Machine</option><option value="update">Edit Existing Machine</option></select></div>
-<div class="field" id="entrySelWrap" style="display:none"><label>Select Machine</label><select id="entrySel" onchange="entrySelChange()"></select></div>
-<div class="field"><label>Machine</label><input type="text" id="entryMachine" placeholder="Machine name"></div>
-<div class="field"><label>Brand / Origin</label><input type="text" id="entryBrand"></div>
-<div class="field"><label>Supplier Name</label><input type="text" id="entrySupplier"></div>
-<div class="field"><label>Company Name</label><input type="text" id="entryCompany"></div>
-<div class="field"><label>Mail ID</label><input type="text" id="entryMail"></div>
+<div class="modal-head"><div>Machine</div><button onclick="closeModal('machineModal')">&times;</button></div>
+<div class="field"><label>Mode</label><select id="mMode" onchange="mModeChange()"><option value="add">Add New Machine</option><option value="update">Modify Machine</option></select></div>
+<div class="field" id="mSelWrap" style="display:none"><label>Select Machine</label><select id="mSel" onchange="mSelChange()"></select></div>
+<div class="field"><label>Machine</label><input type="text" id="mMachine" placeholder="Machine name"></div>
 <div class="row">
-<div class="field"><label>Qty</label><input type="number" id="entryQty"></div>
-<div class="field"><label>Rate (USD)</label><input type="number" id="entryRate"></div>
+<div class="field"><label>Qty</label><input type="number" id="mQty"></div>
+<div class="field"><label>Rate (USD)</label><input type="number" id="mRate"></div>
 </div>
-<div class="entry-msg" id="entryMsg"></div>
-<button class="btn" id="entrySave" onclick="saveEntry()">Save</button>
+<div class="entry-msg" id="mMsg"></div>
+<button class="btn" onclick="saveMachine()">Save</button>
+</div>
+</div>
+<div class="modal" id="supplierModal" style="display:none">
+<div class="modal-box">
+<div class="modal-head"><div>Supplier Info</div><button onclick="closeModal('supplierModal')">&times;</button></div>
+<div class="field"><label>Machine</label><select id="sSel" onchange="sSelChange()"></select></div>
+<div class="field"><label>Brand / Origin</label><input type="text" id="sBrand"></div>
+<div class="field"><label>Supplier Name</label><input type="text" id="sSupplier"></div>
+<div class="field"><label>Company Name</label><input type="text" id="sCompany"></div>
+<div class="field"><label>Mail ID</label><input type="text" id="sMail"></div>
+<div class="entry-msg" id="sMsg"></div>
+<button class="btn" onclick="saveSupplier()">Save</button>
 </div>
 </div>
 </body>
