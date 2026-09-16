@@ -384,15 +384,11 @@ function machineRows(){
 }
 function renderStats(){
   var list = machineRows();
-  var secs={}; list.forEach(function(m){ secs[m.section]=1; });
   var qty=0,usd=0;
   list.forEach(function(m){ qty+=m.qty||0; usd+=m.total||0; });
-  var title = machineGroupLabel ? machineGroupLabel : (secVal?('Machines in '+secLabel(secVal)):'Machines');
   document.getElementById('mStats').innerHTML=
-    '<div class="stat a"><span class="num">'+list.length+'</span>'+esc(title)+'</div>'+
     '<div class="stat b"><span class="num">'+fmt(qty)+'</span>Total Sets</div>'+
-    '<div class="stat c"><span class="num">'+money(usd)+'</span>Total Amount (USD)</div>'+
-    '<div class="stat d"><span class="num">'+Object.keys(secs).length+'</span>Section'+(Object.keys(secs).length===1?'':'s')+'</div>';
+    '<div class="stat c"><span class="num">'+money(usd)+'</span>Total Amount (USD)</div>';
 }
 function renderMachines(){
   var list=machineRows();
