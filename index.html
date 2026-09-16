@@ -568,7 +568,19 @@ function loadData(first){
     restoreView();
   });
 }
-restoreView();
+function primeView(){
+  var h=location.hash.replace(/^#/,'');
+  var top = (h==='machine'||h.indexOf('machine/')===0) ? 'machine' : (h==='land' ? 'land' : 'home');
+  document.getElementById('viewHome').style.display = top==='home'?'block':'none';
+  document.getElementById('viewMachine').style.display = top==='machine'?'block':'none';
+  document.getElementById('viewLand').style.display = top==='land'?'block':'none';
+  if(top==='machine'){
+    document.getElementById('mSections').style.display='block';
+    document.getElementById('mGroups').style.display='none';
+    document.getElementById('mDetail').style.display='none';
+  }
+}
+primeView();
 loadData(true);
 setInterval(function(){ loadData(false); }, 60000);
 </script>
