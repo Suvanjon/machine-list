@@ -150,17 +150,29 @@ tr.total td{background:#eaf3f3;font-weight:800;color:#005151;border-top:2px soli
 <th data-col="sl">S/L</th>
 <th data-col="section">Section</th>
 <th data-col="machine">Machine</th>
-<th data-col="brand">Brand / Origin</th>
-<th data-col="supplier">Supplier / Company</th>
-<th data-col="mail">Mail ID</th>
 <th data-col="qty">Qty</th>
 <th data-col="rate">Rate (USD)</th>
-<th data-col="total">Total (USD)</th>
+<th data-col="total">Total Rate (USD)</th>
 </tr></thead>
 <tbody id="mBody"></tbody>
 </table>
 </div>
 <div class="no-data" id="mNo" style="display:none">No machines found.</div>
+</div>
+<div class="card">
+<div class="card-title">Supplier Information</div>
+<div class="tbl-wrap">
+<table id="sTable">
+<thead><tr>
+<th>S/L</th>
+<th>Brand / Origin</th>
+<th>Supplier Name</th>
+<th>Company Name</th>
+<th>Mail ID</th>
+</tr></thead>
+<tbody id="sBody"></tbody>
+</table>
+</div>
 </div>
 </div>
 </div>
@@ -400,26 +412,32 @@ function renderMachines(){
     });
   }
   var tb=document.getElementById('mBody'); tb.innerHTML='';
+  var sb=document.getElementById('sBody'); sb.innerHTML='';
   document.getElementById('mNo').style.display=list.length?'none':'block';
   list.forEach(function(m,i){
     var tr=document.createElement('tr');
     tr.innerHTML='<td class="sl">'+(i+1)+'</td>'+
       '<td><span class="sec-badge" style="background:'+secColor(m.section)+'">'+esc(secLabel(m.section))+'</span></td>'+
       '<td>'+esc(m.machine)+'</td>'+
-      '<td>'+esc(m.brand)+'</td>'+
-      '<td>'+esc(m.company)+(m.supplier?'<br><span style="color:#8aa0ae">'+esc(m.supplier)+'</span>':'')+'</td>'+
-      '<td>'+mailLink(m.mail)+'</td>'+
       '<td class="qty">'+fmt(m.qty)+'</td>'+
       '<td class="num">'+money(m.rate)+'</td>'+
       '<td class="num">'+money(m.total)+'</td>';
     tb.appendChild(tr);
+    var sr=document.createElement('tr');
+    sr.innerHTML='<td class="sl">'+(i+1)+'</td>'+
+      '<td>'+esc(m.brand)+'</td>'+
+      '<td>'+esc(m.supplier)+'</td>'+
+      '<td>'+esc(m.company)+'</td>'+
+      '<td>'+mailLink(m.mail)+'</td>';
+    sb.appendChild(sr);
     (m.alts||[]).forEach(function(a){
-      var at=document.createElement('tr'); at.className='alt';
-      at.innerHTML='<td class="sl">&#8627;</td><td></td><td></td>'+
+      var ar=document.createElement('tr'); ar.className='alt';
+      ar.innerHTML='<td class="sl">&#8627;</td>'+
         '<td>'+esc(a.brand)+'</td>'+
-        '<td>'+esc(a.company)+(a.supplier?'<br><span>'+esc(a.supplier)+'</span>':'')+'</td>'+
-        '<td>'+mailLink(a.mail)+'</td><td></td><td></td><td></td>';
-      tb.appendChild(at);
+        '<td>'+esc(a.supplier)+'</td>'+
+        '<td>'+esc(a.company)+'</td>'+
+        '<td>'+mailLink(a.mail)+'</td>';
+      sb.appendChild(ar);
     });
   });
 }
