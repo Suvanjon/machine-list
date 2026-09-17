@@ -372,7 +372,7 @@ function renderHome(){
   var st=sectionStats('');
   document.getElementById('homeMachineSub').innerHTML='<b>'+M.length+'</b> size &middot; <b>'+fmt(st.qty)+'</b> sets &middot; '+money(st.usd)+' / '+taka(st.usd);
   var lt=landTotals();
-  document.getElementById('homeLandSub').innerHTML='<b>'+lt.projects+'</b> projects &middot; '+fmt(Math.round(lt.sqm))+' Sq.M total area';
+  document.getElementById('homeLandSub').innerHTML='<b>'+fmt(Math.round(lt.sqf))+'</b> Sq.F total area';
 }
 function renderSecCards(){
   var el=document.getElementById('secCards');
