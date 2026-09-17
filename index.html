@@ -177,6 +177,7 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 <div class="stats" id="mStats"></div>
 <div class="imm-pic" id="immPic" style="display:none"><img src="products/imm.png" alt="Injection Molding"></div>
 <div class="imm-pic" id="robotPic" style="display:none"><img src="products/robot.png" alt="Robot"></div>
+<div class="imm-pic" id="crusherPic" style="display:none"><img src="products/crusher.png" alt="Crusher Machine"></div>
 </div>
 <div class="card">
 <div class="top-bar">
@@ -457,6 +458,7 @@ function renderStats(){
     '<div class="stat edit2" onclick="openSupplierForm()"><span class="num">&#9881;</span>Supplier Info</div>';
   document.getElementById('immPic').style.display = (machineGroupLabel==='Injection Molding') ? 'block' : 'none';
   document.getElementById('robotPic').style.display = (machineGroupLabel==='Robot') ? 'block' : 'none';
+  document.getElementById('crusherPic').style.display = (machineGroupLabel==='Crusher Machine') ? 'block' : 'none';
 }
 function renderMachines(){
   var list=machineRows();
