@@ -44,6 +44,7 @@ body{background:radial-gradient(1100px 500px at 50% -12%, rgba(42,154,160,.16), 
 .quote span{display:block}
 .quote span+span{margin-top:2px}
 .sec-cards{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;margin:0 auto 18px;max-width:740px}
+.sec-cards.gc .seccard{flex:0 0 calc((100% - 48px)/4)}
 .seccard{flex:0 0 calc((100% - 32px)/3);background:linear-gradient(180deg,#fff,#f4f9fa);border:5px solid #00565c;border-radius:24px;padding:16px 18px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;box-shadow:0 1px 0 #fff inset,0 -1px 0 rgba(0,0,0,.05) inset,0 12px 26px -10px rgba(13,40,58,.35)}
 .seccard:hover{transform:translateY(-4px);border-color:#00565c;box-shadow:0 1px 0 #fff inset,0 -1px 0 rgba(0,0,0,.05) inset,0 22px 40px -12px rgba(0,86,92,.4)}
 .seccard .sc-name{font-size:15px;font-weight:800;color:var(--teal);margin-bottom:7px;position:relative}
@@ -168,7 +169,7 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 </div>
 <div id="mGroups" style="display:none">
 <button class="back-btn" id="backGroups">&#8592; Back</button>
-<div class="sec-cards" id="groupCards"></div>
+<div class="sec-cards gc" id="groupCards"></div>
 </div>
 <div id="mDetail" style="display:none">
 <button class="back-btn" id="backSections">&#8592; Back</button>
@@ -395,11 +396,12 @@ function renderGroupCards(){
   var el=document.getElementById('groupCards');
   var groups=MACHINE_GROUPS[secVal]||[];
   var html='';
-  groups.forEach(function(g){
+  groups.forEach(function(g, gi){
+    if(gi===3) html+='<div style="flex-basis:100%;height:0"></div>';
     var list=M.filter(function(m){ return m.section===secVal && inGroup(m,g); });
     var qty=0,usd=0;
     list.forEach(function(m){ qty+=m.qty||0; usd+=m.total||0; });
-    html+='<div class="seccard" data-gi="'+groups.indexOf(g)+'"><div class="sc-name">'+esc(g.label)+'</div><div class="sc-line"><b>'+list.length+'</b> size &middot; <b>'+fmt(qty)+'</b> sets</div><div class="sc-line">'+money(usd)+' / '+taka(usd)+'</div></div>';
+    html+='<div class="seccard" data-gi="'+gi+'"><div class="sc-name">'+esc(g.label)+'</div><div class="sc-line"><b>'+list.length+'</b> size &middot; <b>'+fmt(qty)+'</b> sets</div><div class="sc-line">'+money(usd)+' / '+taka(usd)+'</div></div>';
   });
   el.innerHTML=html;
   el.querySelectorAll('.seccard').forEach(function(c){
