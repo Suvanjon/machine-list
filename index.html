@@ -487,7 +487,7 @@ function renderMachines(){
       '<td class="num">'+money(m.rate)+(m.rate!=null?'<br><span style="color:#8aa0ae;font-size:11px">'+taka(m.rate)+'</span>':'')+'</td>'+
       '<td class="num">'+money(m.total)+(m.total!=null?'<br><span style="color:#8aa0ae;font-size:11px">'+taka(m.total)+'</span>':'')+'</td>';
     tb.appendChild(tr);
-    if(m.brand || m.supplier || m.company || m.mail){
+    if(m.supplier || m.company || m.mail){
       var sr=document.createElement('tr');
       sr.innerHTML='<td class="sl">'+(i+1)+'</td>'+
         '<td>'+esc(m.brand)+'</td>'+
