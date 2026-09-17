@@ -179,6 +179,7 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 <div class="imm-pic" id="robotPic" style="display:none"><img src="products/robot.png" alt="Robot"></div>
 <div class="imm-pic" id="crusherPic" style="display:none"><img src="products/crusher.png" alt="Crusher Machine"></div>
 <div class="imm-pic" id="mixturePic" style="display:none"><img src="products/mixture.png" alt="Mixture Machine"></div>
+<div class="imm-pic" id="feedingPic" style="display:none"><img src="products/feeding.png" alt="Central Feeding"></div>
 </div>
 <div class="card">
 <div class="top-bar">
@@ -461,6 +462,7 @@ function renderStats(){
   document.getElementById('robotPic').style.display = (machineGroupLabel==='Robot') ? 'block' : 'none';
   document.getElementById('crusherPic').style.display = (machineGroupLabel==='Crusher Machine') ? 'block' : 'none';
   document.getElementById('mixturePic').style.display = (machineGroupLabel==='Mixture Machine') ? 'block' : 'none';
+  document.getElementById('feedingPic').style.display = (machineGroupLabel==='Central Feeding') ? 'block' : 'none';
 }
 function renderMachines(){
   var list=machineRows();
