@@ -272,7 +272,7 @@ var GID_MACHINE='86905509', GID_LAND='746325702';
 var CSV_MACHINE='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&gid='+GID_MACHINE;
 var CSV_LAND='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&gid='+GID_LAND;
 var SHEET_URL='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/edit';
-var ENTRY_URL='https://script.google.com/macros/s/AKfycbwRZFVw3CQUHD2nsu8_8x0DtLogTj3GGNnSurWJ9kbTieU6KJLEFrLBlv-bgSy6mwzvbw/exec';
+var ENTRY_URL='https://script.google.com/macros/s/AKfycbwK1ZX8L6olG1ZFewDxoRmIITGsykGR_ePQSzlNjirT_E44V7_-Jh2XNhSQneY9u0hrMQ/exec';
 var M = [];
 var L = [];
 var SECS = [];
@@ -702,6 +702,14 @@ function saveMachine(){
   postEntry(payload, 'mMsg', function(){ loadData(false); setTimeout(function(){ closeModal('machineModal'); }, 800); });
 }
 
+function sModeChange(){
+  if(document.getElementById('sMode').value==='add'){
+    document.getElementById('sBrand').value='';
+    document.getElementById('sSupplier').value='';
+    document.getElementById('sCompany').value='';
+    document.getElementById('sMail').value='';
+  } else { sSelChange(); }
+}
 function sSelChange(){
   var m=document.getElementById('sSel').value, found=null;
   M.forEach(function(x){ if(x.machine===m) found=x; });
@@ -714,15 +722,21 @@ function sSelChange(){
 }
 function openSupplierForm(){
   fillMachineOptions(document.getElementById('sSel'), false);
+  document.getElementById('sMode').value='add';
   var msg=document.getElementById('sMsg'); msg.className='entry-msg'; msg.textContent='';
-  sSelChange();
+  document.getElementById('sBrand').value='';
+  document.getElementById('sSupplier').value='';
+  document.getElementById('sCompany').value='';
+  document.getElementById('sMail').value='';
   openModal('supplierModal');
 }
 function saveSupplier(){
+  var mode=document.getElementById('sMode').value;
   var sel=document.getElementById('sSel').value;
   var payload={
-    action:'updateSupplier',
-    origMachine: sel,
+    action: mode==='update' ? 'updateSupplier' : 'addSupplier',
+    machine: sel,
+    section: secVal,
     brand: document.getElementById('sBrand').value.trim(),
     supplier: document.getElementById('sSupplier').value.trim(),
     company: document.getElementById('sCompany').value.trim(),
@@ -749,6 +763,7 @@ function saveSupplier(){
 <div class="modal" id="supplierModal" style="display:none">
 <div class="modal-box">
 <div class="modal-head"><div>Supplier Info</div><button onclick="closeModal('supplierModal')">&times;</button></div>
+<div class="field"><label>Mode</label><select id="sMode" onchange="sModeChange()"><option value="add">Add Supplier</option><option value="update">Modify Supplier</option></select></div>
 <div class="field"><label>Machine</label><select id="sSel" onchange="sSelChange()"></select></div>
 <div class="field"><label>Brand / Origin</label><input type="text" id="sBrand"></div>
 <div class="field"><label>Supplier Name</label><input type="text" id="sSupplier"></div>
