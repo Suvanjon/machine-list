@@ -324,17 +324,17 @@ function buildLandData(rows){
   return out;
 }
 
-var SEC_LABEL={'Plastic':'Plastic Manufacturing','Work Shop':'Tool Room & Workshop','Switch':'Electrical Switch & Accessories'};
+var SEC_LABEL={'Plastic':'Plastic Manufacturing','Work Shop':'Tool Room & Workshop','Switch':'Electrical Switch & Accessories','LED':'LED Lighting','LAB':'Testing Laboratory'};
 function secLabel(s){ return SEC_LABEL[s]||s; }
 var MACHINE_GROUPS={
   'Plastic':[
     {label:'Injection Molding', re:/Injection Molding/i},
-    {label:'Robot', re:/Robot/i},
-    {label:'Crusher Machine', re:/Crusher/i},
-    {label:'Mixture Machine', re:/Mixture/i},
-    {label:'Central Feeding', re:/Central Feeding|Auto Loader/i},
-    {label:'Mold', re:/^Mold$/i},
-    {label:'Supporting Machine', rest:true}
+    {label:'Robotics & Automation', re:/Robot/i},
+    {label:'Crushing & Recycling', re:/Crusher/i},
+    {label:'Mixing & Blending', re:/Mixture/i},
+    {label:'Central Feeding System', re:/Central Feeding|Auto Loader/i},
+    {label:'Mold & Tooling', re:/^Mold$/i},
+    {label:'Auxiliary Equipment', rest:true}
   ]
 };
 var machineGroupLabel='';
@@ -460,11 +460,11 @@ function renderStats(){
     '<div class="stat edit" onclick="openMachineForm()"><span class="num">&#9998;</span>Machine</div>'+
     '<div class="stat edit2" onclick="openSupplierForm()"><span class="num">&#9881;</span>Supplier Info</div>';
   document.getElementById('immPic').style.display = (machineGroupLabel==='Injection Molding') ? 'block' : 'none';
-  document.getElementById('robotPic').style.display = (machineGroupLabel==='Robot') ? 'block' : 'none';
-  document.getElementById('crusherPic').style.display = (machineGroupLabel==='Crusher Machine') ? 'block' : 'none';
-  document.getElementById('mixturePic').style.display = (machineGroupLabel==='Mixture Machine') ? 'block' : 'none';
-  document.getElementById('feedingPic').style.display = (machineGroupLabel==='Central Feeding') ? 'block' : 'none';
-  document.getElementById('moldPic').style.display = (machineGroupLabel==='Mold') ? 'block' : 'none';
+  document.getElementById('robotPic').style.display = (machineGroupLabel==='Robotics & Automation') ? 'block' : 'none';
+  document.getElementById('crusherPic').style.display = (machineGroupLabel==='Crushing & Recycling') ? 'block' : 'none';
+  document.getElementById('mixturePic').style.display = (machineGroupLabel==='Mixing & Blending') ? 'block' : 'none';
+  document.getElementById('feedingPic').style.display = (machineGroupLabel==='Central Feeding System') ? 'block' : 'none';
+  document.getElementById('moldPic').style.display = (machineGroupLabel==='Mold & Tooling') ? 'block' : 'none';
 }
 function renderMachines(){
   var list=machineRows();
