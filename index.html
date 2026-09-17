@@ -175,7 +175,7 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 <button class="back-btn" id="backSections">&#8592; Back</button>
 <div class="stats-row">
 <div class="stats" id="mStats"></div>
-<div class="imm-pic" id="immPic" style="display:none"><img src="products/imm.png" alt="Injection Molding Machine"></div>
+<div class="imm-pic" id="immPic" style="display:none"><img src="products/imm.png" alt="Injection Molding"></div>
 </div>
 <div class="card">
 <div class="top-bar">
@@ -326,7 +326,7 @@ var SEC_LABEL={'Plastic':'Plastic Manufacturing'};
 function secLabel(s){ return SEC_LABEL[s]||s; }
 var MACHINE_GROUPS={
   'Plastic':[
-    {label:'Injection Molding Machine', re:/Injection Molding/i},
+    {label:'Injection Molding', re:/Injection Molding/i},
     {label:'Robot', re:/Robot/i},
     {label:'Crusher Machine', re:/Crusher/i},
     {label:'Mixture Machine', re:/Mixture/i},
@@ -457,7 +457,7 @@ function renderStats(){
     '<div class="stat c"><span class="num">'+money(usd)+'</span><span class="sub">'+taka(usd)+'</span>Total Amount</div>'+
     '<div class="stat edit" onclick="openMachineForm()"><span class="num">&#9998;</span>Machine</div>'+
     '<div class="stat edit2" onclick="openSupplierForm()"><span class="num">&#9881;</span>Supplier Info</div>';
-  document.getElementById('immPic').style.display = (machineGroupLabel==='Injection Molding Machine') ? 'block' : 'none';
+  document.getElementById('immPic').style.display = (machineGroupLabel==='Injection Molding') ? 'block' : 'none';
 }
 function renderMachines(){
   var list=machineRows();
