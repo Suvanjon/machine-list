@@ -712,10 +712,10 @@ function sModeChange(){
     document.getElementById('sSupplier').value='';
     document.getElementById('sCompany').value='';
     document.getElementById('sMail').value='';
-  } else { sSelChange(); }
+  } else { sMachineChange(); }
 }
-function sSelChange(){
-  var m=document.getElementById('sSel').value, found=null;
+function sMachineChange(){
+  var m=document.getElementById('sMachine').value.trim(), found=null;
   M.forEach(function(x){ if(x.machine===m) found=x; });
   if(found){
     document.getElementById('sBrand').value=found.brand||'';
@@ -725,9 +725,9 @@ function sSelChange(){
   }
 }
 function openSupplierForm(){
-  fillMachineOptions(document.getElementById('sSel'), false);
   document.getElementById('sMode').value='add';
   var msg=document.getElementById('sMsg'); msg.className='entry-msg'; msg.textContent='';
+  document.getElementById('sMachine').value='';
   document.getElementById('sBrand').value='';
   document.getElementById('sSupplier').value='';
   document.getElementById('sCompany').value='';
@@ -736,7 +736,7 @@ function openSupplierForm(){
 }
 function saveSupplier(){
   var mode=document.getElementById('sMode').value;
-  var sel=document.getElementById('sSel').value;
+  var sel=document.getElementById('sMachine').value.trim();
   var payload={
     action: mode==='update' ? 'updateSupplier' : 'addSupplier',
     machine: sel,
@@ -746,7 +746,7 @@ function saveSupplier(){
     company: document.getElementById('sCompany').value.trim(),
     mail: document.getElementById('sMail').value.trim()
   };
-  if(!sel){ var sm=document.getElementById('sMsg'); sm.className='entry-msg err'; sm.textContent='Select a machine'; return; }
+  if(!sel){ var sm=document.getElementById('sMsg'); sm.className='entry-msg err'; sm.textContent='Enter a machine name'; return; }
   postEntry(payload, 'sMsg', function(){ loadData(false); setTimeout(function(){ closeModal('supplierModal'); }, 800); });
 }
 </script>
@@ -768,7 +768,7 @@ function saveSupplier(){
 <div class="modal-box">
 <div class="modal-head"><div>Supplier Info</div><button onclick="closeModal('supplierModal')">&times;</button></div>
 <div class="field"><label>Mode</label><select id="sMode" onchange="sModeChange()"><option value="add">Add Supplier</option><option value="update">Modify Supplier</option></select></div>
-<div class="field"><label>Machine</label><select id="sSel" onchange="sSelChange()"></select></div>
+<div class="field"><label>Machine</label><input type="text" id="sMachine" placeholder="Machine name" onchange="sMachineChange()"></div>
 <div class="field"><label>Brand / Origin</label><input type="text" id="sBrand"></div>
 <div class="field"><label>Supplier Name</label><input type="text" id="sSupplier"></div>
 <div class="field"><label>Company Name</label><input type="text" id="sCompany"></div>
