@@ -487,13 +487,15 @@ function renderMachines(){
       '<td class="num">'+money(m.rate)+(m.rate!=null?'<br><span style="color:#8aa0ae;font-size:11px">'+taka(m.rate)+'</span>':'')+'</td>'+
       '<td class="num">'+money(m.total)+(m.total!=null?'<br><span style="color:#8aa0ae;font-size:11px">'+taka(m.total)+'</span>':'')+'</td>';
     tb.appendChild(tr);
-    var sr=document.createElement('tr');
-    sr.innerHTML='<td class="sl">'+(i+1)+'</td>'+
-      '<td>'+esc(m.brand)+'</td>'+
-      '<td>'+esc(m.supplier)+'</td>'+
-      '<td>'+esc(m.company)+'</td>'+
-      '<td>'+mailLink(m.mail)+'</td>';
-    sb.appendChild(sr);
+    if(m.brand || m.supplier || m.company || m.mail){
+      var sr=document.createElement('tr');
+      sr.innerHTML='<td class="sl">'+(i+1)+'</td>'+
+        '<td>'+esc(m.brand)+'</td>'+
+        '<td>'+esc(m.supplier)+'</td>'+
+        '<td>'+esc(m.company)+'</td>'+
+        '<td>'+mailLink(m.mail)+'</td>';
+      sb.appendChild(sr);
+    }
     (m.alts||[]).forEach(function(a){
       var ar=document.createElement('tr'); ar.className='alt';
       ar.innerHTML='<td class="sl">&#8627;</td>'+
