@@ -307,9 +307,9 @@ function buildMachineData(rows){
     if(machine){
       var q=num(r[6]), rt=num(r[7]);
       var tot=(q!=null && rt!=null) ? q*rt : num(r[8]);
-      cur={section:section,machine:machine,brand:sup.brand,supplier:sup.supplier,company:sup.company,mail:sup.mail,qty:q,rate:rt,total:tot,alts:[]};
+      cur={section:section,machine:machine,brand:sup.brand,supplier:sup.supplier,company:sup.company,mail:sup.mail,qty:q,rate:rt,total:tot,alts:[],_row:i+1};
       out.push(cur);
-    }else if(cur){ cur.alts.push(sup); }
+    }else if(cur){ sup._row=i+1; cur.alts.push(sup); }
   }
   return out;
 }
@@ -710,22 +710,50 @@ function saveMachine(){
   postEntry(payload, 'mMsg', function(){ loadData(false); setTimeout(function(){ closeModal('machineModal'); }, 800); });
 }
 
+function supplierEntries(){
+  var list = M.filter(function(m){ return m.section===secVal; });
+  var entries=[];
+  list.forEach(function(m){
+    entries.push({row:m._row, machine:m.machine, label:m.machine, sup:{brand:m.brand,supplier:m.supplier,company:m.company,mail:m.mail}});
+    (m.alts||[]).forEach(function(a){
+      entries.push({row:a._row, machine:m.machine, label:m.machine+' ↳ '+(a.company||a.supplier||a.brand||'supplier'), sup:a});
+    });
+  });
+  return entries;
+}
+function fillSupplierSelect(){
+  var sel=document.getElementById('sSel');
+  var cur=sel.value;
+  sel.innerHTML='';
+  supplierEntries().forEach(function(e){
+    var o=document.createElement('option');
+    o.value=e.row; o.textContent=e.label;
+    sel.appendChild(o);
+  });
+  if(cur) sel.value=cur;
+}
 function sModeChange(){
-  if(document.getElementById('sMode').value==='add'){
+  var update=document.getElementById('sMode').value==='update';
+  document.getElementById('sMachineWrap').style.display=update?'none':'block';
+  document.getElementById('sSelWrap').style.display=update?'block':'none';
+  document.getElementById('sRemove').style.display=update?'inline-block':'none';
+  if(update){ fillSupplierSelect(); sSelChange(); }
+  else {
+    document.getElementById('sMachine').value='';
     document.getElementById('sBrand').value='';
     document.getElementById('sSupplier').value='';
     document.getElementById('sCompany').value='';
     document.getElementById('sMail').value='';
-  } else { sMachineChange(); }
+  }
 }
-function sMachineChange(){
-  var m=document.getElementById('sMachine').value.trim(), found=null;
-  M.forEach(function(x){ if(x.machine===m) found=x; });
-  if(found){
-    document.getElementById('sBrand').value=found.brand||'';
-    document.getElementById('sSupplier').value=found.supplier||'';
-    document.getElementById('sCompany').value=found.company||'';
-    document.getElementById('sMail').value=found.mail||'';
+function sSelChange(){
+  var row=document.getElementById('sSel').value, e=null;
+  supplierEntries().forEach(function(x){ if(String(x.row)===String(row)) e=x; });
+  if(e){
+    document.getElementById('sBrand').value=e.sup.brand||'';
+    document.getElementById('sSupplier').value=e.sup.supplier||'';
+    document.getElementById('sCompany').value=e.sup.company||'';
+    document.getElementById('sMail').value=e.sup.mail||'';
   }
 }
 function openSupplierForm(){
@@ -736,22 +764,35 @@ function openSupplierForm(){
   document.getElementById('sSupplier').value='';
   document.getElementById('sCompany').value='';
   document.getElementById('sMail').value='';
+  sModeChange();
   openModal('supplierModal');
 }
 function saveSupplier(){
   var mode=document.getElementById('sMode').value;
-  var sel=document.getElementById('sMachine').value.trim();
   var payload={
     action: mode==='update' ? 'updateSupplier' : 'addSupplier',
-    machine: sel,
     section: secVal,
     brand: document.getElementById('sBrand').value.trim(),
     supplier: document.getElementById('sSupplier').value.trim(),
     company: document.getElementById('sCompany').value.trim(),
     mail: document.getElementById('sMail').value.trim()
   };
-  if(!sel){ var sm=document.getElementById('sMsg'); sm.className='entry-msg err'; sm.textContent='Enter a machine name'; return; }
+  if(mode==='update'){
+    var row=document.getElementById('sSel').value;
+    if(!row){ var sm=document.getElementById('sMsg'); sm.className='entry-msg err'; sm.textContent='Select a machine'; return; }
+    payload.row=row;
+  } else {
+    var sel=document.getElementById('sMachine').value.trim();
+    if(!sel){ var sm2=document.getElementById('sMsg'); sm2.className='entry-msg err'; sm2.textContent='Enter a machine name'; return; }
+    payload.machine=sel;
+  }
   postEntry(payload, 'sMsg', function(){ loadData(false); setTimeout(function(){ closeModal('supplierModal'); }, 800); });
+}
+function removeSupplier(){
+  var row=document.getElementById('sSel').value;
+  if(!row){ var sm=document.getElementById('sMsg'); sm.className='entry-msg err'; sm.textContent='Select a machine'; return; }
+  if(!confirm('Remove this supplier entry?')) return;
+  postEntry({action:'removeSupplier', row:row}, 'sMsg', function(){ loadData(false); setTimeout(function(){ closeModal('supplierModal'); }, 800); });
 }
 </script>
 <div class="modal" id="machineModal" style="display:none">
@@ -772,13 +813,17 @@ function saveSupplier(){
 <div class="modal-box">
 <div class="modal-head"><div>Supplier Info</div><button onclick="closeModal('supplierModal')">&times;</button></div>
 <div class="field"><label>Mode</label><select id="sMode" onchange="sModeChange()"><option value="add">Add Supplier</option><option value="update">Modify Supplier</option></select></div>
-<div class="field"><label>Machine</label><input type="text" id="sMachine" placeholder="Machine name" onchange="sMachineChange()"></div>
+<div class="field" id="sMachineWrap"><label>Machine</label><input type="text" id="sMachine" placeholder="Machine name"></div>
+<div class="field" id="sSelWrap" style="display:none"><label>Select Machine</label><select id="sSel" onchange="sSelChange()"></select></div>
 <div class="field"><label>Brand / Origin</label><input type="text" id="sBrand"></div>
 <div class="field"><label>Supplier Name</label><input type="text" id="sSupplier"></div>
 <div class="field"><label>Company Name</label><input type="text" id="sCompany"></div>
 <div class="field"><label>Mail ID</label><input type="text" id="sMail"></div>
 <div class="entry-msg" id="sMsg"></div>
+<div style="display:flex;gap:10px;align-items:center">
 <button class="btn" onclick="saveSupplier()">Save</button>
+<button class="btn" id="sRemove" style="display:none;background:linear-gradient(135deg,#d64545,#a11d1d);margin-top:6px" onclick="removeSupplier()">Remove Supplier</button>
+</div>
 </div>
 </div>
 </body>
