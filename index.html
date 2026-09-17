@@ -713,15 +713,8 @@ function saveMachine(){
 }
 
 function supplierEntries(){
-  var list = M.filter(function(m){ return m.section===secVal; });
-  var entries=[];
-  list.forEach(function(m){
-    entries.push({row:m._row, machine:m.machine, label:m.machine, sup:{brand:m.brand,supplier:m.supplier,company:m.company,mail:m.mail}});
-    (m.alts||[]).forEach(function(a){
-      entries.push({row:a._row, machine:m.machine, label:m.machine+' ↳ '+(a.company||a.supplier||a.brand||'supplier'), sup:a});
-    });
-  });
-  return entries;
+  return M.filter(function(m){ return m.section===secVal; })
+    .map(function(m){ return {row:m._row, machine:m.machine, label:m.machine, sup:{brand:m.brand,supplier:m.supplier,company:m.company,mail:m.mail}}; });
 }
 function fillSupplierSelect(){
   var sel=document.getElementById('sSel');
@@ -790,11 +783,11 @@ function saveSupplier(){
   }
   postEntry(payload, 'sMsg', function(){ loadData(false); setTimeout(function(){ closeModal('supplierModal'); }, 800); });
 }
-function removeSupplier(){
+function removeMachine(){
   var row=document.getElementById('sSel').value;
   if(!row){ var sm=document.getElementById('sMsg'); sm.className='entry-msg err'; sm.textContent='Select a machine'; return; }
-  if(!confirm('Remove this supplier entry?')) return;
-  postEntry({action:'removeSupplier', row:row}, 'sMsg', function(){ loadData(false); setTimeout(function(){ closeModal('supplierModal'); }, 800); });
+  if(!confirm('Remove this machine and all its suppliers?')) return;
+  postEntry({action:'removeMachine', row:row}, 'sMsg', function(){ loadData(false); setTimeout(function(){ closeModal('supplierModal'); }, 800); });
 }
 </script>
 <div class="modal" id="machineModal" style="display:none">
@@ -824,7 +817,7 @@ function removeSupplier(){
 <div class="entry-msg" id="sMsg"></div>
 <div style="display:flex;gap:10px;align-items:center">
 <button class="btn" onclick="saveSupplier()">Save</button>
-<button class="btn" id="sRemove" style="display:none;background:linear-gradient(135deg,#d64545,#a11d1d);margin-top:6px" onclick="removeSupplier()">Remove Supplier</button>
+<button class="btn" id="sRemove" style="display:none;background:linear-gradient(135deg,#d64545,#a11d1d);margin-top:6px" onclick="removeMachine()">Remove Machine</button>
 </div>
 </div>
 </div>
