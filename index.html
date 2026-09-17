@@ -515,7 +515,6 @@ function renderLand(){
   var rows=L.filter(function(r){ return !projVal || r.project===projVal; });
   var lt=landTotals();
   document.getElementById('lStats').innerHTML=
-    '<div class="stat a"><span class="num">'+fmt(Math.round(lt.sqm))+'</span>Total Area (Sq.M)</div>'+
     '<div class="stat b"><span class="num">'+fmt(Math.round(lt.sqf))+'</span>Total Area (Sq.F)</div>'+
     '<div class="stat d"><span class="num">'+lt.projects+'</span>Projects</div>';
   var tb=document.getElementById('lBody'); tb.innerHTML='';
