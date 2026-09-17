@@ -138,7 +138,7 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 <div class="homecard hc-c" id="goPower">
 <div class="hc-icon">&#128101;</div>
 <div class="hc-title">Manpower Planning</div>
-<div class="hc-sub">Workforce &amp; headcount plan</div>
+<div class="hc-sub" id="homePowerSub">Workforce &amp; headcount plan</div>
 <div class="hc-go">Open &rarr;</div>
 </div>
 </div>
@@ -248,9 +248,23 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 
 <div id="viewPower" style="display:none">
 <button class="back-btn" id="backPower">&#8592; Back</button>
+<div class="stats" id="pStats"></div>
 <div class="card">
 <div class="card-title">Manpower Planning</div>
-<div class="no-data">Data coming soon.</div>
+<div class="tbl-wrap">
+<table id="pTable">
+<thead><tr>
+<th>S/L</th>
+<th>Description</th>
+<th>Officer</th>
+<th>Supervisor</th>
+<th>Helper</th>
+<th>Total Manpower</th>
+</tr></thead>
+<tbody id="pBody"></tbody>
+</table>
+</div>
+<div class="no-data" id="pNo" style="display:none">No data found.</div>
 </div>
 </div>
 
@@ -272,13 +286,15 @@ function secColor(s){ return '#006066'; }
 
 var sortCol='section', sortAsc=true, secVal='', searchVal='';
 var SHEET_ID='1BeciLxtwDh-PkkoxpYHwBc87ATa3nYQPKdAXB9maXvY';
-var GID_MACHINE='86905509', GID_LAND='746325702';
+var GID_MACHINE='86905509', GID_LAND='746325702', GID_POWER='678045459';
 var CSV_MACHINE='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&gid='+GID_MACHINE;
 var CSV_LAND='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&gid='+GID_LAND;
+var CSV_POWER='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&gid='+GID_POWER;
 var SHEET_URL='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/edit';
 var ENTRY_URL='https://script.google.com/macros/s/AKfycbwK1ZX8L6olG1ZFewDxoRmIITGsykGR_ePQSzlNjirT_E44V7_-Jh2XNhSQneY9u0hrMQ/exec';
 var M = [];
 var L = [];
+var P = [];
 var SECS = [];
 function rebuildSections(){
   SECS=[];
@@ -320,6 +336,16 @@ function buildLandData(rows){
     if(str(r[0])) project=str(r[0]);
     var machine=str(r[1]);
     out.push({project:project,machine:machine,qty:num(r[2]),length:num(r[3]),width:num(r[4]),base:num(r[5]),totalBase:num(r[6]),clearance:num(r[7]),totalAreaM:num(r[8]),totalAreaF:num(r[9]),isTotal:machine.indexOf('Total')===0});
+  }
+  return out;
+}
+function buildPowerData(rows){
+  var out=[];
+  for(var i=1;i<rows.length;i++){
+    var r=rows[i];
+    var desc=str(r[1]);
+    if(!desc) continue;
+    out.push({sl:str(r[0]),desc:desc,officer:num(r[2]),supervisor:num(r[3]),helper:num(r[4]),total:num(r[5]),isTotal:desc.toLowerCase()==='total'});
   }
   return out;
 }
@@ -373,6 +399,10 @@ function renderHome(){
   document.getElementById('homeMachineSub').innerHTML='<b>'+M.length+'</b> size &middot; <b>'+fmt(st.qty)+'</b> sets &middot; '+money(st.usd)+' / '+taka(st.usd);
   var lt=landTotals();
   document.getElementById('homeLandSub').innerHTML='<b>'+fmt(Math.round(lt.sqf))+'</b> Sq.F total area';
+  var pt=0; P.forEach(function(x){ if(!x.isTotal) pt+=x.total||0; });
+  var ptot=P.filter(function(x){ return x.isTotal; });
+  if(ptot.length) pt=ptot[0].total||pt;
+  document.getElementById('homePowerSub').innerHTML='<b>'+fmt(pt)+'</b> total manpower';
 }
 function renderSecCards(){
   var el=document.getElementById('secCards');
@@ -537,6 +567,33 @@ function renderLand(){
   });
 }
 
+function renderPower(){
+  var list=P.filter(function(x){ return !x.isTotal; });
+  var tot=P.filter(function(x){ return x.isTotal; });
+  var off=0,sup=0,help=0,all=0;
+  list.forEach(function(x){ off+=x.officer||0; sup+=x.supervisor||0; help+=x.helper||0; all+=x.total||0; });
+  if(tot.length){ var t=tot[0]; off=t.officer||off; sup=t.supervisor||sup; help=t.helper||help; all=t.total||all; }
+  document.getElementById('pStats').innerHTML=
+    '<div class="stat a"><span class="num">'+fmt(all)+'</span>Total Manpower</div>'+
+    '<div class="stat b"><span class="num">'+fmt(off)+'</span>Officer</div>'+
+    '<div class="stat c"><span class="num">'+fmt(sup)+'</span>Supervisor</div>'+
+    '<div class="stat d"><span class="num">'+fmt(help)+'</span>Helper</div>';
+  var tb=document.getElementById('pBody'); tb.innerHTML='';
+  var shown=list.concat(tot);
+  shown.forEach(function(x,i){
+    var tr=document.createElement('tr');
+    if(x.isTotal) tr.className='total';
+    tr.innerHTML='<td class="sl">'+(x.isTotal?'':(i+1))+'</td>'+
+      '<td>'+esc(x.desc)+'</td>'+
+      '<td class="num">'+fmt(x.officer)+'</td>'+
+      '<td class="num">'+fmt(x.supervisor)+'</td>'+
+      '<td class="num">'+fmt(x.helper)+'</td>'+
+      '<td class="num">'+fmt(x.total)+'</td>';
+    tb.appendChild(tr);
+  });
+  document.getElementById('pNo').style.display=shown.length?'none':'block';
+}
+
 function show(view){
   currentView=view;
   document.getElementById('viewHome').style.display = view==='home'?'block':'none';
@@ -550,7 +607,7 @@ function restoreView(){
   var h=location.hash.replace(/^#/,'');
   try{ h=decodeURIComponent(h); }catch(e){}
   if(h==='land'){ show('land'); renderLand(); }
-  else if(h==='power'){ show('power'); }
+  else if(h==='power'){ show('power'); renderPower(); }
   else if(h.indexOf('machine/')===0){
     var parts=h.slice(8).split('/');
     var s=parts[0], g=parts[1]||'';
@@ -590,7 +647,7 @@ document.getElementById('projFilter').addEventListener('change',renderLand);
 
 document.getElementById('goMachine').addEventListener('click',function(){ show('machine'); showMachineDetail(false); });
 document.getElementById('goLand').addEventListener('click',function(){ show('land'); renderLand(); });
-document.getElementById('goPower').addEventListener('click',function(){ show('power'); });
+document.getElementById('goPower').addEventListener('click',function(){ show('power'); renderPower(); });
 document.getElementById('backMachine').addEventListener('click',function(){ show('home'); });
 document.getElementById('backSections').addEventListener('click',function(){
   machineGroupLabel='';
@@ -619,21 +676,22 @@ function loadData(first){
   var t='&t='+Date.now();
   return Promise.all([
     fetch(CSV_MACHINE+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildMachineData(parseCSV(x)); }),
-    fetch(CSV_LAND+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildLandData(parseCSV(x)); })
+    fetch(CSV_LAND+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildLandData(parseCSV(x)); }),
+    fetch(CSV_POWER+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildPowerData(parseCSV(x)); })
   ]).then(function(res){
     if(!res[0] || !res[0].length) throw new Error('empty');
-    var sig=JSON.stringify(res[0])+'|'+JSON.stringify(res[1]||[]);
+    var sig=JSON.stringify(res[0])+'|'+JSON.stringify(res[1]||[])+'|'+JSON.stringify(res[2]||[]);
     if(!first && sig===lastSig) return;
     lastSig=sig;
-    M=res[0]; L=res[1]||[];
+    M=res[0]; L=res[1]||[]; P=res[2]||[];
     rebuildSections(); refreshFilters();
-    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand();
+    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand(); renderPower();
     restoreView();
   }).catch(function(){
     if(M.length) return;
-    M=window.MACHINE_DATA||[]; L=window.LAND_DATA||[];
+    M=window.MACHINE_DATA||[]; L=window.LAND_DATA||[]; P=window.POWER_DATA||[];
     rebuildSections(); refreshFilters();
-    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand();
+    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand(); renderPower();
     restoreView();
   });
 }
