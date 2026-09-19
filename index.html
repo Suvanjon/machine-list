@@ -867,7 +867,7 @@ function saveMachine(){
     rate: document.getElementById('mRate').value
   };
   if(!payload.machine){ var mm=document.getElementById('mMsg'); mm.className='entry-msg err'; mm.textContent='Machine name is required'; return; }
-  postEntry(payload, 'mMsg', function(){ loadData(false); setTimeout(function(){ closeModal('machineModal'); }, 800); });
+  postEntry(payload, 'mMsg', function(){ setTimeout(function(){ closeModal('machineModal'); }, 800); setTimeout(function(){ loadData(true); }, 2000); });
 }
 
 function supplierEntries(){
@@ -939,13 +939,13 @@ function saveSupplier(){
     if(!sel){ var sm2=document.getElementById('sMsg'); sm2.className='entry-msg err'; sm2.textContent='Enter a machine name'; return; }
     payload.machine=sel;
   }
-  postEntry(payload, 'sMsg', function(){ loadData(false); setTimeout(function(){ closeModal('supplierModal'); }, 800); });
+  postEntry(payload, 'sMsg', function(){ setTimeout(function(){ closeModal('supplierModal'); }, 800); setTimeout(function(){ loadData(true); }, 2000); });
 }
 function removeMachine(){
   var row=document.getElementById('sSel').value;
   if(!row){ var sm=document.getElementById('sMsg'); sm.className='entry-msg err'; sm.textContent='Select a machine'; return; }
   if(!confirm('Remove this machine and all its suppliers?')) return;
-  postEntry({action:'removeMachine', row:row}, 'sMsg', function(){ loadData(false); setTimeout(function(){ closeModal('supplierModal'); }, 800); });
+  postEntry({action:'removeMachine', row:row}, 'sMsg', function(){ setTimeout(function(){ closeModal('supplierModal'); }, 800); setTimeout(function(){ loadData(true); }, 2000); });
 }
 </script>
 <div class="modal" id="machineModal" style="display:none">
