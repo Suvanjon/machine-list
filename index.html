@@ -450,7 +450,7 @@ function landTotals(){
 }
 function renderHome(){
   var st=sectionStats('');
-  document.getElementById('homeMachineSub').innerHTML='<b>'+M.length+'</b> size &middot; <b>'+fmt(st.qty)+'</b> sets &middot; '+money(st.usd)+' / '+taka(st.usd);
+  document.getElementById('homeMachineSub').innerHTML='<b>'+M.length+'</b> size &middot; <b>'+fmt(st.qty)+'</b> sets &middot; '+money(st.usd);
   var lt=landTotals();
   document.getElementById('homeLandSub').innerHTML='<b>'+fmt(Math.round(lt.sqf))+'</b> Sq.F total area';
   var pt=0; P.forEach(function(x){ if(!x.isTotal) pt+=x.total||0; });
@@ -467,7 +467,7 @@ function renderSecCards(){
   var html='';
   SECS.forEach(function(s){
     var st=sectionStats(s);
-    html+='<div class="seccard'+(secVal===s?' active':'')+'" data-sec="'+esc(s)+'"><div class="sc-name">'+esc(secLabel(s))+'</div><div class="sc-line"><b>'+st.count+'</b> size &middot; <b>'+fmt(st.qty)+'</b> sets</div><div class="sc-line">'+money(st.usd)+' / '+taka(st.usd)+'</div></div>';
+    html+='<div class="seccard'+(secVal===s?' active':'')+'" data-sec="'+esc(s)+'"><div class="sc-name">'+esc(secLabel(s))+'</div><div class="sc-line"><b>'+st.count+'</b> size &middot; <b>'+fmt(st.qty)+'</b> sets</div><div class="sc-line">'+money(st.usd)+'</div></div>';
   });
   el.innerHTML=html;
   el.querySelectorAll('.seccard').forEach(function(c){
@@ -491,7 +491,7 @@ function renderGroupCards(){
     var list=M.filter(function(m){ return m.section===secVal && inGroup(m,g); });
     var qty=0,usd=0;
     list.forEach(function(m){ qty+=m.qty||0; usd+=m.total||0; });
-    html+='<div class="seccard" data-gi="'+gi+'"><div class="sc-name">'+esc(g.label)+'</div><div class="sc-line"><b>'+list.length+'</b> size &middot; <b>'+fmt(qty)+'</b> sets</div><div class="sc-line">'+money(usd)+' / '+taka(usd)+'</div></div>';
+    html+='<div class="seccard" data-gi="'+gi+'"><div class="sc-name">'+esc(g.label)+'</div><div class="sc-line"><b>'+list.length+'</b> size &middot; <b>'+fmt(qty)+'</b> sets</div><div class="sc-line">'+money(usd)+'</div></div>';
   });
   el.innerHTML=html;
   el.querySelectorAll('.seccard').forEach(function(c){
@@ -545,7 +545,7 @@ function renderStats(){
   list.forEach(function(m){ qty+=m.qty||0; usd+=m.total||0; });
   document.getElementById('mStats').innerHTML=
     '<div class="stat b"><span class="num">'+fmt(qty)+'</span>Total Sets</div>'+
-    '<div class="stat c"><span class="num">'+money(usd)+'</span><span class="sub">'+taka(usd)+'</span>Total Amount</div>'+
+    '<div class="stat c"><span class="num">'+money(usd)+'</span>Total Amount</div>'+
     '<div class="stat edit" onclick="openMachineForm()"><span class="num">&#9998;</span>Machine</div>'+
     '<div class="stat edit2" onclick="openSupplierForm()"><span class="num">&#9881;</span>Supplier Info</div>';
   document.getElementById('immPic').style.display = (machineGroupLabel==='Injection Molding') ? 'block' : 'none';
@@ -573,8 +573,8 @@ function renderMachines(){
       '<td><span class="sec-badge" style="background:'+secColor(m.section)+'">'+esc(secLabel(m.section))+'</span></td>'+
       '<td>'+esc(m.machine)+'</td>'+
       '<td class="qty">'+fmt(m.qty)+'</td>'+
-      '<td class="num">'+money(m.rate)+(m.rate!=null?'<br><span style="color:#8aa0ae;font-size:11px">'+taka(m.rate)+'</span>':'')+'</td>'+
-      '<td class="num">'+money(m.total)+(m.total!=null?'<br><span style="color:#8aa0ae;font-size:11px">'+taka(m.total)+'</span>':'')+'</td>';
+      '<td class="num">'+money(m.rate)+'</td>'+
+      '<td class="num">'+money(m.total)+'</td>';
     tb.appendChild(tr);
     if(m.supplier || m.company || m.mail){
       var sr=document.createElement('tr');
