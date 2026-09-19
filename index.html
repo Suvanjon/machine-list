@@ -121,6 +121,26 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 </style>
 </head>
 <body>
+<div id="gate" style="position:fixed;inset:0;background:linear-gradient(135deg,#004d40 0%,#00695c 50%,#009688 100%);display:flex;align-items:center;justify-content:center;z-index:99999;padding:16px">
+<div style="text-align:center;color:#fff;max-width:320px">
+<div style="font-size:22px;font-weight:800;margin-bottom:6px">&#128274;</div>
+<div style="font-size:16px;font-weight:700;margin-bottom:14px">Enter Password</div>
+<input type="password" id="gatePass" placeholder="Password" onkeydown="if(event.key==='Enter')checkGate()" style="width:100%;padding:12px 14px;border-radius:10px;border:none;font-size:16px;text-align:center;font-family:inherit;outline:none">
+<button onclick="checkGate()" style="width:100%;margin-top:10px;padding:12px;border-radius:10px;border:none;background:#26a69a;color:#fff;font-size:15px;font-weight:700;cursor:pointer">Unlock</button>
+<div id="gateMsg" style="color:#ffc9c9;margin-top:10px;font-size:13px;min-height:16px"></div>
+</div>
+</div>
+<script>
+var GATE_PASS='455750';
+function checkGate(){
+  if(document.getElementById('gatePass').value===GATE_PASS){
+    document.getElementById('gate').style.display='none';
+  }else{
+    document.getElementById('gateMsg').textContent='Wrong password';
+    document.getElementById('gatePass').value='';
+  }
+}
+</script>
 <div class="hdr">
 <div class="hdr-text">LED Lighting &amp; Electrical Accessories Manufacturing Project Plan</div>
 <div class="hdr-sub">A strong business begins with a clear vision, a proper plan and a confident first step</div>
