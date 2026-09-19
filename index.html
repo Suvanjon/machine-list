@@ -21,7 +21,7 @@ body{background:radial-gradient(1100px 500px at 50% -12%, rgba(42,154,160,.16), 
 
 .home-inner{max-width:880px;margin:0 auto}
 .quote-top{margin:22px auto 0;text-align:center;color:var(--muted);font-size:14px;line-height:1.8;font-style:italic;padding:0 16px}
-.home-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin:16px auto 0;max-width:880px}
+.home-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px auto 0;max-width:880px}
 .homecard{position:relative;overflow:hidden;border-radius:24px;border:5px solid #00565c;padding:20px 22px;color:#fff;cursor:pointer;transition:all .22s;box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 -2px 0 rgba(0,0,0,.16) inset,0 16px 30px -8px rgba(13,40,58,.4);min-height:150px;display:flex;flex-direction:column;justify-content:center}
 .homecard:hover{transform:translateY(-4px) scale(1.01);box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 -2px 0 rgba(0,0,0,.16) inset,0 24px 44px -10px rgba(13,40,58,.5)}
 .homecard:after{content:"";position:absolute;top:-50px;right:-50px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.14)}
@@ -29,6 +29,7 @@ body{background:radial-gradient(1100px 500px at 50% -12%, rgba(42,154,160,.16), 
 .hc-a{background:linear-gradient(135deg,#12a0ab 0%,#0b7f89 40%,#00565c 100%)}
 .hc-b{background:linear-gradient(135deg,#2f7f9e 0%,#1b5e7d 45%,#0d3b52 100%)}
 .hc-c{background:linear-gradient(135deg,#0d7f8a 0%,#08626d 45%,#043a42 100%)}
+.hc-d{background:linear-gradient(135deg,#d8a000 0%,#a97a00 45%,#6b4a00 100%)}
 .hc-icon{font-size:18px;margin-bottom:8px;position:relative}
 .hc-title{font-size:16px;font-weight:800;margin-bottom:6px;position:relative;letter-spacing:.01em}
 .hc-sub{font-size:11.5px;color:rgba(255,255,255,.88);position:relative;line-height:1.5}
@@ -142,6 +143,12 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 <div class="hc-icon">&#128101;</div>
 <div class="hc-title">Manpower Planning</div>
 <div class="hc-sub" id="homePowerSub">Workforce &amp; headcount plan</div>
+<div class="hc-go">Open &rarr;</div>
+</div>
+<div class="homecard hc-d" id="goPUtil">
+<div class="hc-icon">&#9889;</div>
+<div class="hc-title">Power &amp; Utility</div>
+<div class="hc-sub" id="homePUtilSub">Power consumption plan</div>
 <div class="hc-go">Open &rarr;</div>
 </div>
 </div>
@@ -280,6 +287,27 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 </div>
 </div>
 
+<div id="viewPUtil" style="display:none">
+<button class="back-btn" id="backPUtil">&#8592; Back</button>
+<div class="stats" id="puStats"></div>
+<div class="card">
+<div class="card-title">Power &amp; Utility</div>
+<div class="tbl-wrap">
+<table id="puTable">
+<thead><tr>
+<th>Floor</th>
+<th>Machine Name</th>
+<th>Qty</th>
+<th>Actual Power (KW)</th>
+<th>Total Power (KW)</th>
+</tr></thead>
+<tbody id="puBody"></tbody>
+</table>
+</div>
+<div class="no-data" id="puNo" style="display:none">No data found.</div>
+</div>
+</div>
+
 </div>
 
 <script src="data.js"></script>
@@ -298,15 +326,17 @@ function secColor(s){ return '#006066'; }
 
 var sortCol='section', sortAsc=true, secVal='', searchVal='';
 var SHEET_ID='1BeciLxtwDh-PkkoxpYHwBc87ATa3nYQPKdAXB9maXvY';
-var GID_MACHINE='86905509', GID_LAND='746325702', GID_POWER='678045459';
+var GID_MACHINE='86905509', GID_LAND='746325702', GID_POWER='678045459', GID_PC='547289225';
 var CSV_MACHINE='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&gid='+GID_MACHINE;
 var CSV_LAND='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&gid='+GID_LAND;
 var CSV_POWER='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&gid='+GID_POWER;
+var CSV_PC='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&gid='+GID_PC;
 var SHEET_URL='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/edit';
 var ENTRY_URL='https://script.google.com/macros/s/AKfycbwK1ZX8L6olG1ZFewDxoRmIITGsykGR_ePQSzlNjirT_E44V7_-Jh2XNhSQneY9u0hrMQ/exec';
 var M = [];
 var L = [];
 var P = [];
+var PC = [];
 var SECS = [];
 function rebuildSections(){
   SECS=[];
@@ -358,6 +388,17 @@ function buildPowerData(rows){
     var desc=str(r[1]);
     if(!desc) continue;
     out.push({sl:str(r[0]),desc:desc,officer:num(r[2]),supervisor:num(r[3]),helper:num(r[4]),total:num(r[5]),isTotal:desc.toLowerCase()==='total'});
+  }
+  return out;
+}
+function buildPowerConsumptionData(rows){
+  var out=[];
+  for(var i=1;i<rows.length;i++){
+    var r=rows[i];
+    var floor=str(r[0]);
+    var machine=str(r[1]);
+    if(!floor && !machine) continue;
+    out.push({floor:floor,machine:machine,qty:num(r[2]),actualPower:num(r[3]),totalPower:num(r[4]),isTotal:floor.indexOf('Total')===0});
   }
   return out;
 }
@@ -415,6 +456,10 @@ function renderHome(){
   var ptot=P.filter(function(x){ return x.isTotal; });
   if(ptot.length) pt=ptot[0].total||pt;
   document.getElementById('homePowerSub').innerHTML='<b>'+fmt(pt)+'</b> total manpower';
+  var pu=0; PC.forEach(function(x){ if(!x.isTotal) pu+=x.totalPower||0; });
+  var putot=PC.filter(function(x){ return x.isTotal; });
+  if(putot.length) pu=putot[0].totalPower||pu;
+  document.getElementById('homePUtilSub').innerHTML='<b>'+fmt(pu)+'</b> KW total power';
 }
 function renderSecCards(){
   var el=document.getElementById('secCards');
@@ -479,6 +524,7 @@ function syncHash(){
   }
   else if(currentView==='land') h='land';
   else if(currentView==='power') h='power';
+  else if(currentView==='putil') h='putil';
   try{ history.replaceState(null,'', h?('#'+h):location.pathname+location.search); }catch(e){}
 }
 function machineRows(){
@@ -606,12 +652,47 @@ function renderPower(){
   document.getElementById('pNo').style.display=shown.length?'none':'block';
 }
 
+function renderPowerUtil(){
+  var FL={'GF':'Ground Floor','2nd F':'2nd Floor','3rd F':'3rd Floor'};
+  var list=PC.filter(function(x){ return !x.isTotal; });
+  var tot=PC.filter(function(x){ return x.isTotal; });
+  var floors=[];
+  list.forEach(function(x){ if(floors.indexOf(x.floor)===-1) floors.push(x.floor); });
+  var ft={};
+  floors.forEach(function(f){ ft[f]=0; });
+  list.forEach(function(x){ ft[x.floor]=(ft[x.floor]||0)+(x.totalPower||0); });
+  var total=0; list.forEach(function(x){ total+=x.totalPower||0; });
+  if(tot.length) total=tot[0].totalPower||total;
+  var stats='<div class="stat a"><span class="num">'+fmt(total)+'</span>Total Power (KW)</div>';
+  floors.forEach(function(f,i){ stats+='<div class="stat '+(['b','c','d'][i]||'b')+'"><span class="num">'+fmt(ft[f])+'</span>'+esc(FL[f]||f)+' (KW)</div>'; });
+  document.getElementById('puStats').innerHTML=stats;
+  var tb=document.getElementById('puBody'); tb.innerHTML='';
+  var shown={};
+  list.forEach(function(x){
+    var tr=document.createElement('tr');
+    var showFloor=!shown[x.floor]; shown[x.floor]=true;
+    tr.innerHTML='<td class="'+(showFloor?'proj':'')+'">'+(showFloor?esc(FL[x.floor]||x.floor):'')+'</td>'+
+      '<td>'+esc(x.machine)+'</td>'+
+      '<td class="qty">'+fmt(x.qty)+'</td>'+
+      '<td class="num">'+fmt(x.actualPower)+'</td>'+
+      '<td class="num">'+fmt(x.totalPower)+'</td>';
+    tb.appendChild(tr);
+  });
+  tot.forEach(function(x){
+    var tr=document.createElement('tr'); tr.className='total';
+    tr.innerHTML='<td class="proj">Total</td><td></td><td></td><td></td><td class="num">'+fmt(x.totalPower)+'</td>';
+    tb.appendChild(tr);
+  });
+  document.getElementById('puNo').style.display=(list.length||tot.length)?'none':'block';
+}
+
 function show(view){
   currentView=view;
   document.getElementById('viewHome').style.display = view==='home'?'block':'none';
   document.getElementById('viewMachine').style.display = view==='machine'?'block':'none';
   document.getElementById('viewLand').style.display = view==='land'?'block':'none';
   document.getElementById('viewPower').style.display = view==='power'?'block':'none';
+  document.getElementById('viewPUtil').style.display = view==='putil'?'block':'none';
   window.scrollTo(0,0);
   syncHash();
 }
@@ -620,6 +701,7 @@ function restoreView(){
   try{ h=decodeURIComponent(h); }catch(e){}
   if(h==='land'){ show('land'); renderLand(); }
   else if(h==='power'){ show('power'); renderPower(); }
+  else if(h==='putil'){ show('putil'); renderPowerUtil(); }
   else if(h.indexOf('machine/')===0){
     var parts=h.slice(8).split('/');
     var s=parts[0], g=parts[1]||'';
@@ -660,6 +742,7 @@ document.getElementById('projFilter').addEventListener('change',renderLand);
 document.getElementById('goMachine').addEventListener('click',function(){ show('machine'); showMachineDetail(false); });
 document.getElementById('goLand').addEventListener('click',function(){ show('land'); renderLand(); });
 document.getElementById('goPower').addEventListener('click',function(){ show('power'); renderPower(); });
+document.getElementById('goPUtil').addEventListener('click',function(){ show('putil'); renderPowerUtil(); });
 document.getElementById('backMachine').addEventListener('click',function(){ show('home'); });
 document.getElementById('backSections').addEventListener('click',function(){
   machineGroupLabel='';
@@ -673,6 +756,7 @@ document.getElementById('backGroups').addEventListener('click',function(){
 });
 document.getElementById('backLand').addEventListener('click',function(){ show('home'); });
 document.getElementById('backPower').addEventListener('click',function(){ show('home'); });
+document.getElementById('backPUtil').addEventListener('click',function(){ show('home'); });
 
 var lastSig='';
 function refreshFilters(){
@@ -689,31 +773,33 @@ function loadData(first){
   return Promise.all([
     fetch(CSV_MACHINE+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildMachineData(parseCSV(x)); }),
     fetch(CSV_LAND+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildLandData(parseCSV(x)); }),
-    fetch(CSV_POWER+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildPowerData(parseCSV(x)); })
+    fetch(CSV_POWER+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildPowerData(parseCSV(x)); }),
+    fetch(CSV_PC+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildPowerConsumptionData(parseCSV(x)); })
   ]).then(function(res){
     if(!res[0] || !res[0].length) throw new Error('empty');
-    var sig=JSON.stringify(res[0])+'|'+JSON.stringify(res[1]||[])+'|'+JSON.stringify(res[2]||[]);
+    var sig=JSON.stringify(res[0])+'|'+JSON.stringify(res[1]||[])+'|'+JSON.stringify(res[2]||[])+'|'+JSON.stringify(res[3]||[]);
     if(!first && sig===lastSig) return;
     lastSig=sig;
-    M=res[0]; L=res[1]||[]; P=res[2]||[];
+    M=res[0]; L=res[1]||[]; P=res[2]||[]; PC=res[3]||[];
     rebuildSections(); refreshFilters();
-    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand(); renderPower();
+    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand(); renderPower(); renderPowerUtil();
     restoreView();
   }).catch(function(){
     if(M.length) return;
-    M=window.MACHINE_DATA||[]; L=window.LAND_DATA||[]; P=window.POWER_DATA||[];
+    M=window.MACHINE_DATA||[]; L=window.LAND_DATA||[]; P=window.POWER_DATA||[]; PC=window.POWER_CONSUMPTION_DATA||[];
     rebuildSections(); refreshFilters();
-    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand(); renderPower();
+    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand(); renderPower(); renderPowerUtil();
     restoreView();
   });
 }
 function primeView(){
   var h=location.hash.replace(/^#/,'');
-  var top = (h==='machine'||h.indexOf('machine/')===0) ? 'machine' : (h==='land' ? 'land' : (h==='power' ? 'power' : 'home'));
+  var top = (h==='machine'||h.indexOf('machine/')===0) ? 'machine' : (h==='land' ? 'land' : (h==='power' ? 'power' : (h==='putil' ? 'putil' : 'home')));
   document.getElementById('viewHome').style.display = top==='home'?'block':'none';
   document.getElementById('viewMachine').style.display = top==='machine'?'block':'none';
   document.getElementById('viewLand').style.display = top==='land'?'block':'none';
   document.getElementById('viewPower').style.display = top==='power'?'block':'none';
+  document.getElementById('viewPUtil').style.display = top==='putil'?'block':'none';
   if(top==='machine'){
     document.getElementById('mSections').style.display='block';
     document.getElementById('mGroups').style.display='none';
