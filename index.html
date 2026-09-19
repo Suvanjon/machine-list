@@ -315,8 +315,18 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 <script src="data.js"></script>
 <script>
 var fmt = function(n){ return n==null||n==='' ? '' : Number(n).toLocaleString('en-US'); };
-var money = function(n){ return n==null||n==='' ? '' : '$'+Number(n).toLocaleString('en-US',{maximumFractionDigits:0}); };
-var taka = function(n){ return n==null||n==='' ? '' : '\u09F3'+Number(Math.round(n*123)).toLocaleString('en-US'); };
+function lakhCrore(n){
+  n=Number(n);
+  if(isNaN(n)) return '';
+  var sign = n<0 ? '-' : '';
+  var a = Math.abs(n);
+  function t2(x){ var s=x.toFixed(2); return s.replace(/\.?0+$/,''); }
+  if(a>=10000000) return sign+t2(a/10000000)+'C';
+  if(a>=100000) return sign+t2(a/100000)+'L';
+  return sign+a.toLocaleString('en-IN');
+}
+var money = function(n){ return n==null||n==='' ? '' : '$'+lakhCrore(n); };
+var taka = function(n){ return n==null||n==='' ? '' : '\u09F3'+lakhCrore(Math.round(n*123)); };
 function esc(s){ return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : ''; }
 function mailLink(s){
   if(!s) return '';
