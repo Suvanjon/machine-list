@@ -133,8 +133,7 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 <script>
 var GATE_PASS='455750';
 function unlock(){
-  var exp=Date.now()+24*60*60*1000;
-  try{ localStorage.setItem('gateUnlocked', String(exp)); }catch(e){}
+  try{ localStorage.setItem('gateUnlocked', '1'); }catch(e){}
   document.getElementById('gate').style.display='none';
 }
 function checkGate(){
@@ -146,8 +145,7 @@ function checkGate(){
 }
 (function(){
   try{
-    var exp=Number(localStorage.getItem('gateUnlocked'));
-    if(exp && Date.now()<exp){ document.getElementById('gate').style.display='none'; }
+    if(localStorage.getItem('gateUnlocked')==='1'){ document.getElementById('gate').style.display='none'; }
   }catch(e){}
 })();
 </script>
