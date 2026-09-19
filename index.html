@@ -132,14 +132,24 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 </div>
 <script>
 var GATE_PASS='455750';
+function unlock(){
+  var exp=Date.now()+24*60*60*1000;
+  try{ localStorage.setItem('gateUnlocked', String(exp)); }catch(e){}
+  document.getElementById('gate').style.display='none';
+}
 function checkGate(){
-  if(document.getElementById('gatePass').value===GATE_PASS){
-    document.getElementById('gate').style.display='none';
-  }else{
+  if(document.getElementById('gatePass').value===GATE_PASS){ unlock(); }
+  else{
     document.getElementById('gateMsg').textContent='Wrong password';
     document.getElementById('gatePass').value='';
   }
 }
+(function(){
+  try{
+    var exp=Number(localStorage.getItem('gateUnlocked'));
+    if(exp && Date.now()<exp){ document.getElementById('gate').style.display='none'; }
+  }catch(e){}
+})();
 </script>
 <div class="hdr">
 <div class="hdr-text">LED Lighting &amp; Electrical Accessories Manufacturing Project Plan</div>
