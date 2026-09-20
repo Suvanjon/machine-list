@@ -151,7 +151,6 @@ function checkGate(){
 })();
 </script>
 <div class="hdr">
-<div class="hdr-tag" id="hdrTag">INNOVATION &bull; QUALITY &bull; A BRIGHTER FUTURE</div>
 <div class="hdr-text">LED Lighting &amp; Electrical Accessories<br>Manufacturing Project Plan</div>
 <div class="hdr-sub" id="hdrSub">A strong business begins with a clear vision, a proper plan and a confident first step.</div>
 </div>
@@ -208,6 +207,7 @@ function checkGate(){
 <div class="prod"><img src="products/flood-light.png" alt="Flood Light"></div>
 </div>
 </div>
+<div class="hdr-tag" style="margin-top:28px;margin-bottom:0">INNOVATION &bull; QUALITY &bull; A BRIGHTER FUTURE</div>
 </div>
 </div>
 
@@ -753,7 +753,6 @@ function show(view){
   document.getElementById('viewPUtil').style.display = view==='putil'?'block':'none';
   document.getElementById('viewProdCap').style.display = view==='prodcap'?'block':'none';
   var isHome = view==='home';
-  document.getElementById('hdrTag').style.display = isHome?'block':'none';
   document.getElementById('hdrSub').style.display = isHome?'block':'none';
   window.scrollTo(0,0);
   syncHash();
@@ -866,7 +865,6 @@ function primeView(){
   document.getElementById('viewPower').style.display = top==='power'?'block':'none';
   document.getElementById('viewPUtil').style.display = top==='putil'?'block':'none';
   document.getElementById('viewProdCap').style.display = top==='prodcap'?'block':'none';
-  document.getElementById('hdrTag').style.display = top==='home'?'block':'none';
   document.getElementById('hdrSub').style.display = top==='home'?'block':'none';
   if(top==='machine'){
     document.getElementById('mSections').style.display='block';
