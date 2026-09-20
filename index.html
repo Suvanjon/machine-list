@@ -6,11 +6,12 @@
 <title>LED Lighting &amp; Electrical Accessories Manufacturing Project Plan</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Inter','Segoe UI',-apple-system,Roboto,Arial,sans-serif}
-:root{--teal:#009688;--muted:#5d7283;--ink:#004d40}
-body{background:radial-gradient(1100px 500px at 50% -12%, rgba(0,150,136,.14), transparent 60%),linear-gradient(180deg,#eef2f6 0%,#f6f8fa 45%,#eaf0f4 100%);min-height:100vh;color:var(--ink);-webkit-font-smoothing:antialiased}
-.hdr{background:transparent;padding:28px 18px 6px;text-align:center;position:relative}
-.hdr-text{position:relative;color:#00796b;font-size:24px;font-weight:800;letter-spacing:.04em;text-shadow:0 1px 1px rgba(255,255,255,.95),0 -1px 1px rgba(0,0,0,.08),0 4px 9px rgba(0,77,64,.2)}
-.hdr-sub{position:relative;color:var(--muted);font-size:12.5px;margin-top:8px;letter-spacing:.04em;text-shadow:0 1px 1px rgba(255,255,255,.7)}
+:root{--teal:#0D9488;--muted:#5d7283;--ink:#134E4A}
+body{background:linear-gradient(180deg,#ECFDF5 0%,#FFFFFF 50%,#ECFDF5 100%);min-height:100vh;color:var(--ink);-webkit-font-smoothing:antialiased}
+.hdr{background:transparent;padding:38px 18px 12px;text-align:center;position:relative}
+.hdr-tag{font-size:14px;font-weight:400;letter-spacing:.22em;color:#0D9488;margin-bottom:16px;text-transform:uppercase}
+.hdr-text{font-size:42px;font-weight:800;line-height:1.12;letter-spacing:.01em;background:linear-gradient(180deg,#0A5F5C 0%,#0D9488 45%,#22C55E 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hdr-sub{font-size:16px;color:#5d7283;margin-top:16px;font-weight:400;letter-spacing:.01em}
 .wrap{max-width:1200px;margin:22px auto;padding:0 16px 52px}
 .card{background:#fff;border:1px solid #e1e8ee;border-top:4px solid #009688;border-radius:16px;padding:22px;box-shadow:0 10px 28px -14px rgba(0,77,64,.18);margin-bottom:20px}
 .card-title{font-size:17px;font-weight:800;color:var(--teal);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #eef1f4;text-shadow:0 1px 1px rgba(255,255,255,.7),0 1px 2px rgba(0,77,64,.12)}
@@ -25,11 +26,11 @@ body{background:radial-gradient(1100px 500px at 50% -12%, rgba(0,150,136,.14), t
 .homecard:hover{transform:translateY(-6px);box-shadow:0 26px 44px -14px rgba(0,77,64,.55)}
 .homecard:after{content:"";position:absolute;top:-50px;right:-50px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.12)}
 .homecard:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.18),transparent 55%);pointer-events:none}
-.hc-a{background:linear-gradient(135deg,#26a69a 0%,#00897b 40%,#009688 100%)}
-.hc-b{background:linear-gradient(135deg,#00897b 0%,#00796b 45%,#00695c 100%)}
-.hc-c{background:linear-gradient(135deg,#00796b 0%,#00695c 45%,#004d40 100%)}
-.hc-d{background:linear-gradient(135deg,#4db6ac 0%,#009688 45%,#00352f 100%)}
-.hc-e{background:linear-gradient(135deg,#80cbc4 0%,#26a69a 45%,#00695c 100%)}
+.hc-a{background:linear-gradient(135deg,#0D9488 0%,#0A5F5C 100%)}
+.hc-b{background:linear-gradient(135deg,#0D9488 0%,#0A5F5C 100%)}
+.hc-c{background:linear-gradient(135deg,#0F766E 0%,#115E59 100%)}
+.hc-d{background:linear-gradient(135deg,#0D9488 0%,#0A5F5C 100%)}
+.hc-e{background:linear-gradient(135deg,#22C55E 0%,#15803D 100%)}
 .hc-icon{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.2);border-radius:10px;font-size:16px;margin-bottom:6px;position:relative;backdrop-filter:blur(2px)}
 .hc-title{font-size:14px;font-weight:800;margin-bottom:3px;position:relative;letter-spacing:.01em;text-shadow:0 1px 2px rgba(0,0,0,.35),0 2px 5px rgba(0,0,0,.2)}
 .hc-sub{font-size:10.5px;color:rgba(255,255,255,.85);position:relative;line-height:1.35}
@@ -44,6 +45,8 @@ body{background:radial-gradient(1100px 500px at 50% -12%, rgba(0,150,136,.14), t
 .prod{width:74px;background:transparent;transition:all .2s;filter:drop-shadow(0 8px 12px rgba(13,40,58,.18))}
 .prod:hover{transform:translateY(-5px);filter:drop-shadow(0 14px 20px rgba(13,40,58,.26))}
 .prod img{width:100%;height:56px;object-fit:contain;display:block;background:transparent}
+.prod-cats{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:28px;padding:0 16px}
+.prod-cats span{background:#fff;border:1px solid #d5e5e0;color:#134E4A;padding:8px 16px;border-radius:999px;font-size:13px;font-weight:600;box-shadow:0 4px 10px -6px rgba(10,95,92,.2)}
 .quote{margin:34px 0 0;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.9;font-style:italic;padding:0 16px}
 .quote span{display:block}
 .quote span+span{margin-top:2px}
@@ -150,8 +153,9 @@ function checkGate(){
 })();
 </script>
 <div class="hdr">
-<div class="hdr-text">LED Lighting &amp; Electrical Accessories Manufacturing Project Plan</div>
-<div class="hdr-sub">A strong business begins with a clear vision, a proper plan and a confident first step</div>
+<div class="hdr-tag">INNOVATION &bull; QUALITY &bull; A BRIGHTER FUTURE</div>
+<div class="hdr-text">LED Lighting &amp; Electrical Accessories<br>Manufacturing Project Plan</div>
+<div class="hdr-sub">A strong business begins with a clear vision, a proper plan and a confident first step.</div>
 </div>
 <div class="wrap">
 
@@ -171,7 +175,7 @@ function checkGate(){
 <div class="hc-go">Open &rarr;</div>
 </div>
 <div class="homecard hc-a" id="goLand">
-<div class="hc-icon">&#127760;</div>
+<div class="hc-icon">&#127960;</div>
 <div class="hc-title">Floor Space Planning</div>
 <div class="hc-sub" id="homeLandSub">Project-wise area &amp; space plan</div>
 <div class="hc-go">Open &rarr;</div>
@@ -205,6 +209,9 @@ function checkGate(){
 <div class="prod"><img src="products/down-panel.png" alt="Down Panel"></div>
 <div class="prod"><img src="products/flood-light.png" alt="Flood Light"></div>
 </div>
+</div>
+<div class="prod-cats">
+<span>Switch &amp; Socket</span><span>LED Bulbs &amp; Lights</span><span>Distribution Board</span><span>Small Electrical Accessories</span><span>Home &amp; Kitchen Appliances</span><span>Lighting Fixtures</span><span>Other Electrical Items</span>
 </div>
 </div>
 </div>
