@@ -371,7 +371,7 @@ function checkGate(){
 <div class="card-title">Market Size</div>
 <div class="tbl-wrap">
 <table>
-<thead><tr><th>Category</th><th>Unit</th><th>Monthly Sales (BDT)</th><th>% of Share</th></tr></thead>
+<thead><tr><th style="text-align:center">Category</th><th style="text-align:center">Unit</th><th style="text-align:center">Monthly Sales (BDT)</th><th style="text-align:center">% of Share</th></tr></thead>
 <tbody id="mkSizeBody"></tbody>
 </table>
 </div>
@@ -380,7 +380,7 @@ function checkGate(){
 <div class="card-title">Competitors Share — LED Lighting</div>
 <div class="tbl-wrap">
 <table>
-<thead><tr><th>Company</th><th>Unit</th><th>PEX</th><th>% of Share</th></tr></thead>
+<thead><tr><th style="text-align:center">Company</th><th style="text-align:center">Unit</th><th style="text-align:center">PEX</th><th style="text-align:center">% of Share</th></tr></thead>
 <tbody id="mkLedBody"></tbody>
 </table>
 </div>
@@ -389,7 +389,7 @@ function checkGate(){
 <div class="card-title">Competitors Share — Switch &amp; Accessories</div>
 <div class="tbl-wrap">
 <table>
-<thead><tr><th>Company</th><th>Unit</th><th>PEX</th><th>% of Share</th></tr></thead>
+<thead><tr><th style="text-align:center">Company</th><th style="text-align:center">Unit</th><th style="text-align:center">PEX</th><th style="text-align:center">% of Share</th></tr></thead>
 <tbody id="mkSwBody"></tbody>
 </table>
 </div>
@@ -815,10 +815,10 @@ function renderMarket(){
     list.forEach(function(x){
       var tr=document.createElement('tr');
       if(x.isTotal) tr.className='total';
-      tr.innerHTML='<td>'+esc(x.name)+'</td>'+
-        '<td>'+esc(x.unit)+'</td>'+
-        '<td class="num">'+esc(x.val)+'</td>'+
-        '<td class="num">'+esc(x.share)+'</td>';
+      tr.innerHTML='<td style="text-align:center">'+esc(x.name)+'</td>'+
+        '<td style="text-align:center">'+esc(x.unit)+'</td>'+
+        '<td class="num" style="text-align:center">'+esc(x.val)+'</td>'+
+        '<td class="num" style="text-align:center">'+esc(x.share)+'</td>';
       tb.appendChild(tr);
     });
     if(!list.length){ tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:#8aa0ae;padding:22px">No data</td></tr>'; }
