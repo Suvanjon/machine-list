@@ -110,6 +110,7 @@ tr.alt td{background:#fbfcfd;font-size:12px;color:var(--muted)}
 tr.alt td.sl{color:#9aa9b8}
 td.num{text-align:right;white-space:nowrap}
 #viewMarket th,#viewMarket td{text-align:center !important}
+#viewCapacity th,#viewCapacity td{text-align:center !important}
 td.qty{text-align:center;font-weight:700;color:var(--teal)}
 .sec-badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;color:#fff;background:linear-gradient(135deg,#26a69a,#009688);white-space:nowrap;box-shadow:0 2px 6px -2px rgba(0,121,107,.5)}
 .mail{color:#00796b;text-decoration:none;word-break:break-all}
@@ -355,7 +356,7 @@ function checkGate(){
 <div class="sc-name">Market Assessment</div>
 <div class="sc-line">Market size, competitors share &amp; demand</div>
 </div>
-<div class="seccard" data-sec="capacity">
+<div class="seccard" data-sec="capacity" onclick="show('capacity')">
 <div class="sc-name">Production Capacity</div>
 <div class="sc-line">Production capacity plan</div>
 </div>
@@ -397,6 +398,11 @@ function checkGate(){
 </div>
 </div>
 
+<div id="viewCapacity" style="display:none">
+<button class="back-btn" id="backCapacity">&#8592; Back</button>
+<div id="capCards"></div>
+</div>
+
 </div>
 
 <script src="data.js"></script>
@@ -425,12 +431,13 @@ function secColor(s){ return '#006066'; }
 
 var sortCol='section', sortAsc=true, secVal='', searchVal='';
 var SHEET_ID='1BeciLxtwDh-PkkoxpYHwBc87ATa3nYQPKdAXB9maXvY';
-var GID_MACHINE='86905509', GID_LAND='746325702', GID_POWER='678045459', GID_PC='547289225', GID_MARKET='748532221';
+var GID_MACHINE='86905509', GID_LAND='746325702', GID_POWER='678045459', GID_PC='547289225', GID_MARKET='748532221', GID_PCAP='977891488';
 var CSV_MACHINE='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_MACHINE;
 var CSV_LAND='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_LAND;
 var CSV_POWER='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_POWER;
 var CSV_PC='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_PC;
 var CSV_MARKET='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_MARKET;
+var CSV_PCAP='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_PCAP;
 var SHEET_URL='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/edit';
 var ENTRY_URL='https://script.google.com/macros/s/AKfycbwK1ZX8L6olG1ZFewDxoRmIITGsykGR_ePQSzlNjirT_E44V7_-Jh2XNhSQneY9u0hrMQ/exec';
 var M = [];
@@ -438,6 +445,7 @@ var L = [];
 var P = [];
 var PC = [];
 var MK = { marketSize:[], led:[], sw:[] };
+var PCAP = [];
 var SECS = [];
 function rebuildSections(){
   SECS=[];
@@ -523,6 +531,20 @@ function buildMarketData(rows){
     else if(section==='sw') mk.sw.push(item);
   }
   return mk;
+}
+function buildProdCapacityData(rows){
+  var years=[];
+  var cur=null;
+  for(var i=0;i<rows.length;i++){
+    var r=rows[i];
+    var c0=str(r[0]), c1=str(r[1]), c2=str(r[2]), c3=str(r[3]), c4=str(r[4]), c5=str(r[5]);
+    if(c0==='YTD' && c1==='Class Name') continue;
+    if(c0==='' && c1==='' && c2==='' && c3==='' && c4==='' && c5==='') continue;
+    if(c0!==''){ cur={year:c0, rows:[]}; years.push(cur); }
+    if(!cur) continue;
+    cur.rows.push({cls:c1, cat:c2, unit:c3, f1:c4, f2:c5, isTotal:c1.indexOf('Total')!==-1});
+  }
+  return years;
 }
 
 var SEC_LABEL={'Plastic':'Plastic Manufacturing','Work Shop':'Tool Room & Workshop','Switch':'Switch & Accessories','LED':'LED Lighting','LAB':'Testing Laboratory'};
@@ -649,6 +671,7 @@ function syncHash(){
   else if(currentView==='putil') h='putil';
   else if(currentView==='prodcap') h='prodcap';
   else if(currentView==='market') h='market';
+  else if(currentView==='capacity') h='capacity';
   try{ history.replaceState(null,'', h?('#'+h):location.pathname+location.search); }catch(e){}
 }
 function machineRows(){
@@ -829,6 +852,32 @@ function renderMarket(){
   fill('mkSwBody', MK.sw);
 }
 
+function renderProdCapacity(){
+  var wrap=document.getElementById('capCards');
+  wrap.innerHTML='';
+  if(!PCAP.length){
+    wrap.innerHTML='<div class="card"><div style="text-align:center;color:#8aa0ae;padding:22px">No data</div></div>';
+    return;
+  }
+  PCAP.forEach(function(y){
+    var card=document.createElement('div');
+    card.className='card';
+    card.innerHTML='<div class="card-title">'+esc(y.year)+'</div>'+
+      '<div class="tbl-wrap"><table>'+
+      '<thead><tr><th style="text-align:center">Class Name</th><th style="text-align:center">No. Of Category</th><th style="text-align:center">Unit</th><th style="text-align:center">Forecast (1st half)</th><th style="text-align:center">Forecast (2nd half)</th></tr></thead>'+
+      '<tbody>'+(y.rows.map(function(x){
+        return '<tr'+(x.isTotal?' class="total"':'')+'>'+
+          '<td style="text-align:center">'+esc(x.cls)+'</td>'+
+          '<td style="text-align:center">'+esc(x.cat)+'</td>'+
+          '<td style="text-align:center">'+esc(x.unit)+'</td>'+
+          '<td class="num" style="text-align:center">'+esc(x.f1)+'</td>'+
+          '<td class="num" style="text-align:center">'+esc(x.f2)+'</td>'+
+        '</tr>';
+      }).join(''))+'</tbody></table></div>';
+    wrap.appendChild(card);
+  });
+}
+
 function show(view){
   currentView=view;
   document.getElementById('viewHome').style.display = view==='home'?'block':'none';
@@ -838,6 +887,7 @@ function show(view){
   document.getElementById('viewPUtil').style.display = view==='putil'?'block':'none';
   document.getElementById('viewProdCap').style.display = view==='prodcap'?'block':'none';
   document.getElementById('viewMarket').style.display = view==='market'?'block':'none';
+  document.getElementById('viewCapacity').style.display = view==='capacity'?'block':'none';
   var isHome = view==='home';
   document.getElementById('hdrSub').style.display = isHome?'block':'none';
   window.scrollTo(0,0);
@@ -851,6 +901,7 @@ function restoreView(){
   else if(h==='putil'){ show('putil'); renderPowerUtil(); }
   else if(h==='prodcap'){ show('prodcap'); }
   else if(h==='market'){ show('market'); }
+  else if(h==='capacity'){ show('capacity'); }
   else if(h.indexOf('machine/')===0){
     var parts=h.slice(8).split('/');
     var s=parts[0], g=parts[1]||'';
@@ -909,6 +960,7 @@ document.getElementById('backPower').addEventListener('click',function(){ show('
 document.getElementById('backPUtil').addEventListener('click',function(){ show('home'); });
 document.getElementById('backProdCap').addEventListener('click',function(){ show('home'); });
 document.getElementById('backMarket').addEventListener('click',function(){ show('prodcap'); });
+document.getElementById('backCapacity').addEventListener('click',function(){ show('prodcap'); });
 
 var lastSig='';
 function refreshFilters(){
@@ -927,27 +979,28 @@ function loadData(first){
     fetch(CSV_LAND+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildLandData(parseCSV(x)); }),
     fetch(CSV_POWER+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildPowerData(parseCSV(x)); }),
     fetch(CSV_PC+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildPowerConsumptionData(parseCSV(x)); }),
-    fetch(CSV_MARKET+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildMarketData(parseCSV(x)); })
+    fetch(CSV_MARKET+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildMarketData(parseCSV(x)); }),
+    fetch(CSV_PCAP+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildProdCapacityData(parseCSV(x)); })
   ]).then(function(res){
     if(!res[0] || !res[0].length) throw new Error('empty');
-    var sig=JSON.stringify(res[0])+'|'+JSON.stringify(res[1]||[])+'|'+JSON.stringify(res[2]||[])+'|'+JSON.stringify(res[3]||[])+'|'+JSON.stringify(res[4]||[]);
+    var sig=JSON.stringify(res[0])+'|'+JSON.stringify(res[1]||[])+'|'+JSON.stringify(res[2]||[])+'|'+JSON.stringify(res[3]||[])+'|'+JSON.stringify(res[4]||[])+'|'+JSON.stringify(res[5]||[]);
     if(!first && sig===lastSig) return;
     lastSig=sig;
-    M=res[0]; L=res[1]||[]; P=res[2]||[]; PC=res[3]||[]; MK=res[4]||{marketSize:[],led:[],sw:[]};
+    M=res[0]; L=res[1]||[]; P=res[2]||[]; PC=res[3]||[]; MK=res[4]||{marketSize:[],led:[],sw:[]}; PCAP=res[5]||[];
     rebuildSections(); refreshFilters();
-    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand(); renderPower(); renderPowerUtil(); renderMarket();
+    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand(); renderPower(); renderPowerUtil(); renderMarket(); renderProdCapacity();
     restoreView();
   }).catch(function(){
     if(M.length) return;
-    M=window.MACHINE_DATA||[]; L=window.LAND_DATA||[]; P=window.POWER_DATA||[]; PC=window.POWER_CONSUMPTION_DATA||[]; MK=window.MARKET_DATA||{marketSize:[],led:[],sw:[]};
+    M=window.MACHINE_DATA||[]; L=window.LAND_DATA||[]; P=window.POWER_DATA||[]; PC=window.POWER_CONSUMPTION_DATA||[]; MK=window.MARKET_DATA||{marketSize:[],led:[],sw:[]}; PCAP=window.PROD_CAPACITY_DATA||[];
     rebuildSections(); refreshFilters();
-    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand(); renderPower(); renderPowerUtil(); renderMarket();
+    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand(); renderPower(); renderPowerUtil(); renderMarket(); renderProdCapacity();
     restoreView();
   });
 }
 function primeView(){
   var h=location.hash.replace(/^#/,'');
-  var top = (h==='machine'||h.indexOf('machine/')===0) ? 'machine' : (h==='land' ? 'land' : (h==='power' ? 'power' : (h==='putil' ? 'putil' : (h==='prodcap' ? 'prodcap' : (h==='market' ? 'market' : 'home')))));
+  var top = (h==='machine'||h.indexOf('machine/')===0) ? 'machine' : (h==='land' ? 'land' : (h==='power' ? 'power' : (h==='putil' ? 'putil' : (h==='prodcap' ? 'prodcap' : (h==='market' ? 'market' : (h==='capacity' ? 'capacity' : 'home'))))));
   document.getElementById('viewHome').style.display = top==='home'?'block':'none';
   document.getElementById('viewMachine').style.display = top==='machine'?'block':'none';
   document.getElementById('viewLand').style.display = top==='land'?'block':'none';
@@ -955,6 +1008,7 @@ function primeView(){
   document.getElementById('viewPUtil').style.display = top==='putil'?'block':'none';
   document.getElementById('viewProdCap').style.display = top==='prodcap'?'block':'none';
   document.getElementById('viewMarket').style.display = top==='market'?'block':'none';
+  document.getElementById('viewCapacity').style.display = top==='capacity'?'block':'none';
   document.getElementById('hdrSub').style.display = top==='home'?'block':'none';
   if(top==='machine'){
     document.getElementById('mSections').style.display='block';
