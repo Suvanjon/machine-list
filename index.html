@@ -1177,7 +1177,20 @@ function saveSupplier(){
     if(!sel){ var sm2=document.getElementById('sMsg'); sm2.className='entry-msg err'; sm2.textContent='Enter a machine name'; return; }
     payload.machine=sel;
   }
-  postEntry(payload, 'sMsg', function(){ setTimeout(function(){ closeModal('supplierModal'); }, 800); setTimeout(function(){ loadData(true); }, 2000); });
+  postEntry(payload, 'sMsg', function(){
+    if(mode==='add'){
+      var found=null;
+      M.forEach(function(m){ if(m.machine===payload.machine && m.section===secVal) found=m; });
+      if(found){
+        found.alts.push({brand:payload.brand,supplier:payload.supplier,company:payload.company,mail:payload.mail});
+        renderMachines();
+      }
+      setTimeout(function(){ loadData(true); }, 10000);
+    } else {
+      setTimeout(function(){ loadData(true); }, 2000);
+    }
+    setTimeout(function(){ closeModal('supplierModal'); }, 800);
+  });
 }
 function removeMachine(){
   var row=document.getElementById('sSel').value;
