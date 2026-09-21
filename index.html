@@ -1199,23 +1199,24 @@ function removeMachine(){
   postEntry({action:'removeMachine', row:row}, 'sMsg', function(){ setTimeout(function(){ closeModal('supplierModal'); }, 800); setTimeout(function(){ loadData(true); }, 2000); });
 }
 function saveVisitor(){
-  var name=document.getElementById('vName').value.trim();
   var email=document.getElementById('vEmail').value.trim();
-  var company=document.getElementById('vCompany').value.trim();
   if(!email){ var vm=document.getElementById('vMsg'); vm.className='entry-msg err'; vm.textContent='Please enter your email'; return; }
-  postEntry({action:'logVisitor', name:name, email:email, company:company}, 'vMsg', function(){
-    try{ localStorage.setItem('visitorLogged','1'); }catch(e){}
-    setTimeout(function(){ closeModal('visitorModal'); }, 600);
+  postEntry({action:'logVisitor', email:email}, 'vMsg', function(){
+    try{ sessionStorage.setItem('visitorEmail', email); }catch(e){}
+    closeModal('visitorModal');
   });
 }
-function skipVisitor(){
-  try{ localStorage.setItem('visitorLogged','1'); }catch(e){}
-  closeModal('visitorModal');
-}
 (function(){
-  try{ if(localStorage.getItem('visitorLogged')==='1') return; }catch(e){}
-  setTimeout(function(){ openModal('visitorModal'); }, 1200);
+  try{ if(sessionStorage.getItem('visitorEmail')) return; }catch(e){}
+  openModal('visitorModal');
 })();
+window.addEventListener('beforeunload', function(){
+  var email='';
+  try{ email=sessionStorage.getItem('visitorEmail')||''; }catch(e){}
+  if(email){
+    try{ navigator.sendBeacon(ENTRY_URL, JSON.stringify({action:'logOut', email:email})); }catch(e){}
+  }
+});
 </script>
 <div class="modal" id="machineModal" style="display:none">
 <div class="modal-box">
@@ -1250,15 +1251,10 @@ function skipVisitor(){
 </div>
 <div class="modal" id="visitorModal" style="display:none">
 <div class="modal-box">
-<div class="modal-head"><div>Welcome — Please Sign In</div><button onclick="skipVisitor()">&times;</button></div>
-<div class="field"><label>Name</label><input type="text" id="vName" placeholder="Your name"></div>
-<div class="field"><label>Email (Gmail)</label><input type="email" id="vEmail" placeholder="you@gmail.com"></div>
-<div class="field"><label>Company / Organization</label><input type="text" id="vCompany" placeholder="Optional"></div>
+<div class="modal-head"><div>Sign In with Gmail to Continue</div></div>
+<div class="field"><label>Email (Gmail)</label><input type="email" id="vEmail" placeholder="you@gmail.com" onkeydown="if(event.key==='Enter')saveVisitor()"></div>
 <div class="entry-msg" id="vMsg"></div>
-<div style="display:flex;gap:10px;align-items:center">
-<button class="btn" onclick="saveVisitor()">Submit</button>
-<button class="btn" style="background:linear-gradient(135deg,#90a4ae,#607d8b)" onclick="skipVisitor()">Skip</button>
-</div>
+<button class="btn" onclick="saveVisitor()">Continue</button>
 </div>
 </div>
 </body>
