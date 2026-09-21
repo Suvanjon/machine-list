@@ -1201,10 +1201,9 @@ function removeMachine(){
 function saveVisitor(){
   var email=document.getElementById('vEmail').value.trim();
   if(!email){ var vm=document.getElementById('vMsg'); vm.className='entry-msg err'; vm.textContent='Please enter your email'; return; }
-  postEntry({action:'logVisitor', email:email}, 'vMsg', function(){
-    try{ sessionStorage.setItem('visitorEmail', email); }catch(e){}
-    closeModal('visitorModal');
-  });
+  try{ sessionStorage.setItem('visitorEmail', email); }catch(e){}
+  closeModal('visitorModal');
+  try{ fetch(ENTRY_URL, { method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify({action:'logVisitor', email:email}) }).catch(function(){}); }catch(e){}
 }
 (function(){
   try{ if(sessionStorage.getItem('visitorEmail')) return; }catch(e){}
