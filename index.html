@@ -835,8 +835,13 @@ function renderPowerUtil(){
 
 function renderMarket(){
   function fill(tbId, list){
+    var sorted=list.slice().sort(function(a,b){
+      if(a.isTotal && !b.isTotal) return 1;
+      if(!a.isTotal && b.isTotal) return -1;
+      return (parseFloat(b.val)||0)-(parseFloat(a.val)||0);
+    });
     var tb=document.getElementById(tbId); tb.innerHTML='';
-    list.forEach(function(x){
+    sorted.forEach(function(x){
       var tr=document.createElement('tr');
       if(x.isTotal) tr.className='total';
       tr.innerHTML='<td style="text-align:center">'+esc(x.name)+'</td>'+
@@ -845,7 +850,7 @@ function renderMarket(){
         '<td class="num" style="text-align:center">'+esc(x.share)+'</td>';
       tb.appendChild(tr);
     });
-    if(!list.length){ tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:#8aa0ae;padding:22px">No data</td></tr>'; }
+    if(!sorted.length){ tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:#8aa0ae;padding:22px">No data</td></tr>'; }
   }
   fill('mkSizeBody', MK.marketSize);
   fill('mkLedBody', MK.led);
