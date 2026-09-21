@@ -69,7 +69,7 @@ body{background:linear-gradient(180deg,#ECFDF5 0%,#FFFFFF 50%,#ECFDF5 100%);min-
 .stat:after{content:"";position:absolute;top:-28px;right:-28px;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,.14)}
 .stat:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.16),transparent 55%);pointer-events:none}
 .stat .num{font-size:27px;font-weight:800;display:block;margin-bottom:3px;position:relative;text-shadow:0 2px 4px rgba(0,0,0,.35),0 1px 2px rgba(0,0,0,.2)}
-.stat .sub{display:block;font-size:11.5px;font-weight:700;position:relative;opacity:.95;margin-bottom:2px}
+.stat .sub{display:block;font-size:27px;font-weight:700;position:relative;opacity:.95;margin-bottom:2px}
 .stat.a{background:linear-gradient(135deg,#26a69a,#009688)}
 .stat.b{background:linear-gradient(135deg,#00897b,#009688)}
 .stat.c{background:linear-gradient(135deg,#00796b,#004d40)}
@@ -714,8 +714,8 @@ function renderMachines(){
       '<td><span class="sec-badge" style="background:'+secColor(m.section)+'">'+esc(secLabel(m.section))+'</span></td>'+
       '<td>'+esc(m.machine)+'</td>'+
       '<td class="qty">'+fmt(m.qty)+'</td>'+
-      '<td class="num">'+money(m.rate)+(m.rate!=null?'<br><span style="color:#8aa0ae;font-size:11px">'+taka(m.rate)+'</span>':'')+'</td>'+
-      '<td class="num">'+money(m.total)+(m.total!=null?'<br><span style="color:#8aa0ae;font-size:11px">'+taka(m.total)+'</span>':'')+'</td>';
+      '<td class="num">'+money(m.rate)+(m.rate!=null?'<br><span style="color:#8aa0ae">'+taka(m.rate)+'</span>':'')+'</td>'+
+      '<td class="num">'+money(m.total)+(m.total!=null?'<br><span style="color:#8aa0ae">'+taka(m.total)+'</span>':'')+'</td>';
     tb.appendChild(tr);
     if(m.supplier || m.company || m.mail){
       var sr=document.createElement('tr');
