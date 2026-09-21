@@ -111,6 +111,7 @@ tr.alt td.sl{color:#9aa9b8}
 td.num{text-align:right;white-space:nowrap}
 #viewMarket th,#viewMarket td{text-align:center !important}
 #viewCapacity th,#viewCapacity td{text-align:center !important}
+#viewSupplier th,#viewSupplier td{text-align:center !important}
 td.qty{text-align:center;font-weight:700;color:var(--teal)}
 .sec-badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;color:#fff;background:linear-gradient(135deg,#26a69a,#009688);white-space:nowrap;box-shadow:0 2px 6px -2px rgba(0,121,107,.5)}
 .mail{color:#00796b;text-decoration:none;word-break:break-all}
@@ -360,7 +361,7 @@ function checkGate(){
 <div class="sc-name">Production Capacity</div>
 <div class="sc-line">Production capacity plan</div>
 </div>
-<div class="seccard" data-sec="supplier">
+<div class="seccard" data-sec="supplier" onclick="show('supplier')">
 <div class="sc-name">Raw Material Supplier</div>
 <div class="sc-line">Supplier list &amp; details</div>
 </div>
@@ -403,6 +404,11 @@ function checkGate(){
 <div id="capCards"></div>
 </div>
 
+<div id="viewSupplier" style="display:none">
+<button class="back-btn" id="backSupplier">&#8592; Back</button>
+<div id="supplierCards"></div>
+</div>
+
 </div>
 
 <script src="data.js"></script>
@@ -431,13 +437,14 @@ function secColor(s){ return '#006066'; }
 
 var sortCol='section', sortAsc=true, secVal='', searchVal='';
 var SHEET_ID='1BeciLxtwDh-PkkoxpYHwBc87ATa3nYQPKdAXB9maXvY';
-var GID_MACHINE='86905509', GID_LAND='746325702', GID_POWER='678045459', GID_PC='547289225', GID_MARKET='748532221', GID_PCAP='977891488';
+var GID_MACHINE='86905509', GID_LAND='746325702', GID_POWER='678045459', GID_PC='547289225', GID_MARKET='748532221', GID_PCAP='977891488', GID_RAW='686302541';
 var CSV_MACHINE='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_MACHINE;
 var CSV_LAND='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_LAND;
 var CSV_POWER='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_POWER;
 var CSV_PC='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_PC;
 var CSV_MARKET='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_MARKET;
 var CSV_PCAP='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_PCAP;
+var CSV_RAW='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_RAW;
 var SHEET_URL='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/edit';
 var ENTRY_URL='https://script.google.com/macros/s/AKfycbwK1ZX8L6olG1ZFewDxoRmIITGsykGR_ePQSzlNjirT_E44V7_-Jh2XNhSQneY9u0hrMQ/exec';
 var M = [];
@@ -446,6 +453,7 @@ var P = [];
 var PC = [];
 var MK = { marketSize:[], led:[], sw:[] };
 var PCAP = [];
+var RAW = [];
 var SECS = [];
 function rebuildSections(){
   SECS=[];
@@ -545,6 +553,20 @@ function buildProdCapacityData(rows){
     cur.rows.push({cls:c1, cat:c2, unit:c3, f1:c4, f2:c5, isTotal:c1.indexOf('Total')!==-1});
   }
   return years;
+}
+function buildRawSupplierData(rows){
+  var sections=[];
+  var cur=null;
+  for(var i=0;i<rows.length;i++){
+    var r=rows[i];
+    var c0=str(r[0]), c1=str(r[1]), c2=str(r[2]), c3=str(r[3]), c4=str(r[4]);
+    if(c0==='SI' && c1==='Supplier Name') continue;
+    if(c0==='' && c1==='' && c2==='' && c3==='' && c4==='') continue;
+    if(c1==='' && c2==='' && c3==='' && c4==='' && c0!==''){ cur={name:c0, rows:[]}; sections.push(cur); continue; }
+    if(!cur) continue;
+    cur.rows.push({si:c0, name:c1, product:c2, contact:c3, mail:c4});
+  }
+  return sections;
 }
 
 var SEC_LABEL={'Plastic':'Plastic Manufacturing','Work Shop':'Tool Room & Workshop','Switch':'Switch & Accessories','LED':'LED Lighting','LAB':'Testing Laboratory'};
@@ -672,6 +694,7 @@ function syncHash(){
   else if(currentView==='prodcap') h='prodcap';
   else if(currentView==='market') h='market';
   else if(currentView==='capacity') h='capacity';
+  else if(currentView==='supplier') h='supplier';
   try{ history.replaceState(null,'', h?('#'+h):location.pathname+location.search); }catch(e){}
 }
 function machineRows(){
@@ -883,6 +906,32 @@ function renderProdCapacity(){
   });
 }
 
+function renderRawSupplier(){
+  var wrap=document.getElementById('supplierCards');
+  wrap.innerHTML='';
+  if(!RAW.length){
+    wrap.innerHTML='<div class="card"><div style="text-align:center;color:#8aa0ae;padding:22px">No data</div></div>';
+    return;
+  }
+  RAW.forEach(function(sec){
+    var card=document.createElement('div');
+    card.className='card';
+    card.innerHTML='<div class="card-title">'+esc(sec.name)+'</div>'+
+      '<div class="tbl-wrap"><table>'+
+      '<thead><tr><th style="text-align:center">SI</th><th style="text-align:center">Supplier Name</th><th style="text-align:center">Product</th><th style="text-align:center">Contact Person</th><th style="text-align:center">Mail</th></tr></thead>'+
+      '<tbody>'+(sec.rows.map(function(x){
+        return '<tr>'+
+          '<td class="sl" style="text-align:center">'+esc(x.si)+'</td>'+
+          '<td style="text-align:center">'+esc(x.name)+'</td>'+
+          '<td style="text-align:center">'+esc(x.product)+'</td>'+
+          '<td style="text-align:center">'+esc(x.contact)+'</td>'+
+          '<td style="text-align:center">'+mailLink(x.mail)+'</td>'+
+        '</tr>';
+      }).join(''))+'</tbody></table></div>';
+    wrap.appendChild(card);
+  });
+}
+
 function show(view){
   currentView=view;
   document.getElementById('viewHome').style.display = view==='home'?'block':'none';
@@ -893,6 +942,7 @@ function show(view){
   document.getElementById('viewProdCap').style.display = view==='prodcap'?'block':'none';
   document.getElementById('viewMarket').style.display = view==='market'?'block':'none';
   document.getElementById('viewCapacity').style.display = view==='capacity'?'block':'none';
+  document.getElementById('viewSupplier').style.display = view==='supplier'?'block':'none';
   var isHome = view==='home';
   document.getElementById('hdrSub').style.display = isHome?'block':'none';
   window.scrollTo(0,0);
@@ -907,6 +957,7 @@ function restoreView(){
   else if(h==='prodcap'){ show('prodcap'); }
   else if(h==='market'){ show('market'); }
   else if(h==='capacity'){ show('capacity'); }
+  else if(h==='supplier'){ show('supplier'); }
   else if(h.indexOf('machine/')===0){
     var parts=h.slice(8).split('/');
     var s=parts[0], g=parts[1]||'';
@@ -966,6 +1017,7 @@ document.getElementById('backPUtil').addEventListener('click',function(){ show('
 document.getElementById('backProdCap').addEventListener('click',function(){ show('home'); });
 document.getElementById('backMarket').addEventListener('click',function(){ show('prodcap'); });
 document.getElementById('backCapacity').addEventListener('click',function(){ show('prodcap'); });
+document.getElementById('backSupplier').addEventListener('click',function(){ show('prodcap'); });
 
 var lastSig='';
 function refreshFilters(){
@@ -985,27 +1037,28 @@ function loadData(first){
     fetch(CSV_POWER+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildPowerData(parseCSV(x)); }),
     fetch(CSV_PC+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildPowerConsumptionData(parseCSV(x)); }),
     fetch(CSV_MARKET+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildMarketData(parseCSV(x)); }),
-    fetch(CSV_PCAP+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildProdCapacityData(parseCSV(x)); })
+    fetch(CSV_PCAP+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildProdCapacityData(parseCSV(x)); }),
+    fetch(CSV_RAW+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildRawSupplierData(parseCSV(x)); })
   ]).then(function(res){
     if(!res[0] || !res[0].length) throw new Error('empty');
-    var sig=JSON.stringify(res[0])+'|'+JSON.stringify(res[1]||[])+'|'+JSON.stringify(res[2]||[])+'|'+JSON.stringify(res[3]||[])+'|'+JSON.stringify(res[4]||[])+'|'+JSON.stringify(res[5]||[]);
+    var sig=JSON.stringify(res[0])+'|'+JSON.stringify(res[1]||[])+'|'+JSON.stringify(res[2]||[])+'|'+JSON.stringify(res[3]||[])+'|'+JSON.stringify(res[4]||[])+'|'+JSON.stringify(res[5]||[])+'|'+JSON.stringify(res[6]||[]);
     if(!first && sig===lastSig) return;
     lastSig=sig;
-    M=res[0]; L=res[1]||[]; P=res[2]||[]; PC=res[3]||[]; MK=res[4]||{marketSize:[],led:[],sw:[]}; PCAP=res[5]||[];
+    M=res[0]; L=res[1]||[]; P=res[2]||[]; PC=res[3]||[]; MK=res[4]||{marketSize:[],led:[],sw:[]}; PCAP=res[5]||[]; RAW=res[6]||[];
     rebuildSections(); refreshFilters();
-    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand(); renderPower(); renderPowerUtil(); renderMarket(); renderProdCapacity();
+    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand(); renderPower(); renderPowerUtil(); renderMarket(); renderProdCapacity(); renderRawSupplier();
     restoreView();
   }).catch(function(){
     if(M.length) return;
-    M=window.MACHINE_DATA||[]; L=window.LAND_DATA||[]; P=window.POWER_DATA||[]; PC=window.POWER_CONSUMPTION_DATA||[]; MK=window.MARKET_DATA||{marketSize:[],led:[],sw:[]}; PCAP=window.PROD_CAPACITY_DATA||[];
+    M=window.MACHINE_DATA||[]; L=window.LAND_DATA||[]; P=window.POWER_DATA||[]; PC=window.POWER_CONSUMPTION_DATA||[]; MK=window.MARKET_DATA||{marketSize:[],led:[],sw:[]}; PCAP=window.PROD_CAPACITY_DATA||[]; RAW=window.RAW_SUPPLIER_DATA||[];
     rebuildSections(); refreshFilters();
-    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand(); renderPower(); renderPowerUtil(); renderMarket(); renderProdCapacity();
+    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand(); renderPower(); renderPowerUtil(); renderMarket(); renderProdCapacity(); renderRawSupplier();
     restoreView();
   });
 }
 function primeView(){
   var h=location.hash.replace(/^#/,'');
-  var top = (h==='machine'||h.indexOf('machine/')===0) ? 'machine' : (h==='land' ? 'land' : (h==='power' ? 'power' : (h==='putil' ? 'putil' : (h==='prodcap' ? 'prodcap' : (h==='market' ? 'market' : (h==='capacity' ? 'capacity' : 'home'))))));
+  var top = (h==='machine'||h.indexOf('machine/')===0) ? 'machine' : (h==='land' ? 'land' : (h==='power' ? 'power' : (h==='putil' ? 'putil' : (h==='prodcap' ? 'prodcap' : (h==='market' ? 'market' : (h==='capacity' ? 'capacity' : (h==='supplier' ? 'supplier' : 'home')))))));
   document.getElementById('viewHome').style.display = top==='home'?'block':'none';
   document.getElementById('viewMachine').style.display = top==='machine'?'block':'none';
   document.getElementById('viewLand').style.display = top==='land'?'block':'none';
@@ -1014,6 +1067,7 @@ function primeView(){
   document.getElementById('viewProdCap').style.display = top==='prodcap'?'block':'none';
   document.getElementById('viewMarket').style.display = top==='market'?'block':'none';
   document.getElementById('viewCapacity').style.display = top==='capacity'?'block':'none';
+  document.getElementById('viewSupplier').style.display = top==='supplier'?'block':'none';
   document.getElementById('hdrSub').style.display = top==='home'?'block':'none';
   if(top==='machine'){
     document.getElementById('mSections').style.display='block';
