@@ -371,8 +371,8 @@ function checkGate(){
 <div class="card-title">Market Size</div>
 <div class="tbl-wrap">
 <table>
-<thead><tr><th>Industry</th><th>Market Size</th></tr></thead>
-<tbody><tr><td>LED Lighting &amp; Electrical Accessories</td><td>—</td></tr></tbody>
+<thead><tr><th>Category</th><th>Unit</th><th>Monthly Sales (BDT)</th><th>% of Share</th></tr></thead>
+<tbody id="mkSizeBody"></tbody>
 </table>
 </div>
 </div>
@@ -380,8 +380,8 @@ function checkGate(){
 <div class="card-title">Competitors Share — LED Lighting</div>
 <div class="tbl-wrap">
 <table>
-<thead><tr><th>Company</th><th>Market Share</th></tr></thead>
-<tbody><tr><td colspan="2" style="text-align:center;color:#8aa0ae;padding:22px">Data coming soon.</td></tr></tbody>
+<thead><tr><th>Company</th><th>Unit</th><th>PEX</th><th>% of Share</th></tr></thead>
+<tbody id="mkLedBody"></tbody>
 </table>
 </div>
 </div>
@@ -389,8 +389,8 @@ function checkGate(){
 <div class="card-title">Competitors Share — Switch &amp; Accessories</div>
 <div class="tbl-wrap">
 <table>
-<thead><tr><th>Company</th><th>Market Share</th></tr></thead>
-<tbody><tr><td colspan="2" style="text-align:center;color:#8aa0ae;padding:22px">Data coming soon.</td></tr></tbody>
+<thead><tr><th>Company</th><th>Unit</th><th>PEX</th><th>% of Share</th></tr></thead>
+<tbody id="mkSwBody"></tbody>
 </table>
 </div>
 </div>
@@ -424,17 +424,19 @@ function secColor(s){ return '#006066'; }
 
 var sortCol='section', sortAsc=true, secVal='', searchVal='';
 var SHEET_ID='1BeciLxtwDh-PkkoxpYHwBc87ATa3nYQPKdAXB9maXvY';
-var GID_MACHINE='86905509', GID_LAND='746325702', GID_POWER='678045459', GID_PC='547289225';
+var GID_MACHINE='86905509', GID_LAND='746325702', GID_POWER='678045459', GID_PC='547289225', GID_MARKET='748532221';
 var CSV_MACHINE='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_MACHINE;
 var CSV_LAND='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_LAND;
 var CSV_POWER='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_POWER;
 var CSV_PC='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_PC;
+var CSV_MARKET='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_MARKET;
 var SHEET_URL='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/edit';
 var ENTRY_URL='https://script.google.com/macros/s/AKfycbwK1ZX8L6olG1ZFewDxoRmIITGsykGR_ePQSzlNjirT_E44V7_-Jh2XNhSQneY9u0hrMQ/exec';
 var M = [];
 var L = [];
 var P = [];
 var PC = [];
+var MK = { marketSize:[], led:[], sw:[] };
 var SECS = [];
 function rebuildSections(){
   SECS=[];
@@ -499,6 +501,27 @@ function buildPowerConsumptionData(rows){
     out.push({floor:floor,machine:machine,qty:num(r[2]),actualPower:num(r[3]),totalPower:num(r[4]),isTotal:floor.indexOf('Total')===0});
   }
   return out;
+}
+function buildMarketData(rows){
+  var mk={ marketSize:[], led:[], sw:[] };
+  var section='marketSize';
+  for(var i=0;i<rows.length;i++){
+    var r=rows[i];
+    var c0=str(r[0]), c1=str(r[1]), c2=str(r[2]), c3=str(r[3]);
+    if(c0.indexOf('Competitors share')!==-1){
+      if(c0.indexOf('Switch')!==-1) section='sw';
+      else section='led';
+      continue;
+    }
+    if(c0==='Category' || c0==='Company Name') continue;
+    if(c0==='' && c1==='Unit') continue;
+    if(c0==='' && c1==='') continue;
+    var item={ name:c0, unit:c1, val:c2, share:c3, isTotal:c0==='GRAND TOTAL' };
+    if(section==='marketSize') mk.marketSize.push(item);
+    else if(section==='led') mk.led.push(item);
+    else if(section==='sw') mk.sw.push(item);
+  }
+  return mk;
 }
 
 var SEC_LABEL={'Plastic':'Plastic Manufacturing','Work Shop':'Tool Room & Workshop','Switch':'Switch & Accessories','LED':'LED Lighting','LAB':'Testing Laboratory'};
@@ -786,6 +809,25 @@ function renderPowerUtil(){
   document.getElementById('puNo').style.display=(list.length||tot.length)?'none':'block';
 }
 
+function renderMarket(){
+  function fill(tbId, list){
+    var tb=document.getElementById(tbId); tb.innerHTML='';
+    list.forEach(function(x){
+      var tr=document.createElement('tr');
+      if(x.isTotal) tr.className='total';
+      tr.innerHTML='<td>'+esc(x.name)+'</td>'+
+        '<td>'+esc(x.unit)+'</td>'+
+        '<td class="num">'+esc(x.val)+'</td>'+
+        '<td class="num">'+esc(x.share)+'</td>';
+      tb.appendChild(tr);
+    });
+    if(!list.length){ tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:#8aa0ae;padding:22px">No data</td></tr>'; }
+  }
+  fill('mkSizeBody', MK.marketSize);
+  fill('mkLedBody', MK.led);
+  fill('mkSwBody', MK.sw);
+}
+
 function show(view){
   currentView=view;
   document.getElementById('viewHome').style.display = view==='home'?'block':'none';
@@ -883,21 +925,22 @@ function loadData(first){
     fetch(CSV_MACHINE+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildMachineData(parseCSV(x)); }),
     fetch(CSV_LAND+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildLandData(parseCSV(x)); }),
     fetch(CSV_POWER+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildPowerData(parseCSV(x)); }),
-    fetch(CSV_PC+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildPowerConsumptionData(parseCSV(x)); })
+    fetch(CSV_PC+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildPowerConsumptionData(parseCSV(x)); }),
+    fetch(CSV_MARKET+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildMarketData(parseCSV(x)); })
   ]).then(function(res){
     if(!res[0] || !res[0].length) throw new Error('empty');
-    var sig=JSON.stringify(res[0])+'|'+JSON.stringify(res[1]||[])+'|'+JSON.stringify(res[2]||[])+'|'+JSON.stringify(res[3]||[]);
+    var sig=JSON.stringify(res[0])+'|'+JSON.stringify(res[1]||[])+'|'+JSON.stringify(res[2]||[])+'|'+JSON.stringify(res[3]||[])+'|'+JSON.stringify(res[4]||[]);
     if(!first && sig===lastSig) return;
     lastSig=sig;
-    M=res[0]; L=res[1]||[]; P=res[2]||[]; PC=res[3]||[];
+    M=res[0]; L=res[1]||[]; P=res[2]||[]; PC=res[3]||[]; MK=res[4]||{marketSize:[],led:[],sw:[]};
     rebuildSections(); refreshFilters();
-    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand(); renderPower(); renderPowerUtil();
+    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand(); renderPower(); renderPowerUtil(); renderMarket();
     restoreView();
   }).catch(function(){
     if(M.length) return;
-    M=window.MACHINE_DATA||[]; L=window.LAND_DATA||[]; P=window.POWER_DATA||[]; PC=window.POWER_CONSUMPTION_DATA||[];
+    M=window.MACHINE_DATA||[]; L=window.LAND_DATA||[]; P=window.POWER_DATA||[]; PC=window.POWER_CONSUMPTION_DATA||[]; MK=window.MARKET_DATA||{marketSize:[],led:[],sw:[]};
     rebuildSections(); refreshFilters();
-    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand(); renderPower(); renderPowerUtil();
+    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand(); renderPower(); renderPowerUtil(); renderMarket();
     restoreView();
   });
 }
