@@ -1208,7 +1208,7 @@ function saveVisitor(){
 }
 (function(){
   try{ if(sessionStorage.getItem('visitorEmail')) return; }catch(e){}
-  openModal('visitorModal');
+  setTimeout(function(){ openModal('visitorModal'); }, 200);
 })();
 window.addEventListener('beforeunload', function(){
   var email='';
