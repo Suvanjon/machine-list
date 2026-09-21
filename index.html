@@ -864,7 +864,7 @@ function renderProdCapacity(){
     card.className='card';
     card.innerHTML='<div class="card-title">'+esc(y.year)+'</div>'+
       '<div class="tbl-wrap"><table>'+
-      '<thead><tr><th style="text-align:center">Class Name</th><th style="text-align:center">No. Of Category</th><th style="text-align:center">Unit</th><th style="text-align:center">Forecast (1st half)</th><th style="text-align:center">Forecast (2nd half)</th></tr></thead>'+
+      '<thead><tr><th style="text-align:center">Class Name</th><th style="text-align:center">No. Of Category</th><th style="text-align:center">Unit</th><th style="text-align:center">Capacity for 1st half</th><th style="text-align:center">Capacity for 2nd half</th></tr></thead>'+
       '<tbody>'+(y.rows.map(function(x){
         return '<tr'+(x.isTotal?' class="total"':'')+'>'+
           '<td style="text-align:center">'+esc(x.cls)+'</td>'+
