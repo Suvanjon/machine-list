@@ -350,7 +350,7 @@ function checkGate(){
 <div id="viewProdCap" style="display:none">
 <button class="back-btn" id="backProdCap">&#8592; Back</button>
 <div class="sec-cards" id="prodCapCards">
-<div class="seccard" data-sec="market">
+<div class="seccard" data-sec="market" onclick="show('market')">
 <div class="sc-name">Market Assessment</div>
 <div class="sc-line">Market size, competitors share &amp; demand</div>
 </div>
@@ -361,6 +361,37 @@ function checkGate(){
 <div class="seccard" data-sec="supplier">
 <div class="sc-name">Raw Material Supplier</div>
 <div class="sc-line">Supplier list &amp; details</div>
+</div>
+</div>
+</div>
+
+<div id="viewMarket" style="display:none">
+<button class="back-btn" id="backMarket">&#8592; Back</button>
+<div class="card">
+<div class="card-title">Market Size</div>
+<div class="tbl-wrap">
+<table>
+<thead><tr><th>Industry</th><th>Market Size</th></tr></thead>
+<tbody><tr><td>LED Lighting &amp; Electrical Accessories</td><td>—</td></tr></tbody>
+</table>
+</div>
+</div>
+<div class="card">
+<div class="card-title">Competitors Share — LED Lighting</div>
+<div class="tbl-wrap">
+<table>
+<thead><tr><th>Company</th><th>Market Share</th></tr></thead>
+<tbody><tr><td colspan="2" style="text-align:center;color:#8aa0ae;padding:22px">Data coming soon.</td></tr></tbody>
+</table>
+</div>
+</div>
+<div class="card">
+<div class="card-title">Competitors Share — Switch &amp; Accessories</div>
+<div class="tbl-wrap">
+<table>
+<thead><tr><th>Company</th><th>Market Share</th></tr></thead>
+<tbody><tr><td colspan="2" style="text-align:center;color:#8aa0ae;padding:22px">Data coming soon.</td></tr></tbody>
+</table>
 </div>
 </div>
 </div>
@@ -593,6 +624,7 @@ function syncHash(){
   else if(currentView==='power') h='power';
   else if(currentView==='putil') h='putil';
   else if(currentView==='prodcap') h='prodcap';
+  else if(currentView==='market') h='market';
   try{ history.replaceState(null,'', h?('#'+h):location.pathname+location.search); }catch(e){}
 }
 function machineRows(){
@@ -762,6 +794,7 @@ function show(view){
   document.getElementById('viewPower').style.display = view==='power'?'block':'none';
   document.getElementById('viewPUtil').style.display = view==='putil'?'block':'none';
   document.getElementById('viewProdCap').style.display = view==='prodcap'?'block':'none';
+  document.getElementById('viewMarket').style.display = view==='market'?'block':'none';
   var isHome = view==='home';
   document.getElementById('hdrSub').style.display = isHome?'block':'none';
   window.scrollTo(0,0);
@@ -774,6 +807,7 @@ function restoreView(){
   else if(h==='power'){ show('power'); renderPower(); }
   else if(h==='putil'){ show('putil'); renderPowerUtil(); }
   else if(h==='prodcap'){ show('prodcap'); }
+  else if(h==='market'){ show('market'); }
   else if(h.indexOf('machine/')===0){
     var parts=h.slice(8).split('/');
     var s=parts[0], g=parts[1]||'';
@@ -831,6 +865,7 @@ document.getElementById('backLand').addEventListener('click',function(){ show('h
 document.getElementById('backPower').addEventListener('click',function(){ show('home'); });
 document.getElementById('backPUtil').addEventListener('click',function(){ show('home'); });
 document.getElementById('backProdCap').addEventListener('click',function(){ show('home'); });
+document.getElementById('backMarket').addEventListener('click',function(){ show('prodcap'); });
 
 var lastSig='';
 function refreshFilters(){
@@ -868,13 +903,14 @@ function loadData(first){
 }
 function primeView(){
   var h=location.hash.replace(/^#/,'');
-  var top = (h==='machine'||h.indexOf('machine/')===0) ? 'machine' : (h==='land' ? 'land' : (h==='power' ? 'power' : (h==='putil' ? 'putil' : (h==='prodcap' ? 'prodcap' : 'home'))));
+  var top = (h==='machine'||h.indexOf('machine/')===0) ? 'machine' : (h==='land' ? 'land' : (h==='power' ? 'power' : (h==='putil' ? 'putil' : (h==='prodcap' ? 'prodcap' : (h==='market' ? 'market' : 'home')))));
   document.getElementById('viewHome').style.display = top==='home'?'block':'none';
   document.getElementById('viewMachine').style.display = top==='machine'?'block':'none';
   document.getElementById('viewLand').style.display = top==='land'?'block':'none';
   document.getElementById('viewPower').style.display = top==='power'?'block':'none';
   document.getElementById('viewPUtil').style.display = top==='putil'?'block':'none';
   document.getElementById('viewProdCap').style.display = top==='prodcap'?'block':'none';
+  document.getElementById('viewMarket').style.display = top==='market'?'block':'none';
   document.getElementById('hdrSub').style.display = top==='home'?'block':'none';
   if(top==='machine'){
     document.getElementById('mSections').style.display='block';
