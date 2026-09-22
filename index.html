@@ -144,6 +144,25 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 .no-data{text-align:center;padding:44px;color:#94A3B8;font-size:15px}
 .foot{text-align:center;color:#94A3B8;font-size:13px;padding:10px 0 0}
 .foot a{color:#115E59}
+@keyframes tiltIn{0%{opacity:0;transform:perspective(900px) translateY(22px) rotateX(-14deg) scale(.94)}55%{opacity:1;transform:perspective(900px) translateY(-5px) rotateX(5deg) scale(1.015)}100%{opacity:1;transform:perspective(900px) translateY(0) rotateX(0)}}
+.homecard,.card,.seccard,.stat{animation:tiltIn .55s cubic-bezier(.2,.7,.3,1) backwards}
+.homecard:nth-child(2){animation-delay:.06s}
+.homecard:nth-child(3){animation-delay:.12s}
+.homecard:nth-child(4){animation-delay:.18s}
+.homecard:nth-child(5){animation-delay:.24s}
+.seccard:nth-child(2){animation-delay:.06s}
+.seccard:nth-child(3){animation-delay:.12s}
+.seccard:nth-child(4){animation-delay:.18s}
+.seccard:nth-child(5){animation-delay:.24s}
+.seccard:nth-child(6){animation-delay:.3s}
+.seccard:nth-child(n+7){animation-delay:.36s}
+.card:nth-of-type(2){animation-delay:.1s}
+.card:nth-of-type(3){animation-delay:.2s}
+.card:nth-of-type(4){animation-delay:.3s}
+.stat:nth-child(2){animation-delay:.07s}
+.stat:nth-child(3){animation-delay:.14s}
+.stat:nth-child(4){animation-delay:.21s}
+.stat:nth-child(5){animation-delay:.28s}
 
 </style>
 </head>
