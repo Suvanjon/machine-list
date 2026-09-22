@@ -183,6 +183,7 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 </div>
 </div>
 <div class="hdr-tag" style="margin-top:28px;margin-bottom:0">INNOVATION &bull; QUALITY &bull; A BRIGHTER FUTURE</div>
+<div class="foot" style="margin-top:14px"><a href="#visitors" onclick="show('visitors');renderVisitors()">Visitor Log</a></div>
 </div>
 </div>
 
@@ -381,6 +382,21 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 <div id="supplierCards"></div>
 </div>
 
+<div id="viewVisitors" style="display:none">
+<button class="back-btn" id="backVisitors">&#8592; Back</button>
+<div class="stats" id="vStats"></div>
+<div class="card">
+<div class="card-title">Visitor Log</div>
+<div class="tbl-wrap">
+<table>
+<thead><tr><th>S/L</th><th>Email</th><th>In Time</th><th>Out Time</th></tr></thead>
+<tbody id="vBody"></tbody>
+</table>
+</div>
+<div class="no-data" id="vNo" style="display:none">No visitors yet.</div>
+</div>
+</div>
+
 </div>
 
 <script src="data.js"></script>
@@ -409,7 +425,7 @@ function secColor(s){ return '#006066'; }
 
 var sortCol='section', sortAsc=true, secVal='', searchVal='';
 var SHEET_ID='1BeciLxtwDh-PkkoxpYHwBc87ATa3nYQPKdAXB9maXvY';
-var GID_MACHINE='86905509', GID_LAND='746325702', GID_POWER='678045459', GID_PC='547289225', GID_MARKET='748532221', GID_PCAP='977891488', GID_RAW='686302541';
+var GID_MACHINE='86905509', GID_LAND='746325702', GID_POWER='678045459', GID_PC='547289225', GID_MARKET='748532221', GID_PCAP='977891488', GID_RAW='686302541', GID_VISITORS='1082751698';
 var CSV_MACHINE='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_MACHINE;
 var CSV_LAND='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_LAND;
 var CSV_POWER='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_POWER;
@@ -417,6 +433,7 @@ var CSV_PC='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=cs
 var CSV_MARKET='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_MARKET;
 var CSV_PCAP='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_PCAP;
 var CSV_RAW='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_RAW;
+var CSV_VISITORS='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_VISITORS;
 var SHEET_URL='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/edit';
 var ENTRY_URL='https://script.google.com/macros/s/AKfycbwK1ZX8L6olG1ZFewDxoRmIITGsykGR_ePQSzlNjirT_E44V7_-Jh2XNhSQneY9u0hrMQ/exec';
 var M = [];
@@ -426,6 +443,7 @@ var PC = [];
 var MK = { marketSize:[], led:[], sw:[] };
 var PCAP = [];
 var RAW = [];
+var VISITORS = [];
 var SECS = [];
 function rebuildSections(){
   SECS=[];
@@ -539,6 +557,16 @@ function buildRawSupplierData(rows){
     cur.rows.push({si:c0, name:c1, product:c2, contact:c3, mail:c4});
   }
   return sections;
+}
+function buildVisitorsData(rows){
+  var out=[];
+  for(var i=1;i<rows.length;i++){
+    var r=rows[i];
+    var email=str(r[0]);
+    if(!email) continue;
+    out.push({email:email, inTime:str(r[1]), outTime:str(r[2])});
+  }
+  return out;
 }
 
 var SEC_LABEL={'Plastic':'Plastic Manufacturing','Work Shop':'Tool Room & Workshop','Switch':'Switch & Accessories','LED':'LED Lighting','LAB':'Testing Laboratory'};
@@ -667,6 +695,7 @@ function syncHash(){
   else if(currentView==='market') h='market';
   else if(currentView==='capacity') h='capacity';
   else if(currentView==='supplier') h='supplier';
+  else if(currentView==='visitors') h='visitors';
   try{ history.replaceState(null,'', h?('#'+h):location.pathname+location.search); }catch(e){}
 }
 function machineRows(){
@@ -904,6 +933,21 @@ function renderRawSupplier(){
   });
 }
 
+function renderVisitors(){
+  var stats='<div class="stat a"><span class="num">'+fmt(VISITORS.length)+'</span>Total Visits</div>';
+  document.getElementById('vStats').innerHTML=stats;
+  var tb=document.getElementById('vBody'); tb.innerHTML='';
+  VISITORS.forEach(function(v,i){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td class="sl">'+(i+1)+'</td>'+
+      '<td>'+esc(v.email)+'</td>'+
+      '<td>'+esc(v.inTime)+'</td>'+
+      '<td>'+esc(v.outTime)+'</td>';
+    tb.appendChild(tr);
+  });
+  document.getElementById('vNo').style.display=VISITORS.length?'none':'block';
+}
+
 function show(view){
   currentView=view;
   document.getElementById('viewHome').style.display = view==='home'?'block':'none';
@@ -915,6 +959,7 @@ function show(view){
   document.getElementById('viewMarket').style.display = view==='market'?'block':'none';
   document.getElementById('viewCapacity').style.display = view==='capacity'?'block':'none';
   document.getElementById('viewSupplier').style.display = view==='supplier'?'block':'none';
+  document.getElementById('viewVisitors').style.display = view==='visitors'?'block':'none';
   var isHome = view==='home';
   document.getElementById('hdrSub').style.display = isHome?'block':'none';
   window.scrollTo(0,0);
@@ -930,6 +975,7 @@ function restoreView(){
   else if(h==='market'){ show('market'); }
   else if(h==='capacity'){ show('capacity'); }
   else if(h==='supplier'){ show('supplier'); }
+  else if(h==='visitors'){ show('visitors'); renderVisitors(); }
   else if(h.indexOf('machine/')===0){
     var parts=h.slice(8).split('/');
     var s=parts[0], g=parts[1]||'';
@@ -990,6 +1036,7 @@ document.getElementById('backProdCap').addEventListener('click',function(){ show
 document.getElementById('backMarket').addEventListener('click',function(){ show('prodcap'); });
 document.getElementById('backCapacity').addEventListener('click',function(){ show('prodcap'); });
 document.getElementById('backSupplier').addEventListener('click',function(){ show('prodcap'); });
+document.getElementById('backVisitors').addEventListener('click',function(){ show('home'); });
 
 var lastSig='';
 function refreshFilters(){
@@ -1010,27 +1057,28 @@ function loadData(first){
     fetch(CSV_PC+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildPowerConsumptionData(parseCSV(x)); }),
     fetch(CSV_MARKET+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildMarketData(parseCSV(x)); }),
     fetch(CSV_PCAP+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildProdCapacityData(parseCSV(x)); }),
-    fetch(CSV_RAW+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildRawSupplierData(parseCSV(x)); })
+    fetch(CSV_RAW+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildRawSupplierData(parseCSV(x)); }),
+    fetch(CSV_VISITORS+t,{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(x){ return buildVisitorsData(parseCSV(x)); })
   ]).then(function(res){
     if(!res[0] || !res[0].length) throw new Error('empty');
-    var sig=JSON.stringify(res[0])+'|'+JSON.stringify(res[1]||[])+'|'+JSON.stringify(res[2]||[])+'|'+JSON.stringify(res[3]||[])+'|'+JSON.stringify(res[4]||[])+'|'+JSON.stringify(res[5]||[])+'|'+JSON.stringify(res[6]||[]);
+    var sig=JSON.stringify(res[0])+'|'+JSON.stringify(res[1]||[])+'|'+JSON.stringify(res[2]||[])+'|'+JSON.stringify(res[3]||[])+'|'+JSON.stringify(res[4]||[])+'|'+JSON.stringify(res[5]||[])+'|'+JSON.stringify(res[6]||[])+'|'+JSON.stringify(res[7]||[]);
     if(!first && sig===lastSig) return;
     lastSig=sig;
-    M=res[0]; L=res[1]||[]; P=res[2]||[]; PC=res[3]||[]; MK=res[4]||{marketSize:[],led:[],sw:[]}; PCAP=res[5]||[]; RAW=res[6]||[];
+    M=res[0]; L=res[1]||[]; P=res[2]||[]; PC=res[3]||[]; MK=res[4]||{marketSize:[],led:[],sw:[]}; PCAP=res[5]||[]; RAW=res[6]||[]; VISITORS=res[7]||[];
     rebuildSections(); refreshFilters();
-    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand(); renderPower(); renderPowerUtil(); renderMarket(); renderProdCapacity(); renderRawSupplier();
+    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand(); renderPower(); renderPowerUtil(); renderMarket(); renderProdCapacity(); renderRawSupplier(); renderVisitors();
     restoreView();
   }).catch(function(){
     if(M.length) return;
-    M=window.MACHINE_DATA||[]; L=window.LAND_DATA||[]; P=window.POWER_DATA||[]; PC=window.POWER_CONSUMPTION_DATA||[]; MK=window.MARKET_DATA||{marketSize:[],led:[],sw:[]}; PCAP=window.PROD_CAPACITY_DATA||[]; RAW=window.RAW_SUPPLIER_DATA||[];
+    M=window.MACHINE_DATA||[]; L=window.LAND_DATA||[]; P=window.POWER_DATA||[]; PC=window.POWER_CONSUMPTION_DATA||[]; MK=window.MARKET_DATA||{marketSize:[],led:[],sw:[]}; PCAP=window.PROD_CAPACITY_DATA||[]; RAW=window.RAW_SUPPLIER_DATA||[]; VISITORS=window.VISITOR_DATA||[];
     rebuildSections(); refreshFilters();
-    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand(); renderPower(); renderPowerUtil(); renderMarket(); renderProdCapacity(); renderRawSupplier();
+    renderHome(); renderSecCards(); renderStats(); renderMachines(); renderLand(); renderPower(); renderPowerUtil(); renderMarket(); renderProdCapacity(); renderRawSupplier(); renderVisitors();
     restoreView();
   });
 }
 function primeView(){
   var h=location.hash.replace(/^#/,'');
-  var top = (h==='machine'||h.indexOf('machine/')===0) ? 'machine' : (h==='land' ? 'land' : (h==='power' ? 'power' : (h==='putil' ? 'putil' : (h==='prodcap' ? 'prodcap' : (h==='market' ? 'market' : (h==='capacity' ? 'capacity' : (h==='supplier' ? 'supplier' : 'home')))))));
+  var top = (h==='machine'||h.indexOf('machine/')===0) ? 'machine' : (h==='land' ? 'land' : (h==='power' ? 'power' : (h==='putil' ? 'putil' : (h==='prodcap' ? 'prodcap' : (h==='market' ? 'market' : (h==='capacity' ? 'capacity' : (h==='supplier' ? 'supplier' : (h==='visitors' ? 'visitors' : 'home'))))))));
   document.getElementById('viewHome').style.display = top==='home'?'block':'none';
   document.getElementById('viewMachine').style.display = top==='machine'?'block':'none';
   document.getElementById('viewLand').style.display = top==='land'?'block':'none';
@@ -1040,6 +1088,7 @@ function primeView(){
   document.getElementById('viewMarket').style.display = top==='market'?'block':'none';
   document.getElementById('viewCapacity').style.display = top==='capacity'?'block':'none';
   document.getElementById('viewSupplier').style.display = top==='supplier'?'block':'none';
+  document.getElementById('viewVisitors').style.display = top==='visitors'?'block':'none';
   document.getElementById('hdrSub').style.display = top==='home'?'block':'none';
   if(top==='machine'){
     document.getElementById('mSections').style.display='block';
