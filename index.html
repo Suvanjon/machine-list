@@ -534,7 +534,7 @@ function buildRawSupplierData(rows){
   for(var i=0;i<rows.length;i++){
     var r=rows[i];
     var c0=str(r[0]), c1=str(r[1]), c2=str(r[2]), c3=str(r[3]), c4=str(r[4]);
-    if(c0==='SI' && c1==='Supplier Name') continue;
+    if(c0==='SI' && (c1==='Supplier Name' || c1==='Company Name')) continue;
     if(c0==='' && c1==='' && c2==='' && c3==='' && c4==='') continue;
     if(c1==='' && c2==='' && c3==='' && c4==='' && c0!==''){ cur={name:c0, rows:[]}; sections.push(cur); continue; }
     if(!cur) continue;
@@ -892,7 +892,7 @@ function renderRawSupplier(){
     card.className='card';
     card.innerHTML='<div class="card-title">'+esc(sec.name)+'</div>'+
       '<div class="tbl-wrap"><table>'+
-      '<thead><tr><th style="text-align:center">SI</th><th style="text-align:center">Supplier Name</th><th style="text-align:center">Product</th><th style="text-align:center">Contact Person</th><th style="text-align:center">Mail</th></tr></thead>'+
+      '<thead><tr><th style="text-align:center">SI</th><th style="text-align:center">Company Name</th><th style="text-align:center">Product</th><th style="text-align:center">Contact Person</th><th style="text-align:center">Mail</th></tr></thead>'+
       '<tbody>'+(sec.rows.map(function(x){
         return '<tr>'+
           '<td class="sl" style="text-align:center">'+esc(x.si)+'</td>'+
