@@ -135,6 +135,11 @@ td.num{text-align:right;white-space:nowrap}
 #viewMarket th,#viewMarket td{text-align:center !important}
 #viewCapacity th,#viewCapacity td{text-align:center !important}
 #viewSupplier th,#viewSupplier td{text-align:center !important}
+.inner-card{background:rgba(255,255,255,.97);border-radius:14px;padding:16px 18px;margin-top:16px;box-shadow:0 8px 20px -10px rgba(13,40,58,.3),inset 0 1px 0 #fff}
+.inner-card .ic-title{font-size:15px;font-weight:800;color:#0F766E;margin-bottom:12px;display:flex;align-items:center;gap:9px}
+.inner-card .ic-title:before{content:"";width:5px;height:17px;border-radius:99px;background:linear-gradient(135deg,#14B8A6,#0D9488);flex:0 0 auto}
+.inner-card .ic-empty{text-align:center;color:#94A3B8;padding:24px 10px;font-size:14px}
+.inner-card .tbl-wrap{margin-top:0}
 td.qty{text-align:center;font-weight:700;color:var(--teal)}
 .sec-badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#0D9488,#0F766E);white-space:nowrap;box-shadow:0 1px 0 rgba(255,255,255,.25) inset,0 -1px 0 rgba(0,0,0,.15) inset,0 4px 8px -3px rgba(0,121,107,.6)}
 .mail{color:#115E59;text-decoration:none;word-break:break-all}
@@ -1009,9 +1014,12 @@ function renderCapDetail(){
   '</tr>';
   document.getElementById('capDetailCards').innerHTML='<div class="card">'+
     '<div class="card-title">'+esc(capLabel(cat))+'</div>'+
+    '<div class="inner-card"><div class="ic-title">Capacity</div>'+
     '<div class="tbl-wrap"><table>'+
     '<thead><tr><th style="text-align:center">Year</th><th style="text-align:center">No. Of Category</th><th style="text-align:center">Unit</th><th style="text-align:center">Capacity for 1st half</th><th style="text-align:center">Capacity for 2nd half</th></tr></thead>'+
-    '<tbody>'+rows+'</tbody></table></div></div>';
+    '<tbody>'+rows+'</tbody></table></div></div>'+
+    '<div class="inner-card"><div class="ic-title">Product Costing</div><div class="ic-empty">No data</div></div>'+
+    '</div>';
 }
 function showCapDetail(on){
   document.getElementById('capSections').style.display = on?'none':'block';
