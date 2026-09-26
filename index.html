@@ -468,7 +468,11 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 </div>
 <div id="capDetail" style="display:none">
 <button class="back-btn" id="backCapDetail">&#8592; Back</button>
-<div id="capDetailCards"></div>
+<div class="sec-cards" id="capDetailCards"></div>
+</div>
+<div id="capTab" style="display:none">
+<button class="back-btn" id="backCapTab">&#8592; Back</button>
+<div id="capTabCards"></div>
 </div>
 </div>
 
@@ -948,7 +952,7 @@ function renderMarket(){
   fill('mkSwBody', MK.sw);
 }
 
-var capCat='';
+var capCat=''; var capTab='';
 function capLabel(cat){ return cat.indexOf('Switch')!==-1 ? 'Electrical Accessories' : cat; }
 function capCats(){
   var cats=[];
@@ -991,6 +995,29 @@ function renderProdCapacity(){
 }
 function renderCapDetail(){
   var cat=capCat;
+  var wrap=document.getElementById('capDetailCards');
+  wrap.innerHTML='';
+  var t=capTotals(cat);
+  var c1=document.createElement('div');
+  c1.className='seccard';
+  c1.innerHTML='<div class="sc-name">Capacity</div>'+
+    '<div class="sc-line"><b>'+fmt(t.f1)+'</b> / <b>'+fmt(t.f2)+'</b> '+esc(t.unit)+'</div>';
+  c1.addEventListener('click',function(){ capTab='capacity'; renderCapTab(); showCapTab(true); });
+  wrap.appendChild(c1);
+  var c2=document.createElement('div');
+  c2.className='seccard';
+  c2.innerHTML='<div class="sc-name">Product Costing</div><div class="sc-line">No data</div>';
+  c2.addEventListener('click',function(){ capTab='costing'; renderCapTab(); showCapTab(true); });
+  wrap.appendChild(c2);
+}
+function renderCapTab(){
+  var cat=capCat;
+  var box=document.getElementById('capTabCards');
+  if(capTab==='costing'){
+    box.innerHTML='<div class="card"><div class="card-title">Product Costing &mdash; '+esc(capLabel(cat))+'</div>'+
+      '<div style="text-align:center;color:#94A3B8;padding:26px">No data</div></div>';
+    return;
+  }
   var unit='', f1=0, f2=0, rows='';
   PCAP.forEach(function(y){
     var r=null;
@@ -1012,18 +1039,21 @@ function renderCapDetail(){
     '<td class="num" style="text-align:center">'+fmt(f1)+'</td>'+
     '<td class="num" style="text-align:center">'+fmt(f2)+'</td>'+
   '</tr>';
-  document.getElementById('capDetailCards').innerHTML='<div class="card">'+
-    '<div class="card-title">'+esc(capLabel(cat))+'</div>'+
-    '<div class="inner-card"><div class="ic-title">Capacity</div>'+
+  box.innerHTML='<div class="card">'+
+    '<div class="card-title">Capacity &mdash; '+esc(capLabel(cat))+'</div>'+
     '<div class="tbl-wrap"><table>'+
     '<thead><tr><th style="text-align:center">Year</th><th style="text-align:center">No. Of Category</th><th style="text-align:center">Unit</th><th style="text-align:center">Capacity for 1st half</th><th style="text-align:center">Capacity for 2nd half</th></tr></thead>'+
-    '<tbody>'+rows+'</tbody></table></div></div>'+
-    '<div class="inner-card"><div class="ic-title">Product Costing</div><div class="ic-empty">No data</div></div>'+
-    '</div>';
+    '<tbody>'+rows+'</tbody></table></div></div>';
+}
+function showCapTab(on){
+  document.getElementById('capDetail').style.display = on?'none':'block';
+  document.getElementById('capTab').style.display = on?'block':'none';
+  if(on) window.scrollTo(0,0);
 }
 function showCapDetail(on){
   document.getElementById('capSections').style.display = on?'none':'block';
   document.getElementById('capDetail').style.display = on?'block':'none';
+  document.getElementById('capTab').style.display='none';
   if(on) window.scrollTo(0,0);
 }
 
@@ -1139,6 +1169,7 @@ document.getElementById('backProdCap').addEventListener('click',function(){ show
 document.getElementById('backMarket').addEventListener('click',function(){ show('prodcap'); });
 document.getElementById('backCapacity').addEventListener('click',function(){ show('prodcap'); });
 document.getElementById('backCapDetail').addEventListener('click',function(){ showCapDetail(false); });
+document.getElementById('backCapTab').addEventListener('click',function(){ showCapTab(false); });
 document.getElementById('backSupplier').addEventListener('click',function(){ show('prodcap'); });
 
 var lastSig='';
