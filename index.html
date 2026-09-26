@@ -420,7 +420,7 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 <div class="sc-line">Market size, competitors share &amp; demand</div>
 </div>
 <div class="seccard" data-sec="capacity" onclick="show('capacity')">
-<div class="sc-name">Production Capacity</div>
+<div class="sc-name">Production Capacity &amp; Costing</div>
 <div class="sc-line">Production capacity plan</div>
 </div>
 <div class="seccard" data-sec="supplier" onclick="show('supplier')">
@@ -1385,18 +1385,42 @@ function saveVisitor(){
   try{ sessionStorage.setItem('visitorEmail', email); }catch(e){}
   closeModal('visitorModal');
   try{ fetch(ENTRY_URL, { method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify({action:'logVisitor', email:email}) }).catch(function(){}); }catch(e){}
+  startVisitorHeartbeat();
 }
-(function(){
-  try{ if(sessionStorage.getItem('visitorEmail')) return; }catch(e){}
-  setTimeout(function(){ openModal('visitorModal'); }, 200);
-})();
-window.addEventListener('beforeunload', function(){
+var _beatTimer=null;
+function visitorHeartbeat(){
   var email='';
   try{ email=sessionStorage.getItem('visitorEmail')||''; }catch(e){}
-  if(email){
-    try{ navigator.sendBeacon(ENTRY_URL, JSON.stringify({action:'logOut', email:email})); }catch(e){}
+  if(!email) return;
+  try{ fetch(ENTRY_URL, { method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify({action:'heartbeat', email:email}), keepalive:true }).catch(function(){}); }catch(e){}
+}
+function startVisitorHeartbeat(){
+  if(_beatTimer) clearInterval(_beatTimer);
+  visitorHeartbeat();
+  _beatTimer=setInterval(visitorHeartbeat, 5*60*1000);
+}
+(function(){
+  try{ if(sessionStorage.getItem('visitorEmail')){ startVisitorHeartbeat(); return; } }catch(e){}
+  setTimeout(function(){ openModal('visitorModal'); }, 200);
+})();
+var _visitorOut=false;
+function visitorLogOut(){
+  if(_visitorOut) return;
+  var email='';
+  try{ email=sessionStorage.getItem('visitorEmail')||''; }catch(e){}
+  if(!email) return;
+  _visitorOut=true;
+  var payload=JSON.stringify({action:'logOut', email:email});
+  var blob=null;
+  try{ blob=new Blob([payload], {type:'text/plain'}); }catch(e){}
+  if(blob && navigator.sendBeacon){
+    try{ if(navigator.sendBeacon(ENTRY_URL, blob)) return; }catch(e){}
   }
-});
+  try{ fetch(ENTRY_URL, { method:'POST', headers:{'Content-Type':'text/plain'}, body:payload, keepalive:true }).catch(function(){}); }catch(e){}
+}
+window.addEventListener('pagehide', visitorLogOut);
+window.addEventListener('beforeunload', visitorLogOut);
+window.addEventListener('unload', visitorLogOut);
 </script>
 <div class="modal" id="machineModal" style="display:none">
 <div class="modal-box">
