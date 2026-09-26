@@ -457,8 +457,14 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 </div>
 
 <div id="viewCapacity" style="display:none">
+<div id="capSections">
 <button class="back-btn" id="backCapacity">&#8592; Back</button>
-<div id="capCards"></div>
+<div class="sec-cards" id="capCards"></div>
+</div>
+<div id="capDetail" style="display:none">
+<button class="back-btn" id="backCapDetail">&#8592; Back</button>
+<div id="capDetailCards"></div>
+</div>
 </div>
 
 <div id="viewSupplier" style="display:none">
@@ -937,13 +943,9 @@ function renderMarket(){
   fill('mkSwBody', MK.sw);
 }
 
-function renderProdCapacity(){
-  var wrap=document.getElementById('capCards');
-  wrap.innerHTML='';
-  if(!PCAP.length){
-    wrap.innerHTML='<div class="card"><div style="text-align:center;color:#94A3B8;padding:22px">No data</div></div>';
-    return;
-  }
+var capCat='';
+function capLabel(cat){ return cat.indexOf('Switch')!==-1 ? 'Electrical Accessories' : cat; }
+function capCats(){
   var cats=[];
   PCAP.forEach(function(y){
     (y.rows||[]).forEach(function(x){
@@ -951,38 +953,70 @@ function renderProdCapacity(){
       if(x.cls && cats.indexOf(x.cls)===-1) cats.push(x.cls);
     });
   });
-  cats.forEach(function(cat){
-    var label=(cat.indexOf('Switch')!==-1)?'Electrical Accessories':cat;
-    var f1=0, f2=0, unit='', rows='';
-    PCAP.forEach(function(y){
-      var r=null;
-      (y.rows||[]).forEach(function(x){ if(!x.isTotal && x.cls===cat) r=x; });
-      if(!r) return;
-      unit=r.unit;
-      f1+=parseFloat(r.f1)||0; f2+=parseFloat(r.f2)||0;
-      rows+='<tr>'+
-        '<td style="text-align:center">'+esc(y.year)+'</td>'+
-        '<td style="text-align:center">'+esc(r.cat)+'</td>'+
-        '<td style="text-align:center">'+esc(r.unit)+'</td>'+
-        '<td class="num" style="text-align:center">'+esc(r.f1)+'</td>'+
-        '<td class="num" style="text-align:center">'+esc(r.f2)+'</td>'+
-      '</tr>';
+  return cats;
+}
+function capTotals(cat){
+  var f1=0, f2=0, unit='';
+  PCAP.forEach(function(y){
+    (y.rows||[]).forEach(function(x){
+      if(x.isTotal || x.cls!==cat) return;
+      unit=x.unit||unit;
+      f1+=parseFloat(x.f1)||0; f2+=parseFloat(x.f2)||0;
     });
-    rows+='<tr class="total">'+
-      '<td style="text-align:center">Total</td>'+
-      '<td style="text-align:center"></td>'+
-      '<td style="text-align:center">'+esc(unit)+'</td>'+
-      '<td class="num" style="text-align:center">'+fmt(f1)+'</td>'+
-      '<td class="num" style="text-align:center">'+fmt(f2)+'</td>'+
-    '</tr>';
-    var card=document.createElement('div');
-    card.className='card';
-    card.innerHTML='<div class="card-title">'+esc(label)+'</div>'+
-      '<div class="tbl-wrap"><table>'+
-      '<thead><tr><th style="text-align:center">Year</th><th style="text-align:center">No. Of Category</th><th style="text-align:center">Unit</th><th style="text-align:center">Capacity for 1st half</th><th style="text-align:center">Capacity for 2nd half</th></tr></thead>'+
-      '<tbody>'+rows+'</tbody></table></div>';
-    wrap.appendChild(card);
   });
+  return {f1:f1,f2:f2,unit:unit};
+}
+function renderProdCapacity(){
+  showCapDetail(false);
+  var wrap=document.getElementById('capCards');
+  wrap.innerHTML='';
+  if(!PCAP.length){
+    wrap.innerHTML='<div class="card"><div style="text-align:center;color:#94A3B8;padding:22px">No data</div></div>';
+    return;
+  }
+  capCats().forEach(function(cat){
+    var t=capTotals(cat);
+    var c=document.createElement('div');
+    c.className='seccard';
+    c.innerHTML='<div class="sc-name">'+esc(capLabel(cat))+'</div>'+
+      '<div class="sc-line"><b>'+fmt(t.f1)+'</b> / <b>'+fmt(t.f2)+'</b> '+esc(t.unit)+'</div>';
+    c.addEventListener('click',function(){ capCat=cat; renderCapDetail(); showCapDetail(true); });
+    wrap.appendChild(c);
+  });
+}
+function renderCapDetail(){
+  var cat=capCat;
+  var unit='', f1=0, f2=0, rows='';
+  PCAP.forEach(function(y){
+    var r=null;
+    (y.rows||[]).forEach(function(x){ if(!x.isTotal && x.cls===cat) r=x; });
+    if(!r) return;
+    unit=r.unit; f1+=parseFloat(r.f1)||0; f2+=parseFloat(r.f2)||0;
+    rows+='<tr>'+
+      '<td style="text-align:center">'+esc(y.year)+'</td>'+
+      '<td style="text-align:center">'+esc(r.cat)+'</td>'+
+      '<td style="text-align:center">'+esc(r.unit)+'</td>'+
+      '<td class="num" style="text-align:center">'+esc(r.f1)+'</td>'+
+      '<td class="num" style="text-align:center">'+esc(r.f2)+'</td>'+
+    '</tr>';
+  });
+  rows+='<tr class="total">'+
+    '<td style="text-align:center">Total</td>'+
+    '<td style="text-align:center"></td>'+
+    '<td style="text-align:center">'+esc(unit)+'</td>'+
+    '<td class="num" style="text-align:center">'+fmt(f1)+'</td>'+
+    '<td class="num" style="text-align:center">'+fmt(f2)+'</td>'+
+  '</tr>';
+  document.getElementById('capDetailCards').innerHTML='<div class="card">'+
+    '<div class="card-title">'+esc(capLabel(cat))+'</div>'+
+    '<div class="tbl-wrap"><table>'+
+    '<thead><tr><th style="text-align:center">Year</th><th style="text-align:center">No. Of Category</th><th style="text-align:center">Unit</th><th style="text-align:center">Capacity for 1st half</th><th style="text-align:center">Capacity for 2nd half</th></tr></thead>'+
+    '<tbody>'+rows+'</tbody></table></div></div>';
+}
+function showCapDetail(on){
+  document.getElementById('capSections').style.display = on?'none':'block';
+  document.getElementById('capDetail').style.display = on?'block':'none';
+  if(on) window.scrollTo(0,0);
 }
 
 function renderRawSupplier(){
@@ -1035,7 +1069,7 @@ function restoreView(){
   else if(h==='putil'){ show('putil'); renderPowerUtil(); }
   else if(h==='prodcap'){ show('prodcap'); }
   else if(h==='market'){ show('market'); }
-  else if(h==='capacity'){ show('capacity'); }
+  else if(h==='capacity'){ show('capacity'); renderProdCapacity(); }
   else if(h==='supplier'){ show('supplier'); }
   else if(h.indexOf('machine/')===0){
     var parts=h.slice(8).split('/');
@@ -1096,6 +1130,7 @@ document.getElementById('backPUtil').addEventListener('click',function(){ show('
 document.getElementById('backProdCap').addEventListener('click',function(){ show('home'); });
 document.getElementById('backMarket').addEventListener('click',function(){ show('prodcap'); });
 document.getElementById('backCapacity').addEventListener('click',function(){ show('prodcap'); });
+document.getElementById('backCapDetail').addEventListener('click',function(){ showCapDetail(false); });
 document.getElementById('backSupplier').addEventListener('click',function(){ show('prodcap'); });
 
 var lastSig='';
