@@ -1410,6 +1410,12 @@ function grantAccess(email){
   try{ gatePost({action:'logVisitor', email:email}).catch(function(){}); }catch(e){}
   startVisitorHeartbeat();
 }
+function quickUnlock(email){
+  try{ sessionStorage.setItem('visitorEmail', email); }catch(e){}
+  document.body.classList.remove('locked');
+  var m=document.getElementById('visitorModal'); if(m) m.style.display='none';
+  startVisitorHeartbeat();
+}
 function showGate(msg, isErr){
   document.body.classList.add('locked');
   var wanted = msg || 'Enter your Gmail. Access requires owner approval.';
@@ -1472,20 +1478,30 @@ function startVisitorHeartbeat(){
   _beatTimer=setInterval(visitorHeartbeat, 5*60*1000);
 }
 (function(){
-  var sess='', appr='', pend='';
-  try{ sess=sessionStorage.getItem('visitorEmail')||''; }catch(e){}
+  var appr='', sess='', pend='';
   try{ appr=localStorage.getItem('visitorApproved')||''; }catch(e){}
+  try{ sess=sessionStorage.getItem('visitorEmail')||''; }catch(e){}
   try{ pend=localStorage.getItem('visitorEmail')||''; }catch(e){}
   document.body.classList.add('locked');
-  var cached=sess||appr||pend;
-  if(cached){
-    showGate('Verifying access...');
-    checkAccess(cached).then(function(res){
-      if(res && (res.owner || res.approved)){ grantAccess(cached); }
-      else { try{ localStorage.removeItem('visitorApproved'); }catch(e){} showGate('Waiting for the owner to approve\u2026'); startGatePoll(cached); }
-    }).catch(function(){ showGate('Could not verify access. Please try again.', true); });
+  if(appr){
+    quickUnlock(appr);
+    checkAccess(appr).then(function(res){
+      if(!(res && (res.owner || res.approved))){
+        try{ localStorage.removeItem('visitorApproved'); }catch(e){}
+        showGate('Your access was removed. Request access again.', true);
+      }
+    }).catch(function(){});
   } else {
-    showGate();
+    var email=sess||pend;
+    if(email){
+      showGate('Verifying access...');
+      checkAccess(email).then(function(res){
+        if(res && (res.owner || res.approved)){ grantAccess(email); }
+        else { showGate('Waiting for the owner to approve\u2026'); startGatePoll(email); }
+      }).catch(function(){ showGate('Could not verify access. Please try again.', true); });
+    } else {
+      showGate();
+    }
   }
 })();
 var _visitorOut=false;
