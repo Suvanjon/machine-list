@@ -1399,10 +1399,18 @@ function gatePost(payload, keep){
 var _gateTimer=null;
 function grantAccess(email){
   try{ sessionStorage.setItem('visitorEmail', email); }catch(e){}
+  try{ localStorage.setItem('visitorApproved', email); }catch(e){}
   if(_gateTimer){ clearInterval(_gateTimer); _gateTimer=null; }
   closeModal('visitorModal');
   document.body.classList.remove('locked');
   try{ gatePost({action:'logVisitor', email:email}).catch(function(){}); }catch(e){}
+  startVisitorHeartbeat();
+}
+function quickUnlock(email){
+  try{ sessionStorage.setItem('visitorEmail', email); }catch(e){}
+  try{ localStorage.setItem('visitorApproved', email); }catch(e){}
+  document.body.classList.remove('locked');
+  var m=document.getElementById('visitorModal'); if(m) m.style.display='none';
   startVisitorHeartbeat();
 }
 function showGate(msg){
@@ -1430,12 +1438,28 @@ function saveVisitor(){
     });
   }).catch(function(){ setVMsg('err','Network error. Please try again.'); });
 }
-function startGatePoll(email){
-  if(_gateTimer) clearInterval(_gateTimer);
-  _gateTimer=setInterval(function(){
-    checkAccess(email).then(function(res){ if(res && (res.owner || res.approved)){ grantAccess(email); } }).catch(function(){});
-  }, 15000);
+var _pendingEmail='';
+function tryGrant(email){
+  if(!email) return;
+  checkAccess(email).then(function(res){ if(res && (res.owner || res.approved)){ grantAccess(email); } }).catch(function(){});
 }
+function startGatePoll(email){
+  _pendingEmail=email;
+  if(_gateTimer) clearInterval(_gateTimer);
+  tryGrant(email);
+  _gateTimer=setInterval(function(){ tryGrant(_pendingEmail); }, 2000);
+}
+function recheck(){
+  var e=((document.getElementById('vEmail')||{}).value||'').trim()||_pendingEmail;
+  if(!e){ setVMsg('err','Please enter your Gmail'); return; }
+  setVMsg('','Checking access...');
+  checkAccess(e).then(function(res){
+    if(res && (res.owner || res.approved)){ grantAccess(e); }
+    else { setVMsg('','Still waiting for the owner to approve.'); }
+  }).catch(function(){ setVMsg('err','Network error. Please try again.'); });
+}
+window.addEventListener('focus', function(){ if(_pendingEmail) tryGrant(_pendingEmail); });
+document.addEventListener('visibilitychange', function(){ if(!document.hidden && _pendingEmail) tryGrant(_pendingEmail); });
 var _beatTimer=null;
 function visitorHeartbeat(){
   var email='';
@@ -1449,14 +1473,17 @@ function startVisitorHeartbeat(){
   _beatTimer=setInterval(visitorHeartbeat, 5*60*1000);
 }
 (function(){
-  var email='';
+  var email='', local='';
   try{ email=sessionStorage.getItem('visitorEmail')||''; }catch(e){}
+  try{ local=localStorage.getItem('visitorApproved')||''; }catch(e){}
   document.body.classList.add('locked');
-  if(email){
-    checkAccess(email).then(function(res){
-      if(res && (res.owner || res.approved)){ grantAccess(email); }
-      else { try{ sessionStorage.removeItem('visitorEmail'); }catch(e){} showGate(); }
-    }).catch(function(){ showGate(); });
+  var cached=email||local;
+  if(cached){
+    quickUnlock(cached);
+    checkAccess(cached).then(function(res){
+      if(res && (res.owner || res.approved)){ }
+      else { try{ sessionStorage.removeItem('visitorEmail'); }catch(e){} try{ localStorage.removeItem('visitorApproved'); }catch(e){} showGate(); }
+    }).catch(function(){});
   } else {
     showGate();
   }
@@ -1518,6 +1545,7 @@ window.addEventListener('unload', visitorLogOut);
 <div class="field"><label>Your Gmail</label><input type="email" id="vEmail" placeholder="you@gmail.com" onkeydown="if(event.key==='Enter')saveVisitor()"></div>
 <div class="entry-msg" id="vMsg"></div>
 <button class="btn" onclick="saveVisitor()">Request Access</button>
+<button class="btn" style="margin-top:8px;background:linear-gradient(135deg,#64748B,#475569)" onclick="recheck()">Check again</button>
 </div>
 </div>
 </body>
