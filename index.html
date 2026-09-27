@@ -83,6 +83,16 @@ body{background:linear-gradient(180deg,#F0FDF4 0%,#FFFFFF 50%,#F0FDF4 100%);min-
 #viewMarket .card:nth-of-type(3n+3){background:linear-gradient(135deg,#10B981,#059669)}
 #viewCapacity .card{background:linear-gradient(135deg,#0F766E,#115E59)}
 #viewSupplier .card{background:linear-gradient(135deg,#10B981,#059669)}
+.cap-chart-wrap{background:rgba(255,255,255,.97);border-radius:14px;padding:20px 16px 14px;box-shadow:0 8px 20px -10px rgba(13,40,58,.3),inset 0 1px 0 #fff}
+.cap-chart{display:flex;align-items:flex-end;justify-content:space-around;gap:14px;height:220px;padding:18px 4px 0}
+.cap-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.cap-bars{flex:1;display:flex;align-items:flex-end;gap:8px;width:100%;justify-content:center}
+.cap-bar{width:30px;border-radius:7px 7px 0 0;position:relative;min-height:3px;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -3px 0 rgba(0,0,0,.18);transition:height .6s cubic-bezier(.2,.7,.3,1)}
+.cap-bar span{position:absolute;top:-19px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:800;color:#0F766E;white-space:nowrap}
+.cap-bar-label{margin-top:8px;font-size:12px;font-weight:700;color:#115E59;text-align:center}
+.cap-legend{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.cap-legend div{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:#0F766E}
+.cap-legend i{width:13px;height:13px;border-radius:4px;display:inline-block;box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
 .stats{display:flex;gap:14px;margin:0 0 18px;flex-wrap:wrap;align-items:stretch}
 .stats-row{display:flex;align-items:center;gap:18px;margin:0 0 18px;flex-wrap:wrap}
 .stats-row .stats{margin:0;flex:0 0 auto;min-width:0}
@@ -465,10 +475,6 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 <div id="capSections">
 <button class="back-btn" id="backCapacity">&#8592; Back</button>
 <div class="sec-cards" id="capHomeCards"></div>
-</div>
-<div id="capDetail" style="display:none">
-<button class="back-btn" id="backCapDetail">&#8592; Back</button>
-<div class="sec-cards" id="capDetailCards"></div>
 </div>
 <div id="capTab" style="display:none">
 <button class="back-btn" id="backCapTab">&#8592; Back</button>
@@ -952,7 +958,7 @@ function renderMarket(){
   fill('mkSwBody', MK.sw);
 }
 
-var capFlow=''; var capCat='';
+var capFlow='';
 function capLabel(cat){ return cat.indexOf('Switch')!==-1 ? 'Electrical Accessories' : cat; }
 function capCats(){
   var cats=[];
@@ -964,49 +970,21 @@ function capCats(){
   });
   return cats;
 }
-function capTotals(cat){
-  var f1=0, f2=0, unit='';
-  PCAP.forEach(function(y){
-    (y.rows||[]).forEach(function(x){
-      if(x.isTotal || x.cls!==cat) return;
-      unit=x.unit||unit;
-      f1+=parseFloat(x.f1)||0; f2+=parseFloat(x.f2)||0;
-    });
-  });
-  return {f1:f1,f2:f2,unit:unit};
-}
 function openCapacity(){ show('capacity'); renderProdCapacity(); }
 function renderProdCapacity(){
-  showCapCats(false);
+  showCapHome();
   var wrap=document.getElementById('capHomeCards');
   wrap.innerHTML='';
   var c1=document.createElement('div');
   c1.className='seccard';
-  c1.innerHTML='<div class="sc-name">Production Capacity</div><div class="sc-line">Year-wise production capacity</div>';
-  c1.addEventListener('click',function(){ capFlow='capacity'; capCat=''; renderCapCats(); showCapCats(true); });
+  c1.innerHTML='<div class="sc-name">Production Capacity</div><div class="sc-line">Capacity dashboard &amp; year-wise plan</div>';
+  c1.addEventListener('click',function(){ capFlow='capacity'; renderCapTab(); showCapTab(true); });
   wrap.appendChild(c1);
   var c2=document.createElement('div');
   c2.className='seccard';
   c2.innerHTML='<div class="sc-name">Material Costing</div><div class="sc-line">Material-wise costing details</div>';
-  c2.addEventListener('click',function(){ capFlow='costing'; capCat=''; renderCapTab(); showCapTab(true); });
+  c2.addEventListener('click',function(){ capFlow='costing'; renderCapTab(); showCapTab(true); });
   wrap.appendChild(c2);
-}
-function renderCapCats(){
-  var wrap=document.getElementById('capDetailCards');
-  wrap.innerHTML='';
-  if(!PCAP.length){
-    wrap.innerHTML='<div class="card"><div style="text-align:center;color:#94A3B8;padding:22px">No data</div></div>';
-    return;
-  }
-  capCats().forEach(function(cat){
-    var t=capTotals(cat);
-    var c=document.createElement('div');
-    c.className='seccard';
-    c.innerHTML='<div class="sc-name">'+esc(capLabel(cat))+'</div>'+
-      '<div class="sc-line"><b>'+fmt(t.f1)+'</b> / <b>'+fmt(t.f2)+'</b> '+esc(t.unit)+'</div>';
-    c.addEventListener('click',function(){ capCat=cat; renderCapTab(); showCapTab(true); });
-    wrap.appendChild(c);
-  });
 }
 function renderCapTab(){
   var box=document.getElementById('capTabCards');
@@ -1015,44 +993,95 @@ function renderCapTab(){
       '<div style="text-align:center;color:#94A3B8;padding:26px">No data</div></div>';
     return;
   }
-  var cat=capCat;
-  var unit='', f1=0, f2=0, rows='';
+  box.innerHTML=renderCapacityDashboard();
+}
+function renderCapacityDashboard(){
+  if(!PCAP.length){
+    return '<div class="card"><div class="card-title">Production Capacity</div>'+
+      '<div style="text-align:center;color:#94A3B8;padding:26px">No data</div></div>';
+  }
+  var cats=capCats();
+  var colors=['#14B8A6','#0D9488','#10B981','#22C55E','#0F766E'];
+  var tot={f1:0,f2:0,unit:''};
+  var catTot={};
+  cats.forEach(function(c){ catTot[c]={f1:0,f2:0}; });
   PCAP.forEach(function(y){
-    var r=null;
-    (y.rows||[]).forEach(function(x){ if(!x.isTotal && x.cls===cat) r=x; });
-    if(!r) return;
-    unit=r.unit; f1+=parseFloat(r.f1)||0; f2+=parseFloat(r.f2)||0;
-    rows+='<tr>'+
-      '<td style="text-align:center">'+esc(y.year)+'</td>'+
-      '<td style="text-align:center">'+esc(r.cat)+'</td>'+
-      '<td style="text-align:center">'+esc(r.unit)+'</td>'+
-      '<td class="num" style="text-align:center">'+esc(r.f1)+'</td>'+
-      '<td class="num" style="text-align:center">'+esc(r.f2)+'</td>'+
-    '</tr>';
+    (y.rows||[]).forEach(function(x){
+      if(x.isTotal) return;
+      var a=parseFloat(x.f1)||0, b=parseFloat(x.f2)||0;
+      tot.f1+=a; tot.f2+=b; tot.unit=x.unit||tot.unit;
+      if(catTot[x.cls]){ catTot[x.cls].f1+=a; catTot[x.cls].f2+=b; }
+    });
   });
-  rows+='<tr class="total">'+
-    '<td style="text-align:center">Total</td>'+
-    '<td style="text-align:center"></td>'+
-    '<td style="text-align:center">'+esc(unit)+'</td>'+
-    '<td class="num" style="text-align:center">'+fmt(f1)+'</td>'+
-    '<td class="num" style="text-align:center">'+fmt(f2)+'</td>'+
-  '</tr>';
-  box.innerHTML='<div class="card">'+
-    '<div class="card-title">Production Capacity &mdash; '+esc(capLabel(cat))+'</div>'+
+  var stats='<div class="stat a"><span class="num">'+fmt(tot.f1+tot.f2)+'</span>Total Capacity ('+esc(tot.unit)+')</div>';
+  var cycle=['b','c','d'];
+  cats.forEach(function(c,i){
+    stats+='<div class="stat '+cycle[i%cycle.length]+'"><span class="num">'+fmt(catTot[c].f1+catTot[c].f2)+'</span>'+esc(capLabel(c))+'</div>';
+  });
+  stats+='<div class="stat a"><span class="num">'+PCAP.length+'</span>Years</div>';
+
+  var max=0;
+  PCAP.forEach(function(y){
+    (y.rows||[]).forEach(function(x){
+      if(x.isTotal) return;
+      var v=(parseFloat(x.f1)||0)+(parseFloat(x.f2)||0);
+      if(v>max) max=v;
+    });
+  });
+  if(max<=0) max=1;
+  var chart='';
+  PCAP.forEach(function(y){
+    chart+='<div class="cap-col"><div class="cap-bars">';
+    cats.forEach(function(c,i){
+      var v=0;
+      (y.rows||[]).forEach(function(x){ if(!x.isTotal && x.cls===c) v=(parseFloat(x.f1)||0)+(parseFloat(x.f2)||0); });
+      chart+='<div class="cap-bar" style="height:'+Math.round(v/max*100)+'%;background:'+colors[i%colors.length]+'">'+(v?'<span>'+fmt(v)+'</span>':'')+'</div>';
+    });
+    chart+='</div><div class="cap-bar-label">'+esc(y.year)+'</div></div>';
+  });
+  var legend='';
+  cats.forEach(function(c,i){ legend+='<div><i style="background:'+colors[i%colors.length]+'"></i>'+esc(capLabel(c))+'</div>'; });
+
+  var body='';
+  var g1=0, g2=0;
+  PCAP.forEach(function(y){
+    var y1=0, y2=0;
+    (y.rows||[]).forEach(function(x){
+      if(x.isTotal) return;
+      var a=parseFloat(x.f1)||0, b=parseFloat(x.f2)||0; y1+=a; y2+=b;
+      body+='<tr>'+
+        '<td>'+esc(y.year)+'</td>'+
+        '<td>'+esc(capLabel(x.cls))+'</td>'+
+        '<td>'+esc(x.cat)+'</td>'+
+        '<td>'+esc(x.unit)+'</td>'+
+        '<td class="num">'+fmt(a)+'</td>'+
+        '<td class="num">'+fmt(b)+'</td>'+
+        '<td class="num">'+fmt(a+b)+'</td>'+
+      '</tr>';
+    });
+    g1+=y1; g2+=y2;
+    body+='<tr class="total"><td></td><td>Subtotal</td><td></td><td>'+esc(tot.unit)+'</td>'+
+      '<td class="num">'+fmt(y1)+'</td><td class="num">'+fmt(y2)+'</td><td class="num">'+fmt(y1+y2)+'</td></tr>';
+  });
+  body+='<tr class="total"><td></td><td>Grand Total</td><td></td><td>'+esc(tot.unit)+'</td>'+
+    '<td class="num">'+fmt(g1)+'</td><td class="num">'+fmt(g2)+'</td><td class="num">'+fmt(g1+g2)+'</td></tr>';
+
+  return '<div class="stats">'+stats+'</div>'+
+    '<div class="card"><div class="card-title">Capacity Trend by Year</div>'+
+    '<div class="cap-chart-wrap"><div class="cap-chart">'+chart+'</div><div class="cap-legend">'+legend+'</div></div></div>'+
+    '<div class="card"><div class="card-title">Production Capacity &mdash; Year-wise</div>'+
     '<div class="tbl-wrap"><table>'+
-    '<thead><tr><th style="text-align:center">Year</th><th style="text-align:center">No. Of Category</th><th style="text-align:center">Unit</th><th style="text-align:center">Capacity for 1st half</th><th style="text-align:center">Capacity for 2nd half</th></tr></thead>'+
-    '<tbody>'+rows+'</tbody></table></div></div>';
+    '<thead><tr><th>Year</th><th>Class Name</th><th>No. Of Category</th><th>Unit</th><th>Capacity for 1st half</th><th>Capacity for 2nd half</th><th>Total</th></tr></thead>'+
+    '<tbody>'+body+'</tbody></table></div></div>';
 }
 function showCapTab(on){
-  document.getElementById('capDetail').style.display = on?'none':'block';
+  document.getElementById('capSections').style.display = on?'none':'block';
   document.getElementById('capTab').style.display = on?'block':'none';
   if(on) window.scrollTo(0,0);
 }
-function showCapCats(on){
-  document.getElementById('capSections').style.display = on?'none':'block';
-  document.getElementById('capDetail').style.display = on?'block':'none';
+function showCapHome(){
+  document.getElementById('capSections').style.display='block';
   document.getElementById('capTab').style.display='none';
-  if(on) window.scrollTo(0,0);
 }
 
 function renderRawSupplier(){
@@ -1166,8 +1195,7 @@ document.getElementById('backPUtil').addEventListener('click',function(){ show('
 document.getElementById('backProdCap').addEventListener('click',function(){ show('home'); });
 document.getElementById('backMarket').addEventListener('click',function(){ show('prodcap'); });
 document.getElementById('backCapacity').addEventListener('click',function(){ show('prodcap'); });
-document.getElementById('backCapDetail').addEventListener('click',function(){ showCapCats(false); });
-document.getElementById('backCapTab').addEventListener('click',function(){ if(capFlow==='capacity'){ showCapTab(false); } else { showCapCats(false); } });
+document.getElementById('backCapTab').addEventListener('click',function(){ showCapHome(); });
 document.getElementById('backSupplier').addEventListener('click',function(){ show('prodcap'); });
 
 var lastSig='';
