@@ -1046,18 +1046,17 @@ function renderCapacityDashboard(){
         '<td>'+esc(x.unit)+'</td>'+
         '<td class="num">'+fmt(a)+'</td>'+
         '<td class="num">'+fmt(b)+'</td>'+
-        '<td class="num">'+fmt(a+b)+'</td>'+
       '</tr>';
     });
     body+='<tr class="total"><td></td><td>Subtotal</td><td></td><td>'+esc(tot.unit)+'</td>'+
-      '<td class="num">'+fmt(y1)+'</td><td class="num">'+fmt(y2)+'</td><td class="num">'+fmt(y1+y2)+'</td></tr>';
+      '<td class="num">'+fmt(y1)+'</td><td class="num">'+fmt(y2)+'</td></tr>';
   });
 
   return '<div class="card"><div class="card-title">Capacity Trend by Year</div>'+
     '<div class="cap-chart-wrap"><div class="cap-chart">'+chart+'</div><div class="cap-legend">'+legend+'</div></div></div>'+
     '<div class="card"><div class="card-title">Production Capacity &mdash; Year-wise</div>'+
     '<div class="tbl-wrap"><table>'+
-    '<thead><tr><th>Year</th><th>Class Name</th><th>No. Of Category</th><th>Unit</th><th>Capacity for 1st half</th><th>Capacity for 2nd half</th><th>Total</th></tr></thead>'+
+    '<thead><tr><th>Year</th><th>Class Name</th><th>No. Of Category</th><th>Unit</th><th>Capacity for 1st half</th><th>Capacity for 2nd half</th></tr></thead>'+
     '<tbody>'+body+'</tbody></table></div></div>';
 }
 function showCapTab(on){
