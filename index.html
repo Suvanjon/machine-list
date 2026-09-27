@@ -1415,6 +1415,8 @@ function showGate(msg, isErr){
     if(!m){ if(tries++<50){ setTimeout(attempt,150); } return; }
     m.style.display='flex';
     setVMsg(isErr?'err':'', wanted);
+    var inp=document.getElementById('vEmail');
+    if(inp && !inp.value){ var p=''; try{ p=localStorage.getItem('visitorEmail')||''; }catch(e){} if(p) inp.value=p; }
   })();
 }
 function checkAccess(email){
@@ -1424,12 +1426,11 @@ function saveVisitor(){
   var email=document.getElementById('vEmail').value.trim();
   if(!email){ setVMsg('err','Please enter your Gmail'); return; }
   setVMsg('','Checking access...');
-  checkAccess(email).then(function(res){
+  gatePost({action:'requestAccess', email:email}).then(function(res){
     if(res && (res.owner || res.approved)){ grantAccess(email); return; }
-    return gatePost({action:'requestAccess', email:email}).then(function(){
-      setVMsg('','Request sent. Waiting for the owner to approve \u2014 you will enter automatically once approved.');
-      startGatePoll(email);
-    });
+    try{ localStorage.setItem('visitorEmail', email); }catch(e){}
+    setVMsg('','Request sent. Waiting for the owner to approve \u2014 you will enter automatically once approved.');
+    startGatePoll(email);
   }).catch(function(){ setVMsg('err','Network error. Please try again.'); });
 }
 var _pendingEmail='';
@@ -1467,16 +1468,17 @@ function startVisitorHeartbeat(){
   _beatTimer=setInterval(visitorHeartbeat, 5*60*1000);
 }
 (function(){
-  var email='', local='';
-  try{ email=sessionStorage.getItem('visitorEmail')||''; }catch(e){}
-  try{ local=localStorage.getItem('visitorApproved')||''; }catch(e){}
+  var sess='', appr='', pend='';
+  try{ sess=sessionStorage.getItem('visitorEmail')||''; }catch(e){}
+  try{ appr=localStorage.getItem('visitorApproved')||''; }catch(e){}
+  try{ pend=localStorage.getItem('visitorEmail')||''; }catch(e){}
   document.body.classList.add('locked');
-  var cached=email||local;
+  var cached=sess||appr||pend;
   if(cached){
     showGate('Verifying access...');
     checkAccess(cached).then(function(res){
       if(res && (res.owner || res.approved)){ grantAccess(cached); }
-      else { try{ sessionStorage.removeItem('visitorEmail'); }catch(e){} try{ localStorage.removeItem('visitorApproved'); }catch(e){} showGate('Access not approved. Enter your Gmail to request access.', true); }
+      else { try{ localStorage.removeItem('visitorApproved'); }catch(e){} showGate('Waiting for the owner to approve\u2026'); startGatePoll(cached); }
     }).catch(function(){ showGate('Could not verify access. Please try again.', true); });
   } else {
     showGate();
