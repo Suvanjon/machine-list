@@ -1540,8 +1540,8 @@ window.addEventListener('unload', visitorLogOut);
 </div>
 <div class="modal" id="visitorModal" style="display:none">
 <div class="modal-box">
-<div class="modal-head"><div>Restricted Access</div></div>
-<div style="font-size:13px;color:var(--muted);margin-bottom:14px">This site is private. Enter your Gmail to request access. The owner is notified and you will be let in automatically once approved.</div>
+<div class="modal-head"><div>You are not permitted</div></div>
+<div style="font-size:13px;color:var(--muted);margin-bottom:14px">Your Gmail is not in the allowed list. Enter it below and click <b>Request Access</b> &mdash; the owner will receive an email to approve you. Once approved, you can open the site.</div>
 <div class="field"><label>Your Gmail</label><input type="email" id="vEmail" placeholder="you@gmail.com" onkeydown="if(event.key==='Enter')saveVisitor()"></div>
 <div class="entry-msg" id="vMsg"></div>
 <button class="btn" onclick="saveVisitor()">Request Access</button>
