@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>LED Lighting &amp; Electrical Accessories Manufacturing Project Plan</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Inter','Segoe UI',-apple-system,Roboto,Arial,sans-serif}
@@ -110,6 +113,9 @@ body{background:linear-gradient(180deg,#F0FDF4 0%,#FFFFFF 50%,#F0FDF4 100%);min-
 .stat.edit{background:linear-gradient(135deg,#0D9488,#0F766E);cursor:pointer}
 .stat.edit2{background:linear-gradient(135deg,#10B981,#059669);cursor:pointer}
 .stat.edit:hover,.stat.edit2:hover{opacity:1;transform:translateY(-3px) scale(1.02);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),inset 0 -2px 0 rgba(0,0,0,.18),0 10px 20px -6px rgba(0,77,64,.45),0 28px 48px -16px rgba(0,77,64,.55)}
+body.locked > .hdr,body.locked > .wrap{display:none}
+body.locked .modal#visitorModal{z-index:9999}
+#visitorModal{background:linear-gradient(160deg,#0B2A2A,#062024 55%,#04171A)}
 .modal{position:fixed;inset:0;background:rgba(8,26,36,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
 .modal-box{background:linear-gradient(180deg,#fff,#f6f8fa);border:1px solid #e1e8ee;border-top:5px solid #0D9488;border-radius:18px;padding:24px;width:100%;max-width:520px;max-height:92vh;overflow:auto;box-shadow:0 2px 6px rgba(0,0,0,.2),0 24px 50px -16px rgba(0,0,0,.5),0 50px 90px -24px rgba(0,0,0,.6),inset 0 1px 0 #fff}
 .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
@@ -224,7 +230,7 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 
 </style>
 </head>
-<body>
+<body class="locked">
 <div class="hdr">
 <div class="hdr-text">LED Lighting &amp; Electrical Accessories<br>Manufacturing Project Plan</div>
 <div class="hdr-sub" id="hdrSub">A strong business begins with a clear vision, a proper plan and a confident first step.</div>
@@ -1390,6 +1396,116 @@ function removeMachine(){
   if(!confirm('Remove this machine and all its suppliers?')) return;
   postEntry({action:'removeMachine', row:row}, 'sMsg', function(){ setTimeout(function(){ closeModal('supplierModal'); }, 800); setTimeout(function(){ loadData(true); }, 2000); });
 }
+function setVMsg(cls,txt){ var vm=document.getElementById('vMsg'); if(vm){ vm.className='entry-msg'+(cls?' '+cls:''); vm.textContent=txt||''; } }
+function gatePost(payload, keep){
+  return fetch(ENTRY_URL, { method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload), keepalive:!!keep }).then(function(r){ return r.json(); });
+}
+var _gateTimer=null;
+function grantAccess(email){
+  try{ sessionStorage.setItem('visitorEmail', email); }catch(e){}
+  try{ localStorage.setItem('visitorApproved', email); }catch(e){}
+  if(_gateTimer){ clearInterval(_gateTimer); _gateTimer=null; }
+  closeModal('visitorModal');
+  document.body.classList.remove('locked');
+  try{ gatePost({action:'logVisitor', email:email}).catch(function(){}); }catch(e){}
+  startVisitorHeartbeat();
+}
+function showGate(msg, isErr){
+  document.body.classList.add('locked');
+  var wanted = msg || 'Enter your Gmail. Access requires owner approval.';
+  var tries=0;
+  (function attempt(){
+    var m=document.getElementById('visitorModal');
+    if(!m){ if(tries++<50){ setTimeout(attempt,150); } return; }
+    m.style.display='flex';
+    setVMsg(isErr?'err':'', wanted);
+    var inp=document.getElementById('vEmail');
+    if(inp && !inp.value){ var p=''; try{ p=localStorage.getItem('visitorEmail')||''; }catch(e){} if(p) inp.value=p; }
+  })();
+}
+function checkAccess(email){
+  return gatePost({action:'checkAccess', email:email});
+}
+function saveVisitor(){
+  var email=document.getElementById('vEmail').value.trim();
+  if(!email){ setVMsg('err','Please enter your Gmail'); return; }
+  setVMsg('','Checking access...');
+  gatePost({action:'requestAccess', email:email}).then(function(res){
+    if(res && (res.owner || res.approved)){ grantAccess(email); return; }
+    try{ localStorage.setItem('visitorEmail', email); }catch(e){}
+    setVMsg('','Request sent. Waiting for the owner to approve \u2014 you will enter automatically once approved.');
+    startGatePoll(email);
+  }).catch(function(){ setVMsg('err','Network error. Please try again.'); });
+}
+var _pendingEmail='';
+function tryGrant(email){
+  if(!email) return;
+  checkAccess(email).then(function(res){ if(res && (res.owner || res.approved)){ grantAccess(email); } }).catch(function(){});
+}
+function startGatePoll(email){
+  _pendingEmail=email;
+  if(_gateTimer) clearInterval(_gateTimer);
+  tryGrant(email);
+  _gateTimer=setInterval(function(){ tryGrant(_pendingEmail); }, 2000);
+}
+function recheck(){
+  var e=((document.getElementById('vEmail')||{}).value||'').trim()||_pendingEmail;
+  if(!e){ setVMsg('err','Please enter your Gmail'); return; }
+  setVMsg('','Checking access...');
+  checkAccess(e).then(function(res){
+    if(res && (res.owner || res.approved)){ grantAccess(e); }
+    else { setVMsg('','Still waiting for the owner to approve.'); }
+  }).catch(function(){ setVMsg('err','Network error. Please try again.'); });
+}
+window.addEventListener('focus', function(){ if(_pendingEmail) tryGrant(_pendingEmail); });
+document.addEventListener('visibilitychange', function(){ if(!document.hidden && _pendingEmail) tryGrant(_pendingEmail); });
+var _beatTimer=null;
+function visitorHeartbeat(){
+  var email='';
+  try{ email=sessionStorage.getItem('visitorEmail')||''; }catch(e){}
+  if(!email) return;
+  try{ gatePost({action:'heartbeat', email:email}, true).catch(function(){}); }catch(e){}
+}
+function startVisitorHeartbeat(){
+  if(_beatTimer) clearInterval(_beatTimer);
+  visitorHeartbeat();
+  _beatTimer=setInterval(visitorHeartbeat, 5*60*1000);
+}
+(function(){
+  var sess='', appr='', pend='';
+  try{ sess=sessionStorage.getItem('visitorEmail')||''; }catch(e){}
+  try{ appr=localStorage.getItem('visitorApproved')||''; }catch(e){}
+  try{ pend=localStorage.getItem('visitorEmail')||''; }catch(e){}
+  document.body.classList.add('locked');
+  var cached=sess||appr||pend;
+  if(cached){
+    showGate('Verifying access...');
+    checkAccess(cached).then(function(res){
+      if(res && (res.owner || res.approved)){ grantAccess(cached); }
+      else { try{ localStorage.removeItem('visitorApproved'); }catch(e){} showGate('Waiting for the owner to approve\u2026'); startGatePoll(cached); }
+    }).catch(function(){ showGate('Could not verify access. Please try again.', true); });
+  } else {
+    showGate();
+  }
+})();
+var _visitorOut=false;
+function visitorLogOut(){
+  if(_visitorOut) return;
+  var email='';
+  try{ email=sessionStorage.getItem('visitorEmail')||''; }catch(e){}
+  if(!email) return;
+  _visitorOut=true;
+  var payload=JSON.stringify({action:'logOut', email:email});
+  var blob=null;
+  try{ blob=new Blob([payload], {type:'text/plain'}); }catch(e){}
+  if(blob && navigator.sendBeacon){
+    try{ if(navigator.sendBeacon(ENTRY_URL, blob)) return; }catch(e){}
+  }
+  try{ fetch(ENTRY_URL, { method:'POST', headers:{'Content-Type':'text/plain'}, body:payload, keepalive:true }).catch(function(){}); }catch(e){}
+}
+window.addEventListener('pagehide', visitorLogOut);
+window.addEventListener('beforeunload', visitorLogOut);
+window.addEventListener('unload', visitorLogOut);
 </script>
 <div class="modal" id="machineModal" style="display:none">
 <div class="modal-box">
@@ -1421,6 +1537,16 @@ function removeMachine(){
 <button class="btn" id="sRemove" style="display:none;background:linear-gradient(135deg,#d64545,#a11d1d);margin-top:6px" onclick="removeMachine()">Remove Machine</button>
 </div>
   </div>
+</div>
+<div class="modal" id="visitorModal" style="display:none">
+<div class="modal-box">
+<div class="modal-head"><div>Restricted Access</div></div>
+<div style="font-size:13px;color:var(--muted);margin-bottom:14px">This site is private. Enter your Gmail to request access. The owner is notified and you will be let in automatically once approved.</div>
+<div class="field"><label>Your Gmail</label><input type="email" id="vEmail" placeholder="you@gmail.com" onkeydown="if(event.key==='Enter')saveVisitor()"></div>
+<div class="entry-msg" id="vMsg"></div>
+<button class="btn" onclick="saveVisitor()">Request Access</button>
+<button class="btn" style="margin-top:8px;background:linear-gradient(135deg,#64748B,#475569)" onclick="recheck()">Check again</button>
+</div>
 </div>
 </body>
 </html>
