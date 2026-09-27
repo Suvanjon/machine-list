@@ -1406,21 +1406,15 @@ function grantAccess(email){
   try{ gatePost({action:'logVisitor', email:email}).catch(function(){}); }catch(e){}
   startVisitorHeartbeat();
 }
-function quickUnlock(email){
-  try{ sessionStorage.setItem('visitorEmail', email); }catch(e){}
-  try{ localStorage.setItem('visitorApproved', email); }catch(e){}
-  document.body.classList.remove('locked');
-  var m=document.getElementById('visitorModal'); if(m) m.style.display='none';
-  startVisitorHeartbeat();
-}
-function showGate(msg){
+function showGate(msg, isErr){
   document.body.classList.add('locked');
+  var wanted = msg || 'Enter your Gmail. Access requires owner approval.';
   var tries=0;
   (function attempt(){
     var m=document.getElementById('visitorModal');
     if(!m){ if(tries++<50){ setTimeout(attempt,150); } return; }
     m.style.display='flex';
-    setVMsg(msg?'err':'', msg||'Enter your Gmail. Access requires owner approval.');
+    setVMsg(isErr?'err':'', wanted);
   })();
 }
 function checkAccess(email){
@@ -1479,11 +1473,11 @@ function startVisitorHeartbeat(){
   document.body.classList.add('locked');
   var cached=email||local;
   if(cached){
-    quickUnlock(cached);
+    showGate('Verifying access...');
     checkAccess(cached).then(function(res){
-      if(res && (res.owner || res.approved)){ }
-      else { try{ sessionStorage.removeItem('visitorEmail'); }catch(e){} try{ localStorage.removeItem('visitorApproved'); }catch(e){} showGate(); }
-    }).catch(function(){});
+      if(res && (res.owner || res.approved)){ grantAccess(cached); }
+      else { try{ sessionStorage.removeItem('visitorEmail'); }catch(e){} try{ localStorage.removeItem('visitorApproved'); }catch(e){} showGate('Access not approved. Enter your Gmail to request access.', true); }
+    }).catch(function(){ showGate('Could not verify access. Please try again.', true); });
   } else {
     showGate();
   }
