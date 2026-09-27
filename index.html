@@ -1003,22 +1003,13 @@ function renderCapacityDashboard(){
   var cats=capCats();
   var colors=['#14B8A6','#0D9488','#10B981','#22C55E','#0F766E'];
   var tot={f1:0,f2:0,unit:''};
-  var catTot={};
-  cats.forEach(function(c){ catTot[c]={f1:0,f2:0}; });
   PCAP.forEach(function(y){
     (y.rows||[]).forEach(function(x){
       if(x.isTotal) return;
       var a=parseFloat(x.f1)||0, b=parseFloat(x.f2)||0;
       tot.f1+=a; tot.f2+=b; tot.unit=x.unit||tot.unit;
-      if(catTot[x.cls]){ catTot[x.cls].f1+=a; catTot[x.cls].f2+=b; }
     });
   });
-  var stats='<div class="stat a"><span class="num">'+fmt(tot.f1+tot.f2)+'</span>Total Capacity ('+esc(tot.unit)+')</div>';
-  var cycle=['b','c','d'];
-  cats.forEach(function(c,i){
-    stats+='<div class="stat '+cycle[i%cycle.length]+'"><span class="num">'+fmt(catTot[c].f1+catTot[c].f2)+'</span>'+esc(capLabel(c))+'</div>';
-  });
-  stats+='<div class="stat a"><span class="num">'+PCAP.length+'</span>Years</div>';
 
   var max=0;
   PCAP.forEach(function(y){
@@ -1066,8 +1057,7 @@ function renderCapacityDashboard(){
   body+='<tr class="total"><td></td><td>Grand Total</td><td></td><td>'+esc(tot.unit)+'</td>'+
     '<td class="num">'+fmt(g1)+'</td><td class="num">'+fmt(g2)+'</td><td class="num">'+fmt(g1+g2)+'</td></tr>';
 
-  return '<div class="stats">'+stats+'</div>'+
-    '<div class="card"><div class="card-title">Capacity Trend by Year</div>'+
+  return '<div class="card"><div class="card-title">Capacity Trend by Year</div>'+
     '<div class="cap-chart-wrap"><div class="cap-chart">'+chart+'</div><div class="cap-legend">'+legend+'</div></div></div>'+
     '<div class="card"><div class="card-title">Production Capacity &mdash; Year-wise</div>'+
     '<div class="tbl-wrap"><table>'+
