@@ -1230,20 +1230,7 @@ function restoreView(){
   else if(h==='putil'){ show('putil'); renderPowerUtil(); }
   else if(h==='prodcap'){ show('prodcap'); }
   else if(h==='market'){ show('market'); }
-  else if(h==='capacity' || h.indexOf('capacity/')===0){
-    var cp=h.split('/');
-    var cflow=cp[1]?decodeURIComponent(cp[1]):'';
-    var ccat=cp[2]?decodeURIComponent(cp[2]):'';
-    var cgrp=cp[3]?decodeURIComponent(cp[3]):'';
-    show('capacity'); renderProdCapacity();
-    if(cflow){
-      capFlow=cflow; capCostCat=''; capCostGroup=''; renderCapTab(); showCapTab(true);
-      if(cflow==='costing' && ccat){
-        capCostCat=ccat; renderCostDetail(); showCostDetail(true);
-        if(cgrp){ capCostGroup=cgrp; renderCostGroup(cgrp); showCostTab(true); }
-      }
-    }
-  }
+  else if(h==='capacity' || h.indexOf('capacity/')===0){ show('capacity'); restoreCapacityHash(h); syncHash(); }
   else if(h==='supplier'){ show('supplier'); }
   else if(h.indexOf('machine/')===0){
     var parts=h.slice(8).split('/');
@@ -1346,9 +1333,28 @@ function loadData(first){
     restoreView();
   });
 }
+function restoreCapacityHash(hashStr){
+  var h=(typeof hashStr==='string')?hashStr:location.hash.replace(/^#/,'');
+  try{ h=decodeURIComponent(h); }catch(e){}
+  var cp=h.split('/');
+  var cflow=cp[1]?decodeURIComponent(cp[1]):'';
+  var ccat=cp[2]?decodeURIComponent(cp[2]):'';
+  var cgrp=cp[3]?decodeURIComponent(cp[3]):'';
+  renderProdCapacity();
+  capFlow=cflow; capCostCat=ccat; capCostGroup=cgrp;
+  if(cflow){
+    renderCapTab();
+    var panel='tab';
+    if(cflow==='costing' && ccat){ renderCostDetail(); panel='detail'; if(cgrp){ renderCostGroup(cgrp); panel='ctab'; } }
+    document.getElementById('capSections').style.display='none';
+    document.getElementById('capTab').style.display=panel==='tab'?'block':'none';
+    document.getElementById('capCostDetail').style.display=panel==='detail'?'block':'none';
+    document.getElementById('capCostTab').style.display=panel==='ctab'?'block':'none';
+  }
+}
 function primeView(){
   var h=location.hash.replace(/^#/,'');
-  var top = (h==='machine'||h.indexOf('machine/')===0) ? 'machine' : (h==='land' ? 'land' : (h==='power' ? 'power' : (h==='putil' ? 'putil' : (h==='prodcap' ? 'prodcap' : (h==='market' ? 'market' : (h==='capacity' ? 'capacity' : (h==='supplier' ? 'supplier' : 'home')))))));
+  var top = (h==='machine'||h.indexOf('machine/')===0) ? 'machine' : (h==='land' ? 'land' : (h==='power' ? 'power' : (h==='putil' ? 'putil' : (h==='prodcap' ? 'prodcap' : (h==='market' ? 'market' : ((h==='capacity'||h.indexOf('capacity/')===0) ? 'capacity' : (h==='supplier' ? 'supplier' : 'home')))))));
   document.getElementById('viewHome').style.display = top==='home'?'block':'none';
   document.getElementById('viewMachine').style.display = top==='machine'?'block':'none';
   document.getElementById('viewLand').style.display = top==='land'?'block':'none';
@@ -1364,6 +1370,7 @@ function primeView(){
     document.getElementById('mGroups').style.display='none';
     document.getElementById('mDetail').style.display='none';
   }
+  if(top==='capacity'){ restoreCapacityHash(); }
 }
 primeView();
 loadData(true);
