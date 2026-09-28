@@ -29,9 +29,9 @@ body{background:linear-gradient(180deg,#F0FDF4 0%,#FFFFFF 50%,#F0FDF4 100%);min-
 .draw-links a{display:flex;align-items:center;gap:8px;padding:12px 14px;border:2px solid #0D9488;border-radius:14px;color:var(--teal);font-weight:700;text-decoration:none;transition:all .22s cubic-bezier(.2,.7,.3,1);background:#fff;box-shadow:0 1px 2px rgba(13,40,58,.06),0 8px 16px -8px rgba(0,77,64,.2),inset 0 1px 0 #fff}
 .draw-links a:hover{background:linear-gradient(135deg,#0D9488,#0F766E);color:#fff;transform:translateY(-3px);box-shadow:0 6px 12px -4px rgba(0,121,107,.4),0 16px 28px -10px rgba(0,121,107,.5)}
 
-.home-inner{max-width:1000px;margin:0 auto}
+.home-inner{max-width:1160px;margin:0 auto}
 .quote-top{margin:24px auto 0;text-align:center;color:var(--muted);font-size:14.5px;line-height:1.7;font-style:italic;padding:0 16px;letter-spacing:.01em}
-.home-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:18px auto 0;max-width:1000px}
+.home-cards{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:18px auto 0;max-width:1160px}
 .homecard{position:relative;overflow:hidden;border-radius:14px;border:none;padding:14px 12px;color:#fff;cursor:pointer;transition:transform .35s cubic-bezier(.2,.7,.3,1),box-shadow .35s cubic-bezier(.2,.7,.3,1);box-shadow:0 1px 0 rgba(255,255,255,.45) inset,0 -1px 0 rgba(255,255,255,.12) inset,0 -5px 0 rgba(0,0,0,.22) inset,0 3px 6px rgba(13,40,58,.16),0 14px 26px -6px rgba(0,77,64,.35),0 26px 48px -12px rgba(0,77,64,.5);min-height:126px;display:flex;flex-direction:column;justify-content:center}
 .homecard:hover{transform:perspective(800px) translateY(-9px) scale(1.03) rotateX(3deg);box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 -1px 0 rgba(255,255,255,.14) inset,0 -5px 0 rgba(0,0,0,.26) inset,0 8px 16px rgba(13,40,58,.18),0 22px 36px -8px rgba(0,77,64,.4),0 40px 72px -16px rgba(0,77,64,.66)}
 .homecard:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.32),rgba(255,255,255,.08) 40%,transparent 62%);pointer-events:none}
@@ -42,6 +42,7 @@ body{background:linear-gradient(180deg,#F0FDF4 0%,#FFFFFF 50%,#F0FDF4 100%);min-
 .hc-c{background:linear-gradient(135deg,#0D9488,#0F766E)}
 .hc-d{background:linear-gradient(135deg,#22C55E,#16A34A)}
 .hc-e{background:linear-gradient(135deg,#0F766E,#115E59)}
+.hc-f{background:linear-gradient(135deg,#0891B2,#0E7490)}
 .hc-icon{width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.4);border-radius:11px;font-size:18px;margin-bottom:8px;position:relative;backdrop-filter:blur(4px);box-shadow:inset 0 1px 2px rgba(255,255,255,.35),0 3px 8px rgba(0,0,0,.18)}
 .hc-title{font-size:15px;font-weight:800;margin-bottom:3px;position:relative;letter-spacing:.01em;text-shadow:0 1px 3px rgba(0,0,0,.28)}
 .hc-sub{font-size:12px;color:rgba(255,255,255,.9);position:relative;line-height:1.35}
@@ -173,6 +174,7 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 .homecard:nth-child(3){animation-delay:.12s}
 .homecard:nth-child(4){animation-delay:.18s}
 .homecard:nth-child(5){animation-delay:.24s}
+.homecard:nth-child(6){animation-delay:.3s}
 .seccard:nth-child(2){animation-delay:.06s}
 .seccard:nth-child(3){animation-delay:.12s}
 .seccard:nth-child(4){animation-delay:.18s}
@@ -270,6 +272,12 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 <div class="hc-icon">&#128230;</div>
 <div class="hc-title">Market Assessment &amp; Capacity Planning</div>
 <div class="hc-sub" id="homeProdCapSub">Production capacity plan</div>
+<div class="hc-go">Open &rarr;</div>
+</div>
+<div class="homecard hc-f" id="goMatCost">
+<div class="hc-icon">&#128176;</div>
+<div class="hc-title">Material Costing</div>
+<div class="hc-sub" id="homeMatCostSub">Product-wise material cost</div>
 <div class="hc-go">Open &rarr;</div>
 </div>
 </div>
@@ -996,7 +1004,8 @@ function capCats(){
   });
   return cats;
 }
-function openCapacity(){ show('capacity'); renderProdCapacity(); }
+function openCapacity(){ capEntry='prodcap'; show('capacity'); renderProdCapacity(); }
+function openMatCost(){ capEntry='home'; show('capacity'); capFlow='costing'; capCostCat=''; capCostGroup=''; renderCapTab(); showCapTab(true); }
 function renderProdCapacity(){
   showCapHome();
   var wrap=document.getElementById('capHomeCards');
@@ -1004,12 +1013,12 @@ function renderProdCapacity(){
   var c1=document.createElement('div');
   c1.className='seccard';
   c1.innerHTML='<div class="sc-name">Production Capacity</div><div class="sc-line">Capacity dashboard &amp; year-wise plan</div>';
-  c1.addEventListener('click',function(){ capFlow='capacity'; capCostCat=''; capCostGroup=''; renderCapTab(); showCapTab(true); });
+  c1.addEventListener('click',function(){ capEntry='prodcap'; capFlow='capacity'; capCostCat=''; capCostGroup=''; renderCapTab(); showCapTab(true); });
   wrap.appendChild(c1);
   var c2=document.createElement('div');
   c2.className='seccard';
   c2.innerHTML='<div class="sc-name">Material Costing</div><div class="sc-line">Material-wise costing details</div>';
-  c2.addEventListener('click',function(){ capFlow='costing'; capCostCat=''; capCostGroup=''; renderCapTab(); showCapTab(true); });
+  c2.addEventListener('click',function(){ capEntry='prodcap'; capFlow='costing'; capCostCat=''; capCostGroup=''; renderCapTab(); showCapTab(true); });
   wrap.appendChild(c2);
 }
 function renderCapTab(){
@@ -1028,7 +1037,7 @@ function renderCapTab(){
   }
   box.innerHTML=renderCapacityDashboard();
 }
-var capCostCat=''; var capCostGroup='';
+var capEntry=''; var capCostCat=''; var capCostGroup='';
 function renderCostDetail(){
   var wrap=document.getElementById('capCostCards');
   wrap.innerHTML='';
@@ -1273,6 +1282,7 @@ document.getElementById('goLand').addEventListener('click',function(){ show('lan
 document.getElementById('goPower').addEventListener('click',function(){ show('power'); renderPower(); });
 document.getElementById('goPUtil').addEventListener('click',function(){ show('putil'); renderPowerUtil(); });
 document.getElementById('goProdCap').addEventListener('click',function(){ show('prodcap'); });
+document.getElementById('goMatCost').addEventListener('click',function(){ openMatCost(); });
 document.getElementById('backMachine').addEventListener('click',function(){ show('home'); });
 document.getElementById('backSections').addEventListener('click',function(){
   machineGroupLabel='';
@@ -1290,7 +1300,7 @@ document.getElementById('backPUtil').addEventListener('click',function(){ show('
 document.getElementById('backProdCap').addEventListener('click',function(){ show('home'); });
 document.getElementById('backMarket').addEventListener('click',function(){ show('prodcap'); });
 document.getElementById('backCapacity').addEventListener('click',function(){ show('prodcap'); });
-document.getElementById('backCapTab').addEventListener('click',function(){ showCapHome(); });
+document.getElementById('backCapTab').addEventListener('click',function(){ if(capEntry==='home'){ show('home'); } else { showCapHome(); } });
 document.getElementById('backCapCost').addEventListener('click',function(){ showCostDetail(false); });
 document.getElementById('backCapCostTab').addEventListener('click',function(){ if(COST_CSV[capCostCat]){ capCostCat=''; capCostGroup=''; showCapTab(true); } else { showCostTab(false); } });
 document.getElementById('backSupplier').addEventListener('click',function(){ show('prodcap'); });
