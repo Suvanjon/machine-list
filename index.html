@@ -541,6 +541,7 @@ var CSV_PCAP='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=
 var CSV_RAW='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_RAW;
 var CSV_GANG='https://docs.google.com/spreadsheets/d/1RVFfs-QHKsPfmijTZ-N2MiFqPKPEQrV48zewhsrMpCk/gviz/tq?tqx=out:csv&gid=0';
 var CSV_PIANO='https://docs.google.com/spreadsheets/d/1RVFfs-QHKsPfmijTZ-N2MiFqPKPEQrV48zewhsrMpCk/gviz/tq?tqx=out:csv&gid=1883173559';
+var CSV_DBBOX='https://docs.google.com/spreadsheets/d/1RVFfs-QHKsPfmijTZ-N2MiFqPKPEQrV48zewhsrMpCk/gviz/tq?tqx=out:csv&gid=749524709';
 var SHEET_URL='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/edit';
 var ENTRY_URL='https://script.google.com/macros/s/AKfycbwK1ZX8L6olG1ZFewDxoRmIITGsykGR_ePQSzlNjirT_E44V7_-Jh2XNhSQneY9u0hrMQ/exec';
 var M = [];
@@ -1044,6 +1045,7 @@ function renderCostDetail(){
 function renderCostGroup(n){
   if(n==='Gang'){ renderCosting(CSV_GANG,n); return; }
   if(n==='Piano & Holder'){ renderCosting(CSV_PIANO,n); return; }
+  if(n==='DB Box'){ renderCosting(CSV_DBBOX,n); return; }
   var box=document.getElementById('capCostTabCards');
   box.innerHTML='<div class="card"><div class="card-title">'+esc(n)+'</div><div style="text-align:center;color:#94A3B8;padding:26px">No data yet</div></div>';
 }
