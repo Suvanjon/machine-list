@@ -544,6 +544,7 @@ var CSV_PIANO='https://docs.google.com/spreadsheets/d/1RVFfs-QHKsPfmijTZ-N2MiFqP
 var CSV_DBBOX='https://docs.google.com/spreadsheets/d/1RVFfs-QHKsPfmijTZ-N2MiFqPKPEQrV48zewhsrMpCk/gviz/tq?tqx=out:csv&gid=749524709';
 var CSV_CB='https://docs.google.com/spreadsheets/d/1RVFfs-QHKsPfmijTZ-N2MiFqPKPEQrV48zewhsrMpCk/gviz/tq?tqx=out:csv&gid=1374237229';
 var CSV_PVC='https://docs.google.com/spreadsheets/d/1RVFfs-QHKsPfmijTZ-N2MiFqPKPEQrV48zewhsrMpCk/gviz/tq?tqx=out:csv&gid=1491094408';
+var COST_CSV={'Gang':CSV_GANG,'Piano & Holder':CSV_PIANO,'DB Box':CSV_DBBOX,'Circuit Breaker':CSV_CB,'PVC Tape':CSV_PVC};
 var SHEET_URL='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/edit';
 var ENTRY_URL='https://script.google.com/macros/s/AKfycbwK1ZX8L6olG1ZFewDxoRmIITGsykGR_ePQSzlNjirT_E44V7_-Jh2XNhSQneY9u0hrMQ/exec';
 var M = [];
@@ -1020,7 +1021,7 @@ function renderCapTab(){
       var c=document.createElement('div');
       c.className='seccard';
       c.innerHTML='<div class="sc-name">'+esc(n)+'</div><div class="sc-line">Material costing</div>';
-      c.addEventListener('click',function(){ capCostCat=n; capCostGroup=(n==='Circuit Breaker')?n:''; if(n==='Circuit Breaker'){ renderCostGroup(n); showCostDetail(true); showCostTab(true); } else { renderCostDetail(); showCostDetail(true); } });
+      c.addEventListener('click',function(){ capCostCat=n; capCostGroup=''; if(COST_CSV[n]){ capCostGroup=n; renderCostGroup(n); showCostDetail(true); showCostTab(true); } else { renderCostDetail(); showCostDetail(true); } });
       wrap.appendChild(c);
     });
     return;
@@ -1049,11 +1050,7 @@ function renderCostDetail(){
   });
 }
 function renderCostGroup(n){
-  if(n==='Gang'){ renderCosting(CSV_GANG,n); return; }
-  if(n==='Piano & Holder'){ renderCosting(CSV_PIANO,n); return; }
-  if(n==='DB Box'){ renderCosting(CSV_DBBOX,n); return; }
-  if(n==='Circuit Breaker'){ renderCosting(CSV_CB,n); return; }
-  if(n==='PVC Tape'){ renderCosting(CSV_PVC,n); return; }
+  if(COST_CSV[n]){ renderCosting(COST_CSV[n],n); return; }
   var box=document.getElementById('capCostTabCards');
   box.innerHTML='<div class="card"><div class="card-title">'+esc(n)+'</div><div style="text-align:center;color:#94A3B8;padding:26px">No data yet</div></div>';
 }
