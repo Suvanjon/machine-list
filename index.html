@@ -791,7 +791,11 @@ function syncHash(){
   else if(currentView==='putil') h='putil';
   else if(currentView==='prodcap') h='prodcap';
   else if(currentView==='market') h='market';
-  else if(currentView==='capacity') h='capacity';
+  else if(currentView==='capacity'){
+    h='capacity';
+    if(capCostCat!==''){ h+='/costing/'+encodeURIComponent(capCostCat); if(capCostGroup!=='') h+='/'+encodeURIComponent(capCostGroup); }
+    else if(capFlow!=='') h+='/'+encodeURIComponent(capFlow);
+  }
   else if(currentView==='supplier') h='supplier';
   try{ history.replaceState(null,'', h?('#'+h):location.pathname+location.search); }catch(e){}
 }
@@ -998,12 +1002,12 @@ function renderProdCapacity(){
   var c1=document.createElement('div');
   c1.className='seccard';
   c1.innerHTML='<div class="sc-name">Production Capacity</div><div class="sc-line">Capacity dashboard &amp; year-wise plan</div>';
-  c1.addEventListener('click',function(){ capFlow='capacity'; renderCapTab(); showCapTab(true); });
+  c1.addEventListener('click',function(){ capFlow='capacity'; capCostCat=''; capCostGroup=''; renderCapTab(); showCapTab(true); });
   wrap.appendChild(c1);
   var c2=document.createElement('div');
   c2.className='seccard';
   c2.innerHTML='<div class="sc-name">Material Costing</div><div class="sc-line">Material-wise costing details</div>';
-  c2.addEventListener('click',function(){ capFlow='costing'; renderCapTab(); showCapTab(true); });
+  c2.addEventListener('click',function(){ capFlow='costing'; capCostCat=''; capCostGroup=''; renderCapTab(); showCapTab(true); });
   wrap.appendChild(c2);
 }
 function renderCapTab(){
@@ -1015,14 +1019,14 @@ function renderCapTab(){
       var c=document.createElement('div');
       c.className='seccard';
       c.innerHTML='<div class="sc-name">'+esc(n)+'</div><div class="sc-line">Material costing</div>';
-      c.addEventListener('click',function(){ capCostCat=n; if(n==='Circuit Breaker'){ renderCostGroup(n); showCostDetail(true); showCostTab(true); } else { renderCostDetail(); showCostDetail(true); } });
+      c.addEventListener('click',function(){ capCostCat=n; capCostGroup=(n==='Circuit Breaker')?n:''; if(n==='Circuit Breaker'){ renderCostGroup(n); showCostDetail(true); showCostTab(true); } else { renderCostDetail(); showCostDetail(true); } });
       wrap.appendChild(c);
     });
     return;
   }
   box.innerHTML=renderCapacityDashboard();
 }
-var capCostCat='';
+var capCostCat=''; var capCostGroup='';
 function renderCostDetail(){
   var wrap=document.getElementById('capCostCards');
   wrap.innerHTML='';
@@ -1039,7 +1043,7 @@ function renderCostDetail(){
     var c=document.createElement('div');
     c.className='seccard';
     c.innerHTML='<div class="sc-name">'+esc(n)+'</div><div class="sc-line">Material costing</div>';
-    c.addEventListener('click',function(){ renderCostGroup(n); showCostTab(true); });
+    c.addEventListener('click',function(){ capCostGroup=n; renderCostGroup(n); showCostTab(true); });
     wrap.appendChild(c);
   });
 }
@@ -1083,12 +1087,16 @@ function showCostDetail(on){
   document.getElementById('capTab').style.display=on?'none':'block';
   document.getElementById('capCostDetail').style.display=on?'block':'none';
   document.getElementById('capCostTab').style.display='none';
+  if(!on){ capCostCat=''; capCostGroup=''; }
   if(on) window.scrollTo(0,0);
+  syncHash();
 }
 function showCostTab(on){
   document.getElementById('capCostDetail').style.display=on?'none':'block';
   document.getElementById('capCostTab').style.display=on?'block':'none';
+  if(!on){ capCostGroup=''; }
   if(on) window.scrollTo(0,0);
+  syncHash();
 }
 function renderCapacityDashboard(){
   if(!PCAP.length){
@@ -1159,13 +1167,17 @@ function showCapTab(on){
   document.getElementById('capTab').style.display = on?'block':'none';
   document.getElementById('capCostDetail').style.display='none';
   document.getElementById('capCostTab').style.display='none';
+  if(!on){ capFlow=''; capCostCat=''; capCostGroup=''; }
   if(on) window.scrollTo(0,0);
+  syncHash();
 }
 function showCapHome(){
   document.getElementById('capSections').style.display='block';
   document.getElementById('capTab').style.display='none';
   document.getElementById('capCostDetail').style.display='none';
   document.getElementById('capCostTab').style.display='none';
+  capFlow=''; capCostCat=''; capCostGroup='';
+  if(currentView==='capacity') syncHash();
 }
 
 function renderRawSupplier(){
@@ -1218,7 +1230,20 @@ function restoreView(){
   else if(h==='putil'){ show('putil'); renderPowerUtil(); }
   else if(h==='prodcap'){ show('prodcap'); }
   else if(h==='market'){ show('market'); }
-  else if(h==='capacity'){ show('capacity'); renderProdCapacity(); }
+  else if(h==='capacity' || h.indexOf('capacity/')===0){
+    var cp=h.split('/');
+    var cflow=cp[1]?decodeURIComponent(cp[1]):'';
+    var ccat=cp[2]?decodeURIComponent(cp[2]):'';
+    var cgrp=cp[3]?decodeURIComponent(cp[3]):'';
+    show('capacity'); renderProdCapacity();
+    if(cflow){
+      capFlow=cflow; capCostCat=''; capCostGroup=''; renderCapTab(); showCapTab(true);
+      if(cflow==='costing' && ccat){
+        capCostCat=ccat; renderCostDetail(); showCostDetail(true);
+        if(cgrp){ capCostGroup=cgrp; renderCostGroup(cgrp); showCostTab(true); }
+      }
+    }
+  }
   else if(h==='supplier'){ show('supplier'); }
   else if(h.indexOf('machine/')===0){
     var parts=h.slice(8).split('/');
