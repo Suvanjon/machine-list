@@ -540,6 +540,7 @@ var CSV_MARKET='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?forma
 var CSV_PCAP='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_PCAP;
 var CSV_RAW='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_RAW;
 var CSV_GANG='https://docs.google.com/spreadsheets/d/1RVFfs-QHKsPfmijTZ-N2MiFqPKPEQrV48zewhsrMpCk/gviz/tq?tqx=out:csv&gid=0';
+var CSV_PIANO='https://docs.google.com/spreadsheets/d/1RVFfs-QHKsPfmijTZ-N2MiFqPKPEQrV48zewhsrMpCk/gviz/tq?tqx=out:csv&gid=1883173559';
 var SHEET_URL='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/edit';
 var ENTRY_URL='https://script.google.com/macros/s/AKfycbwK1ZX8L6olG1ZFewDxoRmIITGsykGR_ePQSzlNjirT_E44V7_-Jh2XNhSQneY9u0hrMQ/exec';
 var M = [];
@@ -1041,14 +1042,15 @@ function renderCostDetail(){
   });
 }
 function renderCostGroup(n){
-  if(n==='Gang'){ renderGang(); return; }
+  if(n==='Gang'){ renderCosting(CSV_GANG,n); return; }
+  if(n==='Piano & Holder'){ renderCosting(CSV_PIANO,n); return; }
   var box=document.getElementById('capCostTabCards');
   box.innerHTML='<div class="card"><div class="card-title">'+esc(n)+'</div><div style="text-align:center;color:#94A3B8;padding:26px">No data yet</div></div>';
 }
-function renderGang(){
+function renderCosting(url,title){
   var box=document.getElementById('capCostTabCards');
-  box.innerHTML='<div class="card"><div style="text-align:center;color:#94A3B8;padding:26px">Loading Gang costing...</div></div>';
-  fetch(CSV_GANG+'&t='+Date.now(), {cache:'no-store'}).then(function(r){ return r.text(); }).then(function(txt){
+  box.innerHTML='<div class="card"><div style="text-align:center;color:#94A3B8;padding:26px">Loading '+esc(title)+'...</div></div>';
+  fetch(url+'&t='+Date.now(), {cache:'no-store'}).then(function(r){ return r.text(); }).then(function(txt){
     var rows=parseCSV(txt);
     var products=[], cur=null;
     for(var i=1;i<rows.length;i++){
@@ -1071,7 +1073,7 @@ function renderGang(){
         '<tbody>'+matRows+'</tbody></table></div></div>';
     });
     box.innerHTML=html;
-  }).catch(function(){ box.innerHTML='<div class="card"><div style="text-align:center;color:#94A3B8;padding:26px">Could not load Gang data</div></div>'; });
+  }).catch(function(){ box.innerHTML='<div class="card"><div style="text-align:center;color:#94A3B8;padding:26px">Could not load '+esc(title)+' data</div></div>'; });
 }
 function showCostDetail(on){
   document.getElementById('capTab').style.display=on?'none':'block';
