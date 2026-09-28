@@ -1023,7 +1023,7 @@ var capCostCat='';
 function renderCostDetail(){
   var wrap=document.getElementById('capCostCards');
   wrap.innerHTML='';
-  var groups={'Electrical Accessories':['Gang']};
+  var groups={'Electrical Accessories':['Gang','Piano & Holder','DB Box']};
   var list=groups[capCostCat]||[];
   if(!list.length){
     var d=document.createElement('div');
@@ -1036,9 +1036,14 @@ function renderCostDetail(){
     var c=document.createElement('div');
     c.className='seccard';
     c.innerHTML='<div class="sc-name">'+esc(n)+'</div><div class="sc-line">Material costing</div>';
-    if(n==='Gang'){ c.addEventListener('click',function(){ renderGang(); showCostTab(true); }); }
+    c.addEventListener('click',function(){ renderCostGroup(n); showCostTab(true); });
     wrap.appendChild(c);
   });
+}
+function renderCostGroup(n){
+  if(n==='Gang'){ renderGang(); return; }
+  var box=document.getElementById('capCostTabCards');
+  box.innerHTML='<div class="card"><div class="card-title">'+esc(n)+'</div><div style="text-align:center;color:#94A3B8;padding:26px">No data yet</div></div>';
 }
 function renderGang(){
   var box=document.getElementById('capCostTabCards');
