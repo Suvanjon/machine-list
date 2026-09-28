@@ -995,8 +995,14 @@ function renderProdCapacity(){
 function renderCapTab(){
   var box=document.getElementById('capTabCards');
   if(capFlow==='costing'){
-    box.innerHTML='<div class="card"><div class="card-title">Material Costing</div>'+
-      '<div style="text-align:center;color:#94A3B8;padding:26px">No data</div></div>';
+    box.innerHTML='<div class="sec-cards" id="costingCards"></div>';
+    var wrap=document.getElementById('costingCards');
+    ['Electrical Accessories','LED Lighting','Circuit Breaker','PVC Tape','Home Applience'].forEach(function(n){
+      var c=document.createElement('div');
+      c.className='seccard';
+      c.innerHTML='<div class="sc-name">'+esc(n)+'</div><div class="sc-line">Material costing</div>';
+      wrap.appendChild(c);
+    });
     return;
   }
   box.innerHTML=renderCapacityDashboard();
