@@ -1053,18 +1053,19 @@ function renderGang(){
       if(pn){ cur={name:pn, mrate:(r[6]||'').trim(), mats:[]}; products.push(cur); }
       if(cur && mat) cur.mats.push({mat:mat,qty:(r[2]||'').trim(),rate:(r[3]||'').trim(),val:(r[4]||'').trim(),uom:(r[5]||'').trim()});
     }
-    var sHtml='';
-    products.forEach(function(p){ sHtml+='<tr><td>'+esc(p.name)+'</td><td class="num">'+esc(p.mrate)+'</td></tr>'; });
-    var dHtml='';
+    var html='';
     products.forEach(function(p){
-      p.mats.forEach(function(m,i){
-        dHtml+='<tr>'+(i===0?('<td>'+esc(p.name)+'</td>'):'<td></td>')+'<td>'+esc(m.mat)+'</td><td class="num">'+esc(m.qty)+'</td><td class="num">'+esc(m.rate)+'</td><td class="num">'+esc(m.val)+'</td><td>'+esc(m.uom)+'</td></tr>';
+      var matRows='';
+      p.mats.forEach(function(m){
+        matRows+='<tr><td>'+esc(m.mat)+'</td><td class="num">'+esc(m.qty)+'</td><td class="num">'+esc(m.rate)+'</td><td class="num">'+esc(m.val)+'</td><td style="text-align:center">'+esc(m.uom)+'</td></tr>';
       });
+      matRows+='<tr class="total"><td>Material Rate</td><td></td><td></td><td class="num">'+esc(p.mrate)+'</td><td></td></tr>';
+      html+='<div class="card"><div class="card-title">'+esc(p.name)+'</div>'+
+        '<div class="tbl-wrap"><table>'+
+        '<thead><tr><th>Material Name</th><th style="text-align:center">Qty</th><th style="text-align:center">Item Rate</th><th style="text-align:center">Value</th><th style="text-align:center">UoM</th></tr></thead>'+
+        '<tbody>'+matRows+'</tbody></table></div></div>';
     });
-    box.innerHTML='<div class="card"><div class="card-title">Gang &mdash; Product Summary</div>'+
-      '<div class="tbl-wrap"><table><thead><tr><th>Product Name</th><th style="text-align:center">Material Rate</th></tr></thead><tbody>'+sHtml+'</tbody></table></div></div>'+
-      '<div class="card"><div class="card-title">Gang &mdash; Material Costing</div>'+
-      '<div class="tbl-wrap"><table><thead><tr><th>Product Name</th><th>Material Name</th><th style="text-align:center">Qty</th><th style="text-align:center">Item Rate</th><th style="text-align:center">Value</th><th style="text-align:center">UoM</th></tr></thead><tbody>'+dHtml+'</tbody></table></div></div>';
+    box.innerHTML=html;
   }).catch(function(){ box.innerHTML='<div class="card"><div style="text-align:center;color:#94A3B8;padding:26px">Could not load Gang data</div></div>'; });
 }
 function showCostDetail(on){
