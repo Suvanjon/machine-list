@@ -490,6 +490,10 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 <button class="back-btn" id="backCapCost">&#8592; Back</button>
 <div class="sec-cards" id="capCostCards"></div>
 </div>
+<div id="capCostTab" style="display:none">
+<button class="back-btn" id="backCapCostTab">&#8592; Back</button>
+<div id="capCostTabCards"></div>
+</div>
 </div>
 
 <div id="viewSupplier" style="display:none">
@@ -533,6 +537,7 @@ var CSV_PC='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=cs
 var CSV_MARKET='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_MARKET;
 var CSV_PCAP='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_PCAP;
 var CSV_RAW='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_RAW;
+var CSV_GANG='https://docs.google.com/spreadsheets/d/1RVFfs-QHKsPfmijTZ-N2MiFqPKPEQrV48zewhsrMpCk/gviz/tq?tqx=out:csv&gid=0';
 var SHEET_URL='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/edit';
 var ENTRY_URL='https://script.google.com/macros/s/AKfycbwK1ZX8L6olG1ZFewDxoRmIITGsykGR_ePQSzlNjirT_E44V7_-Jh2XNhSQneY9u0hrMQ/exec';
 var M = [];
@@ -1029,12 +1034,46 @@ function renderCostDetail(){
     var c=document.createElement('div');
     c.className='seccard';
     c.innerHTML='<div class="sc-name">'+esc(n)+'</div><div class="sc-line">Material costing</div>';
+    if(n==='Gang'){ c.addEventListener('click',function(){ renderGang(); showCostTab(true); }); }
     wrap.appendChild(c);
   });
+}
+function renderGang(){
+  var box=document.getElementById('capCostTabCards');
+  box.innerHTML='<div class="card"><div style="text-align:center;color:#94A3B8;padding:26px">Loading Gang costing...</div></div>';
+  fetch(CSV_GANG+'&t='+Date.now(), {cache:'no-store'}).then(function(r){ return r.text(); }).then(function(txt){
+    var rows=parseCSV(txt);
+    var products=[], cur=null;
+    for(var i=1;i<rows.length;i++){
+      var r=rows[i];
+      var pn=(r[0]||'').trim(), mat=(r[1]||'').trim();
+      if(!pn && !mat) continue;
+      if(pn){ cur={name:pn, mrate:(r[6]||'').trim(), mats:[]}; products.push(cur); }
+      if(cur && mat) cur.mats.push({mat:mat,qty:(r[2]||'').trim(),rate:(r[3]||'').trim(),val:(r[4]||'').trim(),uom:(r[5]||'').trim()});
+    }
+    var sHtml='';
+    products.forEach(function(p){ sHtml+='<tr><td>'+esc(p.name)+'</td><td class="num">'+esc(p.mrate)+'</td></tr>'; });
+    var dHtml='';
+    products.forEach(function(p){
+      p.mats.forEach(function(m,i){
+        dHtml+='<tr>'+(i===0?('<td>'+esc(p.name)+'</td>'):'<td></td>')+'<td>'+esc(m.mat)+'</td><td class="num">'+esc(m.qty)+'</td><td class="num">'+esc(m.rate)+'</td><td class="num">'+esc(m.val)+'</td><td>'+esc(m.uom)+'</td></tr>';
+      });
+    });
+    box.innerHTML='<div class="card"><div class="card-title">Gang &mdash; Product Summary</div>'+
+      '<div class="tbl-wrap"><table><thead><tr><th>Product Name</th><th style="text-align:center">Material Rate</th></tr></thead><tbody>'+sHtml+'</tbody></table></div></div>'+
+      '<div class="card"><div class="card-title">Gang &mdash; Material Costing</div>'+
+      '<div class="tbl-wrap"><table><thead><tr><th>Product Name</th><th>Material Name</th><th style="text-align:center">Qty</th><th style="text-align:center">Item Rate</th><th style="text-align:center">Value</th><th style="text-align:center">UoM</th></tr></thead><tbody>'+dHtml+'</tbody></table></div></div>';
+  }).catch(function(){ box.innerHTML='<div class="card"><div style="text-align:center;color:#94A3B8;padding:26px">Could not load Gang data</div></div>'; });
 }
 function showCostDetail(on){
   document.getElementById('capTab').style.display=on?'none':'block';
   document.getElementById('capCostDetail').style.display=on?'block':'none';
+  document.getElementById('capCostTab').style.display='none';
+  if(on) window.scrollTo(0,0);
+}
+function showCostTab(on){
+  document.getElementById('capCostDetail').style.display=on?'none':'block';
+  document.getElementById('capCostTab').style.display=on?'block':'none';
   if(on) window.scrollTo(0,0);
 }
 function renderCapacityDashboard(){
@@ -1105,12 +1144,14 @@ function showCapTab(on){
   document.getElementById('capSections').style.display = on?'none':'block';
   document.getElementById('capTab').style.display = on?'block':'none';
   document.getElementById('capCostDetail').style.display='none';
+  document.getElementById('capCostTab').style.display='none';
   if(on) window.scrollTo(0,0);
 }
 function showCapHome(){
   document.getElementById('capSections').style.display='block';
   document.getElementById('capTab').style.display='none';
   document.getElementById('capCostDetail').style.display='none';
+  document.getElementById('capCostTab').style.display='none';
 }
 
 function renderRawSupplier(){
@@ -1226,6 +1267,7 @@ document.getElementById('backMarket').addEventListener('click',function(){ show(
 document.getElementById('backCapacity').addEventListener('click',function(){ show('prodcap'); });
 document.getElementById('backCapTab').addEventListener('click',function(){ showCapHome(); });
 document.getElementById('backCapCost').addEventListener('click',function(){ showCostDetail(false); });
+document.getElementById('backCapCostTab').addEventListener('click',function(){ showCostTab(false); });
 document.getElementById('backSupplier').addEventListener('click',function(){ show('prodcap'); });
 
 var lastSig='';
