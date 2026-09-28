@@ -486,6 +486,10 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 <button class="back-btn" id="backCapTab">&#8592; Back</button>
 <div id="capTabCards"></div>
 </div>
+<div id="capCostDetail" style="display:none">
+<button class="back-btn" id="backCapCost">&#8592; Back</button>
+<div class="sec-cards" id="capCostCards"></div>
+</div>
 </div>
 
 <div id="viewSupplier" style="display:none">
@@ -1001,11 +1005,37 @@ function renderCapTab(){
       var c=document.createElement('div');
       c.className='seccard';
       c.innerHTML='<div class="sc-name">'+esc(n)+'</div><div class="sc-line">Material costing</div>';
+      c.addEventListener('click',function(){ capCostCat=n; renderCostDetail(); showCostDetail(true); });
       wrap.appendChild(c);
     });
     return;
   }
   box.innerHTML=renderCapacityDashboard();
+}
+var capCostCat='';
+function renderCostDetail(){
+  var wrap=document.getElementById('capCostCards');
+  wrap.innerHTML='';
+  var groups={'Electrical Accessories':['Gang']};
+  var list=groups[capCostCat]||[];
+  if(!list.length){
+    var d=document.createElement('div');
+    d.className='seccard';
+    d.innerHTML='<div class="sc-name">'+esc(capCostCat)+'</div><div class="sc-line">No data yet</div>';
+    wrap.appendChild(d);
+    return;
+  }
+  list.forEach(function(n){
+    var c=document.createElement('div');
+    c.className='seccard';
+    c.innerHTML='<div class="sc-name">'+esc(n)+'</div><div class="sc-line">Material costing</div>';
+    wrap.appendChild(c);
+  });
+}
+function showCostDetail(on){
+  document.getElementById('capTab').style.display=on?'none':'block';
+  document.getElementById('capCostDetail').style.display=on?'block':'none';
+  if(on) window.scrollTo(0,0);
 }
 function renderCapacityDashboard(){
   if(!PCAP.length){
@@ -1074,11 +1104,13 @@ function renderCapacityDashboard(){
 function showCapTab(on){
   document.getElementById('capSections').style.display = on?'none':'block';
   document.getElementById('capTab').style.display = on?'block':'none';
+  document.getElementById('capCostDetail').style.display='none';
   if(on) window.scrollTo(0,0);
 }
 function showCapHome(){
   document.getElementById('capSections').style.display='block';
   document.getElementById('capTab').style.display='none';
+  document.getElementById('capCostDetail').style.display='none';
 }
 
 function renderRawSupplier(){
@@ -1193,6 +1225,7 @@ document.getElementById('backProdCap').addEventListener('click',function(){ show
 document.getElementById('backMarket').addEventListener('click',function(){ show('prodcap'); });
 document.getElementById('backCapacity').addEventListener('click',function(){ show('prodcap'); });
 document.getElementById('backCapTab').addEventListener('click',function(){ showCapHome(); });
+document.getElementById('backCapCost').addEventListener('click',function(){ showCostDetail(false); });
 document.getElementById('backSupplier').addEventListener('click',function(){ show('prodcap'); });
 
 var lastSig='';
