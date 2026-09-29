@@ -1015,6 +1015,11 @@ function renderProdCapacity(){
   c1.innerHTML='<div class="sc-name">Production Capacity</div><div class="sc-line">Capacity dashboard &amp; year-wise plan</div>';
   c1.addEventListener('click',function(){ capEntry='prodcap'; capFlow='capacity'; capCostCat=''; capCostGroup=''; renderCapTab(); showCapTab(true); });
   wrap.appendChild(c1);
+  var c2=document.createElement('div');
+  c2.className='seccard';
+  c2.innerHTML='<div class="sc-name">Product Category</div><div class="sc-line">Category-wise product costing</div>';
+  c2.addEventListener('click',function(){ capEntry='prodcap'; capFlow='costing'; capCostCat=''; capCostGroup=''; renderCapTab(); showCapTab(true); });
+  wrap.appendChild(c2);
 }
 function renderCapTab(){
   var box=document.getElementById('capTabCards');
