@@ -566,6 +566,8 @@ var CSV_LED_PANEL='https://docs.google.com/spreadsheets/d/'+LED_SID+'/gviz/tq?tq
 var CSV_LED_BRACKET='https://docs.google.com/spreadsheets/d/'+LED_SID+'/gviz/tq?tqx=out:csv&gid=1524588545';
 var CSV_LED_FLOOD='https://docs.google.com/spreadsheets/d/'+LED_SID+'/gviz/tq?tqx=out:csv&gid=680150254';
 var CSV_LED_DOWN='https://docs.google.com/spreadsheets/d/'+LED_SID+'/gviz/tq?tqx=out:csv&gid=248393747';
+var CSV_PCAT_LED='https://docs.google.com/spreadsheets/d/1TWyizXJ41Mil2fr9tMoXNNEkiOQFmKC1uOQ0VGXzrcw/gviz/tq?tqx=out:csv&gid=0';
+var PCAT_CSV={'LED Lighting':CSV_PCAT_LED};
 var COST_CSV={'Gang':CSV_GANG,'Piano & Holder':CSV_PIANO,'DB Box':CSV_DBBOX,'Circuit Breaker':CSV_CB,'PVC Tape':CSV_PVC,'Exhaust Fan':CSV_EXHAUST,'Plastic':CSV_PLASTIC,'AC LED Bulb':CSV_LED_BULB,'AC/DC':CSV_LED_ACDC,'High Watt':CSV_LED_HW,'Panel Light':CSV_LED_PANEL,'Bracket Tube':CSV_LED_BRACKET,'Flood Light':CSV_LED_FLOOD,'Down Panel':CSV_LED_DOWN};
 var SHEET_URL='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/edit';
 var ENTRY_URL='https://script.google.com/macros/s/AKfycbwK1ZX8L6olG1ZFewDxoRmIITGsykGR_ePQSzlNjirT_E44V7_-Jh2XNhSQneY9u0hrMQ/exec';
@@ -1091,12 +1093,40 @@ function renderCostDetail(){
 }
 function renderCostGroup(n){
   if(capFlow==='category'){
+    if(PCAT_CSV[n]){ renderProdCategory(PCAT_CSV[n],n); return; }
     document.getElementById('capCostTabCards').innerHTML='<div class="card"><div class="card-title">'+esc(n)+'</div><div style="text-align:center;color:#94A3B8;padding:26px">Data coming soon</div></div>';
     return;
   }
   if(COST_CSV[n]){ renderCosting(COST_CSV[n],n); return; }
   var box=document.getElementById('capCostTabCards');
   box.innerHTML='<div class="card"><div class="card-title">'+esc(n)+'</div><div style="text-align:center;color:#94A3B8;padding:26px">No data yet</div></div>';
+}
+function renderProdCategory(url,title){
+  var box=document.getElementById('capCostTabCards');
+  box.innerHTML='<div class="card"><div style="text-align:center;color:#94A3B8;padding:26px">Loading '+esc(title)+'...</div></div>';
+  fetch(url+'&t='+Date.now(),{cache:'no-store'}).then(function(r){ return r.text(); }).then(function(txt){
+    var rows=parseCSV(txt);
+    var groups=[], cur=null;
+    for(var i=1;i<rows.length;i++){
+      var r=rows[i];
+      var cat=(r[0]||'').trim(), name=(r[1]||'').trim(), mrate=(r[2]||'').trim(), drate=(r[3]||'').trim();
+      if(!cat && !name) continue;
+      if(cat){ cur={cat:cat, rows:[]}; groups.push(cur); }
+      if(cur && name) cur.rows.push({name:name,mrate:mrate,drate:drate});
+    }
+    var html='';
+    groups.forEach(function(g){
+      var body='';
+      g.rows.forEach(function(x){
+        body+='<tr><td>'+esc(x.name)+'</td><td class="num">'+esc(x.mrate)+'</td><td class="num">'+esc(x.drate)+'</td></tr>';
+      });
+      html+='<div class="card"><div class="card-title">'+esc(g.cat)+'</div>'+
+        '<div class="tbl-wrap"><table>'+
+        '<thead><tr><th>Product Name</th><th style="text-align:center">Material Rate</th><th style="text-align:center">DP Rate</th></tr></thead>'+
+        '<tbody>'+body+'</tbody></table></div></div>';
+    });
+    box.innerHTML=html||'<div class="card"><div style="text-align:center;color:#94A3B8;padding:26px">No data</div></div>';
+  }).catch(function(){ box.innerHTML='<div class="card"><div style="text-align:center;color:#94A3B8;padding:26px">Could not load '+esc(title)+' data</div></div>'; });
 }
 function renderCosting(url,title){
   var box=document.getElementById('capCostTabCards');
