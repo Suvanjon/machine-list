@@ -558,7 +558,15 @@ var CSV_CB='https://docs.google.com/spreadsheets/d/1RVFfs-QHKsPfmijTZ-N2MiFqPKPE
 var CSV_PVC='https://docs.google.com/spreadsheets/d/1RVFfs-QHKsPfmijTZ-N2MiFqPKPEQrV48zewhsrMpCk/gviz/tq?tqx=out:csv&gid=1491094408';
 var CSV_EXHAUST='https://docs.google.com/spreadsheets/d/1RVFfs-QHKsPfmijTZ-N2MiFqPKPEQrV48zewhsrMpCk/gviz/tq?tqx=out:csv&gid=1000948674';
 var CSV_PLASTIC='https://docs.google.com/spreadsheets/d/1RVFfs-QHKsPfmijTZ-N2MiFqPKPEQrV48zewhsrMpCk/gviz/tq?tqx=out:csv&gid=1048028481';
-var COST_CSV={'Gang':CSV_GANG,'Piano & Holder':CSV_PIANO,'DB Box':CSV_DBBOX,'Circuit Breaker':CSV_CB,'PVC Tape':CSV_PVC,'Exhaust Fan':CSV_EXHAUST,'Plastic':CSV_PLASTIC};
+var LED_SID='1EAMeVis529r3kgoCBZELGrhOpCwv9Skqz1e8zznCy2M';
+var CSV_LED_BULB='https://docs.google.com/spreadsheets/d/'+LED_SID+'/gviz/tq?tqx=out:csv&gid=1144239760';
+var CSV_LED_ACDC='https://docs.google.com/spreadsheets/d/'+LED_SID+'/gviz/tq?tqx=out:csv&gid=1344315013';
+var CSV_LED_HW='https://docs.google.com/spreadsheets/d/'+LED_SID+'/gviz/tq?tqx=out:csv&gid=1751574427';
+var CSV_LED_PANEL='https://docs.google.com/spreadsheets/d/'+LED_SID+'/gviz/tq?tqx=out:csv&gid=149507552';
+var CSV_LED_BRACKET='https://docs.google.com/spreadsheets/d/'+LED_SID+'/gviz/tq?tqx=out:csv&gid=1524588545';
+var CSV_LED_FLOOD='https://docs.google.com/spreadsheets/d/'+LED_SID+'/gviz/tq?tqx=out:csv&gid=680150254';
+var CSV_LED_DOWN='https://docs.google.com/spreadsheets/d/'+LED_SID+'/gviz/tq?tqx=out:csv&gid=248393747';
+var COST_CSV={'Gang':CSV_GANG,'Piano & Holder':CSV_PIANO,'DB Box':CSV_DBBOX,'Circuit Breaker':CSV_CB,'PVC Tape':CSV_PVC,'Exhaust Fan':CSV_EXHAUST,'Plastic':CSV_PLASTIC,'AC LED Bulb':CSV_LED_BULB,'AC/DC':CSV_LED_ACDC,'High Watt':CSV_LED_HW,'Panel Light':CSV_LED_PANEL,'Bracket Tube':CSV_LED_BRACKET,'Flood Light':CSV_LED_FLOOD,'Down Panel':CSV_LED_DOWN};
 var SHEET_URL='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/edit';
 var ENTRY_URL='https://script.google.com/macros/s/AKfycbwK1ZX8L6olG1ZFewDxoRmIITGsykGR_ePQSzlNjirT_E44V7_-Jh2XNhSQneY9u0hrMQ/exec';
 var M = [];
@@ -1250,14 +1258,15 @@ function show(view){
   syncHash();
 }
 function restoreView(){
-  var h=location.hash.replace(/^#/,'');
+  var rawHash=location.hash.replace(/^#/,'');
+  var h=rawHash;
   try{ h=decodeURIComponent(h); }catch(e){}
   if(h==='land'){ show('land'); renderLand(); }
   else if(h==='power'){ show('power'); renderPower(); }
   else if(h==='putil'){ show('putil'); renderPowerUtil(); }
   else if(h==='prodcap'){ show('prodcap'); }
   else if(h==='market'){ show('market'); }
-  else if(h==='capacity' || h.indexOf('capacity/')===0){ show('capacity'); restoreCapacityHash(h); syncHash(); }
+  else if(h==='capacity' || h.indexOf('capacity/')===0){ show('capacity'); restoreCapacityHash(rawHash); syncHash(); }
   else if(h==='supplier'){ show('supplier'); }
   else if(h.indexOf('machine/')===0){
     var parts=h.slice(8).split('/');
@@ -1363,7 +1372,6 @@ function loadData(first){
 }
 function restoreCapacityHash(hashStr){
   var h=(typeof hashStr==='string')?hashStr:location.hash.replace(/^#/,'');
-  try{ h=decodeURIComponent(h); }catch(e){}
   var cp=h.split('/');
   var cflow=cp[1]?decodeURIComponent(cp[1]):'';
   var ccat=cp[2]?decodeURIComponent(cp[2]):'';
