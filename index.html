@@ -803,7 +803,7 @@ function syncHash(){
   else if(currentView==='market') h='market';
   else if(currentView==='capacity'){
     h='capacity';
-    if(capCostCat!==''){ h+='/costing/'+encodeURIComponent(capCostCat); if(capCostGroup!=='') h+='/'+encodeURIComponent(capCostGroup); }
+    if(capCostCat!==''){ h+='/'+encodeURIComponent(capFlow||'costing')+'/'+encodeURIComponent(capCostCat); if(capCostGroup!=='') h+='/'+encodeURIComponent(capCostGroup); }
     else if(capFlow!=='') h+='/'+encodeURIComponent(capFlow);
   }
   else if(currentView==='supplier') h='supplier';
@@ -1018,12 +1018,12 @@ function renderProdCapacity(){
   var c2=document.createElement('div');
   c2.className='seccard';
   c2.innerHTML='<div class="sc-name">Product Category</div><div class="sc-line">Category-wise product costing</div>';
-  c2.addEventListener('click',function(){ capEntry='prodcap'; capFlow='costing'; capCostCat=''; capCostGroup=''; renderCapTab(); showCapTab(true); });
+  c2.addEventListener('click',function(){ capEntry='prodcap'; capFlow='category'; capCostCat=''; capCostGroup=''; renderCapTab(); showCapTab(true); });
   wrap.appendChild(c2);
 }
 function renderCapTab(){
   var box=document.getElementById('capTabCards');
-  if(capFlow==='costing'){
+  if(capFlow==='costing' || capFlow==='category'){
     box.innerHTML='<div class="sec-cards" id="costingCards"></div>';
     var wrap=document.getElementById('costingCards');
     ['Electrical Accessories','LED Lighting','Circuit Breaker','PVC Tape','Exhaust Fan'].forEach(function(n){
@@ -1059,6 +1059,10 @@ function renderCostDetail(){
   });
 }
 function renderCostGroup(n){
+  if(capFlow==='category'){
+    document.getElementById('capCostTabCards').innerHTML='<div class="card"><div class="card-title">'+esc(n)+'</div><div style="text-align:center;color:#94A3B8;padding:26px">Data coming soon</div></div>';
+    return;
+  }
   if(COST_CSV[n]){ renderCosting(COST_CSV[n],n); return; }
   var box=document.getElementById('capCostTabCards');
   box.innerHTML='<div class="card"><div class="card-title">'+esc(n)+'</div><div style="text-align:center;color:#94A3B8;padding:26px">No data yet</div></div>';
@@ -1354,7 +1358,7 @@ function restoreCapacityHash(hashStr){
   if(cflow){
     renderCapTab();
     var panel='tab';
-    if(cflow==='costing' && ccat){ renderCostDetail(); panel='detail'; if(cgrp){ renderCostGroup(cgrp); panel='ctab'; } }
+    if((cflow==='costing'||cflow==='category') && ccat){ renderCostDetail(); panel='detail'; if(cgrp){ renderCostGroup(cgrp); panel='ctab'; } }
     document.getElementById('capSections').style.display='none';
     document.getElementById('capTab').style.display=panel==='tab'?'block':'none';
     document.getElementById('capCostDetail').style.display=panel==='detail'?'block':'none';
