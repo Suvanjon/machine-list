@@ -1383,7 +1383,7 @@ document.getElementById('backMarket').addEventListener('click',function(){ show(
 document.getElementById('backCapacity').addEventListener('click',function(){ show('prodcap'); });
 document.getElementById('backCapTab').addEventListener('click',function(){ if(capEntry==='home'){ show('home'); } else { showCapHome(); } });
 document.getElementById('backCapCost').addEventListener('click',function(){ showCostDetail(false); });
-document.getElementById('backCapCostTab').addEventListener('click',function(){ if(COST_CSV[capCostCat]){ capCostCat=''; capCostGroup=''; showCapTab(true); } else { showCostTab(false); } });
+document.getElementById('backCapCostTab').addEventListener('click',function(){ if(capFlow==='category' || COST_CSV[capCostCat]){ capCostCat=''; capCostGroup=''; showCapTab(true); } else { showCostTab(false); } });
 document.getElementById('backSupplier').addEventListener('click',function(){ show('prodcap'); });
 
 var lastSig='';
