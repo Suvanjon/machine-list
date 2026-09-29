@@ -1116,28 +1116,36 @@ function renderProdCategory(url,title){
     if(seq!==_pcatSeq) return;
     var rows=parseCSV(txt);
     var start=0; while(start<rows.length && (rows[start]||[]).filter(function(x){ return (x||'').trim(); }).length<2) start++;
-    var hdr=(rows[start]||[]).map(function(x){ return (x||'').trim().toLowerCase(); });
-    var grouped=(hdr.indexOf('product category')!==-1);
+    var rawHdr=(rows[start]||[]).map(function(x){ return (x||'').trim(); });
+    var lhdr=rawHdr.map(function(x){ return x.toLowerCase(); });
+    var grouped=(lhdr.indexOf('product category')!==-1);
+    var nameIdx=grouped?1:0;
+    var valLabels=rawHdr.slice(nameIdx+1).filter(function(x){ return x; });
+    var ncols=nameIdx+1+valLabels.length;
     var groups=[], cur=null;
     for(var i=start+1;i<rows.length;i++){
       var r=rows[i];
-      var cat,name,mrate,drate;
-      if(grouped){ cat=(r[0]||'').trim(); name=(r[1]||'').trim(); mrate=(r[2]||'').trim(); drate=(r[3]||'').trim(); }
-      else { cat=''; name=(r[0]||'').trim(); mrate=(r[1]||'').trim(); drate=(r[2]||'').trim(); }
+      var cat=grouped?(r[0]||'').trim():'';
+      var name=(r[nameIdx]||'').trim();
       if(!cat && !name) continue;
+      var vals=[];
+      for(var v=nameIdx+1;v<ncols;v++) vals.push((r[v]||'').trim());
       if(!grouped && !cur){ cur={cat:title, rows:[]}; groups.push(cur); }
       if(grouped && cat){ cur={cat:cat, rows:[]}; groups.push(cur); }
-      if(cur && name) cur.rows.push({name:name,mrate:mrate,drate:drate});
+      if(cur && name) cur.rows.push({name:name, vals:vals});
     }
     var html='';
     groups.forEach(function(g){
+      var head='<th>Product Name</th>';
+      valLabels.forEach(function(l){ head+='<th style="text-align:center">'+esc(l)+'</th>'; });
       var body='';
       g.rows.forEach(function(x){
-        body+='<tr><td>'+esc(x.name)+'</td><td class="num">'+esc(x.mrate)+'</td><td class="num">'+esc(x.drate)+'</td></tr>';
+        var tr='<tr><td>'+esc(x.name)+'</td>';
+        x.vals.forEach(function(v){ tr+='<td class="num">'+esc(v)+'</td>'; });
+        body+=tr+'</tr>';
       });
       html+='<div class="card"><div class="card-title">'+esc(g.cat)+'</div>'+
-        '<div class="tbl-wrap"><table>'+
-        '<thead><tr><th>Product Name</th><th style="text-align:center">Material Rate</th><th style="text-align:center">DP Rate</th></tr></thead>'+
+        '<div class="tbl-wrap"><table><thead><tr>'+head+'</tr></thead>'+
         '<tbody>'+body+'</tbody></table></div></div>';
     });
     box.innerHTML=html||'<div class="card"><div style="text-align:center;color:#94A3B8;padding:26px">No data</div></div>';
