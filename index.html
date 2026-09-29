@@ -1023,7 +1023,11 @@ function renderProdCapacity(){
 }
 function renderCapTab(){
   var box=document.getElementById('capTabCards');
-  if(capFlow==='costing' || capFlow==='category'){
+  if(capFlow==='category'){
+    box.innerHTML='<div class="card"><div class="card-title">Product Category</div><div style="text-align:center;color:#94A3B8;padding:26px">Data coming soon</div></div>';
+    return;
+  }
+  if(capFlow==='costing'){
     box.innerHTML='<div class="sec-cards" id="costingCards"></div>';
     var wrap=document.getElementById('costingCards');
     ['Electrical Accessories','LED Lighting','Circuit Breaker','PVC Tape','Exhaust Fan'].forEach(function(n){
@@ -1041,6 +1045,10 @@ var capEntry=''; var capCostCat=''; var capCostGroup='';
 function renderCostDetail(){
   var wrap=document.getElementById('capCostCards');
   wrap.innerHTML='';
+  if(capFlow==='category'){
+    wrap.innerHTML='<div class="seccard"><div class="sc-name">Product Category</div><div class="sc-line">Data coming soon</div></div>';
+    return;
+  }
   var groups={'Electrical Accessories':['Gang','Piano & Holder','DB Box']};
   var list=groups[capCostCat]||[];
   if(!list.length){
