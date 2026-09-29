@@ -1038,7 +1038,15 @@ function renderProdCapacity(){
 function renderCapTab(){
   var box=document.getElementById('capTabCards');
   if(capFlow==='category'){
-    box.innerHTML='<div class="card"><div class="card-title">Product Category</div><div style="text-align:center;color:#94A3B8;padding:26px">Data coming soon</div></div>';
+    box.innerHTML='<div class="sec-cards" id="catCards"></div>';
+    var w=document.getElementById('catCards');
+    ['LED Lighting','gang Series','Circuit Breaker','PVC Tape','Exhuast Fan'].forEach(function(n){
+      var c=document.createElement('div');
+      c.className='seccard';
+      c.innerHTML='<div class="sc-name">'+esc(n)+'</div><div class="sc-line">Product category</div>';
+      c.addEventListener('click',function(){ capCostCat=n; capCostGroup=n; renderCostGroup(n); showCostDetail(true); showCostTab(true); });
+      w.appendChild(c);
+    });
     return;
   }
   if(capFlow==='costing'){
