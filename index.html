@@ -553,7 +553,8 @@ var CSV_DBBOX='https://docs.google.com/spreadsheets/d/1RVFfs-QHKsPfmijTZ-N2MiFqP
 var CSV_CB='https://docs.google.com/spreadsheets/d/1RVFfs-QHKsPfmijTZ-N2MiFqPKPEQrV48zewhsrMpCk/gviz/tq?tqx=out:csv&gid=1374237229';
 var CSV_PVC='https://docs.google.com/spreadsheets/d/1RVFfs-QHKsPfmijTZ-N2MiFqPKPEQrV48zewhsrMpCk/gviz/tq?tqx=out:csv&gid=1491094408';
 var CSV_EXHAUST='https://docs.google.com/spreadsheets/d/1RVFfs-QHKsPfmijTZ-N2MiFqPKPEQrV48zewhsrMpCk/gviz/tq?tqx=out:csv&gid=1000948674';
-var COST_CSV={'Gang':CSV_GANG,'Piano & Holder':CSV_PIANO,'DB Box':CSV_DBBOX,'Circuit Breaker':CSV_CB,'PVC Tape':CSV_PVC,'Exhaust Fan':CSV_EXHAUST};
+var CSV_PLASTIC='https://docs.google.com/spreadsheets/d/1RVFfs-QHKsPfmijTZ-N2MiFqPKPEQrV48zewhsrMpCk/gviz/tq?tqx=out:csv&gid=1048028481';
+var COST_CSV={'Gang':CSV_GANG,'Piano & Holder':CSV_PIANO,'DB Box':CSV_DBBOX,'Circuit Breaker':CSV_CB,'PVC Tape':CSV_PVC,'Exhaust Fan':CSV_EXHAUST,'Plastic':CSV_PLASTIC};
 var SHEET_URL='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/edit';
 var ENTRY_URL='https://script.google.com/macros/s/AKfycbwK1ZX8L6olG1ZFewDxoRmIITGsykGR_ePQSzlNjirT_E44V7_-Jh2XNhSQneY9u0hrMQ/exec';
 var M = [];
@@ -1086,7 +1087,7 @@ function renderCosting(url,title){
       var r=rows[i];
       var pn=(r[0]||'').trim(), mat=(r[1]||'').trim();
       if(!pn && !mat) continue;
-      if(pn){ cur={name:pn, mrate:(r[6]||'').trim(), mats:[]}; products.push(cur); }
+      if(pn && (!cur || cur.name!==pn)){ cur={name:pn, mrate:(r[6]||'').trim(), mats:[]}; products.push(cur); }
       if(cur && mat) cur.mats.push({mat:mat,qty:(r[2]||'').trim(),rate:(r[3]||'').trim(),val:(r[4]||'').trim(),uom:(r[5]||'').trim()});
     }
     var html='';
