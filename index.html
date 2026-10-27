@@ -1659,7 +1659,9 @@ function saveVisitor(){
   var email=document.getElementById('vEmail').value.trim();
   if(!email){ setVMsg('err','Please enter your Gmail'); return; }
   setVMsg('','Logging in...');
-  grantAccess(email);
+  document.body.classList.remove('locked');
+  var m=document.getElementById('visitorModal'); if(m) m.style.display='none';
+  try{ gatePost({action:'logVisitor', email:email}).catch(function(){}); }catch(e){}
 }
 var _pendingEmail='';
 function tryGrant(email){
@@ -1757,18 +1759,7 @@ window.addEventListener('unload', visitorLogOut);
 </div>
 <script>
 (function(){
-  var appr='', sess='';
-  try{ appr=localStorage.getItem('visitorApproved')||''; }catch(e){}
-  try{ sess=sessionStorage.getItem('visitorEmail')||''; }catch(e){}
-  var email=appr||sess;
-  if(email){
-    try{ sessionStorage.setItem('visitorEmail', email); }catch(e){}
-    document.body.classList.remove('locked');
-    var m=document.getElementById('visitorModal'); if(m) m.style.display='none';
-    startVisitorHeartbeat();
-  } else {
-    showGate('Enter your Gmail to continue.');
-  }
+  showGate('Enter your Gmail to continue.');
 })();
 </script>
 </body>
