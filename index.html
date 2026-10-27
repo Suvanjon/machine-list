@@ -31,7 +31,7 @@ body{background:linear-gradient(180deg,#F0FDF4 0%,#FFFFFF 50%,#F0FDF4 100%);min-
 
 .home-inner{max-width:1160px;margin:0 auto}
 .quote-top{margin:24px auto 0;text-align:center;color:var(--muted);font-size:14.5px;line-height:1.7;font-style:italic;padding:0 16px;letter-spacing:.01em}
-.home-cards{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:18px auto 0;max-width:1160px}
+.home-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:18px auto 0;max-width:1160px}
 .homecard{position:relative;overflow:hidden;border-radius:14px;border:none;padding:14px 12px;color:#fff;cursor:pointer;transition:transform .35s cubic-bezier(.2,.7,.3,1),box-shadow .35s cubic-bezier(.2,.7,.3,1);box-shadow:0 1px 0 rgba(255,255,255,.45) inset,0 -1px 0 rgba(255,255,255,.12) inset,0 -5px 0 rgba(0,0,0,.22) inset,0 3px 6px rgba(13,40,58,.16),0 14px 26px -6px rgba(0,77,64,.35),0 26px 48px -12px rgba(0,77,64,.5);min-height:126px;display:flex;flex-direction:column;justify-content:center}
 .homecard:hover{transform:perspective(800px) translateY(-9px) scale(1.03) rotateX(3deg);box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 -1px 0 rgba(255,255,255,.14) inset,0 -5px 0 rgba(0,0,0,.26) inset,0 8px 16px rgba(13,40,58,.18),0 22px 36px -8px rgba(0,77,64,.4),0 40px 72px -16px rgba(0,77,64,.66)}
 .homecard:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.32),rgba(255,255,255,.08) 40%,transparent 62%);pointer-events:none}
@@ -62,6 +62,8 @@ body{background:linear-gradient(180deg,#F0FDF4 0%,#FFFFFF 50%,#F0FDF4 100%);min-
 .quote span+span{margin-top:2px}
 .sec-cards{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;margin:0 auto 18px;max-width:740px}
 .sec-cards.gc .seccard{flex:0 0 calc((100% - 48px)/4)}
+.sec-cards.quad{max-width:1000px}
+.sec-cards.quad .seccard{flex:0 0 calc((100% - 48px)/4)}
 .sec-cards.split34{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;max-width:1000px}
 .sec-cards.split34 .seccard{flex:none}
 .sec-cards.split34 .seccard:nth-child(-n+3){grid-column:span 4}
@@ -278,12 +280,6 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 <div class="hc-sub" id="homeProdCapSub">Production capacity plan</div>
 <div class="hc-go">Open &rarr;</div>
 </div>
-<div class="homecard hc-f" id="goMatCost">
-<div class="hc-icon">&#128176;</div>
-<div class="hc-title">Material Costing</div>
-<div class="hc-sub" id="homeMatCostSub">Product-wise material cost</div>
-<div class="hc-go">Open &rarr;</div>
-</div>
 </div>
 <div class="prod-gallery">
 <div class="prod-row">
@@ -444,7 +440,7 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 
 <div id="viewProdCap" style="display:none">
 <button class="back-btn" id="backProdCap">&#8592; Back</button>
-<div class="sec-cards" id="prodCapCards">
+<div class="sec-cards quad" id="prodCapCards">
 <div class="seccard" data-sec="market" onclick="show('market')">
 <div class="sc-name">Market Assessment</div>
 <div class="sc-line">Market size, competitors share &amp; demand</div>
@@ -456,6 +452,10 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 <div class="seccard" data-sec="supplier" onclick="show('supplier')">
 <div class="sc-name">Raw Material Supplier</div>
 <div class="sc-line">Supplier list &amp; details</div>
+</div>
+<div class="seccard" data-sec="costing" onclick="openMatCost()">
+<div class="sc-name">Material Costing</div>
+<div class="sc-line">Product-wise material cost</div>
 </div>
 </div>
 </div>
@@ -1027,7 +1027,7 @@ function capCats(){
   return cats;
 }
 function openCapacity(){ capEntry='prodcap'; show('capacity'); renderProdCapacity(); }
-function openMatCost(){ capEntry='home'; show('capacity'); capFlow='costing'; capCostCat=''; capCostGroup=''; renderCapTab(); showCapTab(true); }
+function openMatCost(){ capEntry='matcost'; show('capacity'); capFlow='costing'; capCostCat=''; capCostGroup=''; renderCapTab(); showCapTab(true); }
 function renderProdCapacity(){
   showCapHome();
   var wrap=document.getElementById('capHomeCards');
@@ -1371,7 +1371,6 @@ document.getElementById('goLand').addEventListener('click',function(){ show('lan
 document.getElementById('goPower').addEventListener('click',function(){ show('power'); renderPower(); });
 document.getElementById('goPUtil').addEventListener('click',function(){ show('putil'); renderPowerUtil(); });
 document.getElementById('goProdCap').addEventListener('click',function(){ show('prodcap'); });
-document.getElementById('goMatCost').addEventListener('click',function(){ openMatCost(); });
 document.getElementById('backMachine').addEventListener('click',function(){ show('home'); });
 document.getElementById('backSections').addEventListener('click',function(){
   machineGroupLabel='';
@@ -1389,7 +1388,7 @@ document.getElementById('backPUtil').addEventListener('click',function(){ show('
 document.getElementById('backProdCap').addEventListener('click',function(){ show('home'); });
 document.getElementById('backMarket').addEventListener('click',function(){ show('prodcap'); });
 document.getElementById('backCapacity').addEventListener('click',function(){ show('prodcap'); });
-document.getElementById('backCapTab').addEventListener('click',function(){ if(capEntry==='home'){ show('home'); } else { showCapHome(); } });
+document.getElementById('backCapTab').addEventListener('click',function(){ if(capEntry==='home'){ show('home'); } else if(capEntry==='matcost'){ show('prodcap'); } else { showCapHome(); } });
 document.getElementById('backCapCost').addEventListener('click',function(){ showCostDetail(false); });
 document.getElementById('backCapCostTab').addEventListener('click',function(){ if(capFlow==='category' || COST_CSV[capCostCat]){ capCostCat=''; capCostGroup=''; showCapTab(true); } else { showCostTab(false); } });
 document.getElementById('backSupplier').addEventListener('click',function(){ show('prodcap'); });
@@ -1439,6 +1438,7 @@ function restoreCapacityHash(hashStr){
   var cgrp=cp[3]?decodeURIComponent(cp[3]):'';
   renderProdCapacity();
   capFlow=cflow; capCostCat=ccat; capCostGroup=cgrp;
+  if(cflow==='costing') capEntry='matcost';
   if(cflow){
     renderCapTab();
     var panel='tab';
