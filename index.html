@@ -588,6 +588,7 @@ var SECS = [];
 function rebuildSections(){
   SECS=[];
   M.forEach(function(m){ if(m.section && SECS.indexOf(m.section)===-1) SECS.push(m.section); });
+  if(SECS.indexOf('Metal Processing')===-1) SECS.push('Metal Processing');
 }
 function parseCSV(text){
   var lines=[],row=[],field='',inQ=false;
