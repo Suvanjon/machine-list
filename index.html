@@ -240,7 +240,7 @@ tr.total td{background:#e9f2f3;font-weight:800;color:var(--teal);border-top:2px 
 
 </style>
 </head>
-<body>
+<body class="locked">
 <div class="hdr">
 <div class="hdr-text">LED Lighting &amp; Electrical Accessories<br>Manufacturing Project Plan</div>
 <div class="hdr-sub" id="hdrSub">A strong business begins with a clear vision, a proper plan and a confident first step.</div>
@@ -1658,13 +1658,8 @@ function checkAccess(email){
 function saveVisitor(){
   var email=document.getElementById('vEmail').value.trim();
   if(!email){ setVMsg('err','Please enter your Gmail'); return; }
-  setVMsg('','Checking access...');
-  gatePost({action:'requestAccess', email:email}).then(function(res){
-    if(res && (res.owner || res.approved)){ grantAccess(email); return; }
-    try{ localStorage.setItem('visitorEmail', email); }catch(e){}
-    setVMsg('','Request sent. Waiting for the owner to approve \u2014 you will enter automatically once approved.');
-    startGatePoll(email);
-  }).catch(function(){ setVMsg('err','Network error. Please try again.'); });
+  setVMsg('','Logging in...');
+  grantAccess(email);
 }
 var _pendingEmail='';
 function tryGrant(email){
@@ -1701,9 +1696,18 @@ function startVisitorHeartbeat(){
   _beatTimer=setInterval(visitorHeartbeat, 5*60*1000);
 }
 (function(){
-  document.body.classList.remove('locked');
-  var m=document.getElementById('visitorModal');
-  if(m) m.style.display='none';
+  var appr='', sess='';
+  try{ appr=localStorage.getItem('visitorApproved')||''; }catch(e){}
+  try{ sess=sessionStorage.getItem('visitorEmail')||''; }catch(e){}
+  var email=appr||sess;
+  if(email){
+    try{ sessionStorage.setItem('visitorEmail', email); }catch(e){}
+    document.body.classList.remove('locked');
+    var m=document.getElementById('visitorModal'); if(m) m.style.display='none';
+    startVisitorHeartbeat();
+  } else {
+    showGate('Enter your Gmail to continue.');
+  }
 })();
 var _visitorOut=false;
 function visitorLogOut(){
@@ -1757,12 +1761,11 @@ window.addEventListener('unload', visitorLogOut);
 </div>
 <div class="modal" id="visitorModal" style="display:none">
 <div class="modal-box">
-<div class="modal-head"><div>You are not permitted</div></div>
-<div style="font-size:13px;color:var(--muted);margin-bottom:14px">Your Gmail is not in the allowed list. Enter it below and click <b>Request Access</b> &mdash; the owner will receive an email to approve you. Once approved, you can open the site.</div>
+<div class="modal-head"><div>Welcome</div></div>
+<div style="font-size:13px;color:var(--muted);margin-bottom:14px">Enter your Gmail to continue. Your email will be recorded as a visitor.</div>
 <div class="field"><label>Your Gmail</label><input type="email" id="vEmail" placeholder="you@gmail.com" onkeydown="if(event.key==='Enter')saveVisitor()"></div>
 <div class="entry-msg" id="vMsg"></div>
-<button class="btn" onclick="saveVisitor()">Request Access</button>
-<button class="btn" style="margin-top:8px;background:linear-gradient(135deg,#64748B,#475569)" onclick="recheck()">Check again</button>
+<button class="btn" onclick="saveVisitor()">Continue</button>
 </div>
 </div>
 </body>
