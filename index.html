@@ -1251,9 +1251,7 @@ function renderCapacityDashboard(){
       '<td class="num">'+fmt(y1)+'</td><td class="num">'+fmt(y2)+'</td></tr>';
   });
 
-  return '<div class="card"><div class="card-title">Capacity Trend by Year</div>'+
-    '<div class="cap-chart-wrap"><div class="cap-chart">'+chart+'</div><div class="cap-legend">'+legend+'</div></div></div>'+
-    '<div class="card"><div class="card-title">Production Capacity &mdash; Year-wise</div>'+
+  return '<div class="card"><div class="card-title">Production Capacity &mdash; Year-wise</div>'+
     '<div class="tbl-wrap"><table>'+
     '<thead><tr><th>Year</th><th>Class Name</th><th>No. Of Category</th><th>Unit</th><th>Capacity for 1st half</th><th>Capacity for 2nd half</th></tr></thead>'+
     '<tbody>'+body+'</tbody></table></div></div>';
