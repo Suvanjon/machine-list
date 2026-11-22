@@ -1469,8 +1469,13 @@ function primeView(){
   if(top==='capacity'){ restoreCapacityHash(); }
 }
 primeView();
-loadData(true);
-setInterval(function(){ loadData(false); }, 60000);
+var _dataLoaded=false, _dataTimer=null;
+function startData(){
+  if(_dataLoaded) return;
+  _dataLoaded=true;
+  loadData(true);
+  _dataTimer=setInterval(function(){ loadData(false); }, 60000);
+}
 
 function formMachines(){
   var list=M.filter(function(m){ return m.section===secVal; });
@@ -1630,13 +1635,8 @@ function grantAccess(email){
   if(_gateTimer){ clearInterval(_gateTimer); _gateTimer=null; }
   closeModal('visitorModal');
   document.body.classList.remove('locked');
+  startData();
   try{ gatePost({action:'logVisitor', email:email}).catch(function(){}); }catch(e){}
-  startVisitorHeartbeat();
-}
-function quickUnlock(email){
-  try{ sessionStorage.setItem('visitorEmail', email); }catch(e){}
-  document.body.classList.remove('locked');
-  var m=document.getElementById('visitorModal'); if(m) m.style.display='none';
   startVisitorHeartbeat();
 }
 function showGate(msg, isErr){
@@ -1658,10 +1658,23 @@ function checkAccess(email){
 function saveVisitor(){
   var email=document.getElementById('vEmail').value.trim();
   if(!email){ setVMsg('err','Please enter your Gmail'); return; }
-  setVMsg('','Logging in...');
-  document.body.classList.remove('locked');
-  var m=document.getElementById('visitorModal'); if(m) m.style.display='none';
-  try{ gatePost({action:'logVisitor', email:email}).catch(function(){}); }catch(e){}
+  var btn=document.getElementById('vBtn');
+  setVMsg('','Checking access...');
+  if(btn){ btn.disabled=true; btn.style.opacity='.65'; btn.textContent='Checking...'; }
+  checkAccess(email).then(function(res){
+    if(res && (res.owner || res.approved)){
+      setVMsg('ok','Access granted. Opening...');
+      grantAccess(email);
+      return;
+    }
+    setVMsg('err','Access denied. This Gmail is not on the approved access list.');
+    document.body.classList.add('locked');
+    if(btn){ btn.disabled=false; btn.style.opacity='1'; btn.textContent='Continue'; }
+  }).catch(function(){
+    setVMsg('err','Could not verify access. Please check your connection and try again.');
+    document.body.classList.add('locked');
+    if(btn){ btn.disabled=false; btn.style.opacity='1'; btn.textContent='Continue'; }
+  });
 }
 var _pendingEmail='';
 function tryGrant(email){
@@ -1751,10 +1764,10 @@ window.addEventListener('unload', visitorLogOut);
 <div class="modal" id="visitorModal" style="display:none">
 <div class="modal-box">
 <div class="modal-head"><div>Welcome</div></div>
-<div style="font-size:13px;color:var(--muted);margin-bottom:14px">Enter your Gmail to continue. Your email will be recorded as a visitor.</div>
-<div class="field"><label>Your Gmail</label><input type="email" id="vEmail" placeholder="you@gmail.com" onkeydown="if(event.key==='Enter')saveVisitor()"></div>
+<div style="font-size:13px;color:var(--muted);margin-bottom:14px">Enter your approved Gmail to continue. Only email IDs listed in the owner's access list can open this plan.</div>
+<div class="field"><label>Your Gmail</label><input type="email" id="vEmail" placeholder="you@gmail.com" autocomplete="email" onkeydown="if(event.key==='Enter')saveVisitor()"></div>
 <div class="entry-msg" id="vMsg"></div>
-<button class="btn" onclick="saveVisitor()">Continue</button>
+<button class="btn" id="vBtn" onclick="saveVisitor()">Continue</button>
 </div>
 </div>
 <script>
